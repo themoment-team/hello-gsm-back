@@ -1,0 +1,24 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model application {
+  application_year  Int                @db.Year
+  application_id    Int
+  applicationDetail applicationDetail?
+
+  @@id([application_year, application_id])
+}
+
+model applicationDetail {
+  application_year Int         @db.Year
+  application_id   Int
+  application      application @relation(fields: [application_year, application_id], references: [application_year, application_id], onDelete: Cascade, map: "applicationDetail_application_year_id_fk")
+
+  @@id([application_year, application_id])
+}
