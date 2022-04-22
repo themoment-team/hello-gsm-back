@@ -4,7 +4,11 @@ import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
-  imports: [ConfigModule.forRoot({ envFilePath: ['.env'], isGlobal: true }), AuthModule, PrismaModule],
+  imports: [
+    ConfigModule.forRoot({ envFilePath: ['.env'], isGlobal: true }),
+    AuthModule,
+    PrismaModule,
+  ],
   controllers: [],
   providers: [],
 })
