@@ -10,7 +10,6 @@ export class EmailService {
   private Google = new google.auth.OAuth2(
     this.configService.get('OAUTH_CLIENT_ID'),
     this.configService.get('OAUTH_CLIENT_SECRET'),
-    'https://developers.google.com/oauthplayground',
   );
 
   constructor(private configService: ConfigService) {
@@ -44,7 +43,7 @@ export class EmailService {
     Logger.log(`Send mail to ${result.accepted[0]}`);
   }
 
-  async getToken() {
+  private async getToken() {
     const { tokens } = await this.Google.getToken(
       this.configService.get('AUTH_CODE'),
     );
