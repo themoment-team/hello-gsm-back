@@ -37,9 +37,9 @@ export class RtStrategy extends PassportStrategy(Strategy, 'jwt-rt') {
 
     if (
       !user ||
-      bcrypt.compare(req.cookies['refreshToken'], user.token.refresh_token)
+      !bcrypt.compareSync(req.cookies['refreshToken'], user.token.refresh_token)
     )
       return false;
-    return { ...payload };
+    return { ...payload, refreshToken: req.cookies['refreshToken'] };
   }
 }
