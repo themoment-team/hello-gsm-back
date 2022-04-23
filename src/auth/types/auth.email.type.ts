@@ -1,4 +1,4 @@
 export interface AuthEmail {
-  code: number;
+  code: string;
   expiredAt: Date;
 }
