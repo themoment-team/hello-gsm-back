@@ -6,7 +6,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { Request } from 'express';
 
 type JwtPayload = {
-  sub: number;
+  email: string;
 };
 
 @Injectable()
@@ -29,7 +29,7 @@ export class AtStrategy extends PassportStrategy(Strategy, 'jwt') {
 
   async validate(payload: JwtPayload) {
     const user = await this.prisma.user.findFirst({
-      where: { idx: payload.sub },
+      where: { email: payload.email },
     });
     if (!user) return false;
     return user;

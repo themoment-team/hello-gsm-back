@@ -1,23 +1,21 @@
 -- CreateTable
-CREATE TABLE `user` (
-    `idx` SMALLINT NOT NULL,
-    `email` VARCHAR(320) NOT NULL,
-    `password` VARCHAR(100) NOT NULL,
-    `name` VARCHAR(10) NOT NULL,
-    `gender` VARCHAR(10) NOT NULL,
-    `birth_date` DATE NOT NULL,
-    `phone_number` VARCHAR(15) NOT NULL,
-
-    UNIQUE INDEX `user_id_uindex`(`email`),
-    PRIMARY KEY (`idx`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- CreateTable
 CREATE TABLE `token` (
     `user_idx` SMALLINT NOT NULL,
     `refresh_token` VARCHAR(300) NOT NULL,
 
     PRIMARY KEY (`user_idx`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `user` (
+    `idx` SMALLINT NOT NULL AUTO_INCREMENT,
+    `email` VARCHAR(320) NOT NULL,
+    `password` VARCHAR(100) NOT NULL,
+    `name` VARCHAR(10) NOT NULL,
+    `gender` VARCHAR(10) NOT NULL,
+
+    UNIQUE INDEX `user_id_uindex`(`email`),
+    PRIMARY KEY (`idx`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- AddForeignKey

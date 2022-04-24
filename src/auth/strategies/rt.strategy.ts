@@ -7,7 +7,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 
 type JwtPayload = {
-  id: number;
+  email: string;
 };
 
 @Injectable()
@@ -29,9 +29,9 @@ export class RtStrategy extends PassportStrategy(Strategy, 'jwt-rt') {
   }
 
   async validate(req: Request, payload: JwtPayload) {
-    if (!payload.id) return false;
+    if (!payload.email) return false;
     const user = await this.prisma.user.findFirst({
-      where: { idx: payload.id },
+      where: { email: payload.email },
       include: { token: true },
     });
 
