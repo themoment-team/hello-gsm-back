@@ -7,19 +7,17 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model user {
-  idx          Int      @id @db.SmallInt
-  email        String   @unique(map: "user_id_uindex") @db.VarChar(320)
-  password     String   @db.VarChar(100)
-  name         String   @db.VarChar(10)
-  gender       String   @db.VarChar(10)
-  birth_date   DateTime @db.Date
-  phone_number String   @db.VarChar(15)
-  token        token?
-}
-
 model token {
   user_idx      Int    @id @db.SmallInt
   refresh_token String @db.VarChar(300)
   user          user   @relation(fields: [user_idx], references: [idx], onUpdate: Restrict, map: "table_name_user_idx_fk")
+}
+
+model user {
+  idx      Int    @id @db.SmallInt @default(autoincrement())
+  email    String @unique(map: "user_id_uindex") @db.VarChar(320)
+  password String @db.VarChar(100)
+  name     String @db.VarChar(10)
+  gender   String @db.VarChar(10)
+  token    token?
 }

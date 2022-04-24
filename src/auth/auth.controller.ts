@@ -1,8 +1,8 @@
-import { Body, Controller, Post, Res } from '@nestjs/common';
-import { Response } from 'express';
+import { Body, Controller, Logger, Post, Req, Res } from '@nestjs/common';
+import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { Public } from './decorators/public.decorator';
-import { emailConfirmDto, verifyDto } from './dto';
+import { emailConfirmDto, SignupDto, verifyDto } from './dto';
 
 @Controller('auth')
 export class AuthController {
@@ -18,14 +18,21 @@ export class AuthController {
   @Post('/emailconfirm')
   async emailConfirm(@Body() data: emailConfirmDto, @Res() res: Response) {
     const { expiredAt, token } = await this.authService.emailConfirm(data);
-    res.cookie('emailConfirm', token, { expires: expiredAt });
+    res.cookie('emailConfirm', token, { expires: expiredAt, httpOnly: true });
     res.send('인증 성공');
   }
 
   @Public()
   @Post('/signup')
-  signup() {
-    return;
+  async signup(
+    @Body() data: SignupDto,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    await this.authService.signup(data, req.cookies['emailConfirm']);
+    res.clearCookie('emailConfirm');
+    Logger.log(`${data.name} 가입 성공`);
+    res.send('가입 성공');
   }
 
   @Public()

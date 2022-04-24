@@ -10,8 +10,9 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { EmailService } from 'src/email/email.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { emailConfirmDto, verifyDto } from './dto';
+import { emailConfirmDto, SignupDto, verifyDto } from './dto';
 import { AuthEmail } from './types/auth.email.type';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -65,6 +66,39 @@ export class AuthService {
       new Date(new Date().setMinutes(new Date().getMinutes() + 3)),
     ]);
     return { token, expiredAt };
+  }
+
+  async signup(data: SignupDto, cookie: string) {
+    if (await this.prisma.user.findFirst({ where: { email: data.email } }))
+      throw new ConflictException('같은 이메일이 존재합니다.');
+    if (!cookie) throw new BadRequestException('인증되지 않았습니다.');
+    const token: any = this.jwtService.decode(cookie);
+
+    if (data.email !== token.email || !this.authEmail[data.email])
+      throw new BadRequestException('인증되지 않은 이메일입니다.');
+    if (this.authEmail[data.email].expiredAt < new Date())
+      throw new ForbiddenException('시간이 만료되었습니다.');
+    if (!this.authEmail[data.email].confirm)
+      throw new BadRequestException('인증되지 않았습니다.');
+    if (this.authEmail[data.email].code !== token.code)
+      throw new BadRequestException('토큰이 올바르지 않습니다.');
+    if (data.password !== data.passwordConfirm)
+      throw new BadRequestException('비밀번호가 올바르지 않습니다.');
+
+    const hash = await bcrypt.hash(data.password, 10);
+
+    await this.prisma.user.create({
+      data: {
+        email: data.email,
+        name: data.name,
+        password: hash,
+        gender: data.gender,
+      },
+    });
+
+    delete this.authEmail[data.email];
+
+    return;
   }
 
   private getVerifyCode(): string {
