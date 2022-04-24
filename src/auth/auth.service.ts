@@ -112,8 +112,7 @@ export class AuthService {
     if (!(await bcrypt.compare(data.password, user.password)))
       throw new BadRequestException('비밀번호가 올바르지 않습니다.');
 
-    const tokens = await this.getTokens(user.idx);
-    console.log(tokens);
+    const tokens = await this.getTokens(user.email);
     await this.prisma.user.update({
       where: { email: data.email },
       include: { token: true },
@@ -122,17 +121,26 @@ export class AuthService {
     return tokens;
   }
 
-  private async getTokens(idx: number) {
+  async logout(email: string): Promise<void> {
+    await this.prisma.user.update({
+      where: { email },
+      include: { token: true },
+      data: { token: { update: { refresh_token: '' } } },
+    });
+    return;
+  }
+
+  private async getTokens(email: string) {
     const [at, rt, atExpired, rtExpired] = await Promise.all([
       this.jwtService.sign(
-        { idx },
+        { email },
         {
           secret: this.configService.get('JWT_ACCESS_SECRET'),
           expiresIn: 60 * 10,
         },
       ),
       this.jwtService.sign(
-        { idx },
+        { email },
         {
           secret: this.configService.get('JWT_REFRESH_SECRET'),
           expiresIn: '1d',

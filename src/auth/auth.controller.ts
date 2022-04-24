@@ -2,6 +2,7 @@ import { Body, Controller, Logger, Post, Req, Res } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { Public } from './decorators/public.decorator';
+import { User } from './decorators/user.decorator';
 import { emailConfirmDto, SigninDto, SignupDto, verifyDto } from './dto';
 
 @Controller('auth')
@@ -49,6 +50,14 @@ export class AuthController {
       expires: tokens.rtExpired,
     });
     res.send('로그인 성공');
+  }
+
+  @Post('logout')
+  async logout(@Res() res: Response, @User('email') email: string) {
+    await this.authService.logout(email);
+    res.clearCookie('accessToken');
+    res.clearCookie('refreshToken');
+    res.send('로그아웃 완료');
   }
 
   @Public()
