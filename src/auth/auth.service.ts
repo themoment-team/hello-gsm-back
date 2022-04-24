@@ -10,7 +10,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { EmailService } from 'src/email/email.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { emailConfirmDto, SignupDto, verifyDto } from './dto';
+import { emailConfirmDto, SigninDto, SignupDto, verifyDto } from './dto';
 import { AuthEmail } from './types/auth.email.type';
 import * as bcrypt from 'bcrypt';
 
@@ -93,12 +93,55 @@ export class AuthService {
         name: data.name,
         password: hash,
         gender: data.gender,
+        token: { create: { refresh_token: '' } },
       },
+      include: { token: true },
     });
 
     delete this.authEmail[data.email];
 
     return;
+  }
+
+  async signin(data: SigninDto) {
+    const user = await this.prisma.user.findFirst({
+      where: { email: data.email },
+    });
+    if (!user) throw new BadRequestException('유저를 찾을 수 없습니다.');
+
+    if (!(await bcrypt.compare(data.password, user.password)))
+      throw new BadRequestException('비밀번호가 올바르지 않습니다.');
+
+    const tokens = await this.getTokens(user.idx);
+    console.log(tokens);
+    await this.prisma.user.update({
+      where: { email: data.email },
+      include: { token: true },
+      data: { token: { update: { refresh_token: tokens.rt } } },
+    });
+    return tokens;
+  }
+
+  private async getTokens(idx: number) {
+    const [at, rt, atExpired, rtExpired] = await Promise.all([
+      this.jwtService.sign(
+        { idx },
+        {
+          secret: this.configService.get('JWT_ACCESS_SECRET'),
+          expiresIn: 60 * 10,
+        },
+      ),
+      this.jwtService.sign(
+        { idx },
+        {
+          secret: this.configService.get('JWT_REFRESH_SECRET'),
+          expiresIn: '1d',
+        },
+      ),
+      new Date(new Date().setMinutes(new Date().getMinutes() + 10)),
+      new Date(new Date().setDate(new Date().getDate() + 1)),
+    ]);
+    return { at, rt, atExpired, rtExpired };
   }
 
   private getVerifyCode(): string {
