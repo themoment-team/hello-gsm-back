@@ -1,35 +1,24 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
-import Mail from 'nodemailer/lib/mailer';
 import { google } from 'googleapis';
 
 @Injectable()
 export class EmailService {
-  private transporter: Mail;
   private Google = new google.auth.OAuth2(
     this.configService.get('OAUTH_CLIENT_ID'),
     this.configService.get('OAUTH_CLIENT_SECRET'),
   );
 
   constructor(private configService: ConfigService) {
-    this.transporter = nodemailer.createTransport({
-      service: 'gmail',
-      host: 'smtp.google.com',
-      port: 587,
-      secure: true,
-      auth: {
-        type: 'OAuth2',
-        user: configService.get('OAUTH_USER'),
-        clientId: configService.get('OAUTH_CLIENT_ID'),
-        clientSecret: configService.get('OAUTH_CLIENT_SECRET'),
-        refreshToken: configService.get('OAUTH_REFRESH_TOKEN'),
-        accessToken: configService.get('OAUTH_ACCESS_TOKEN'),
-      },
+    this.Google.setCredentials({
+      refresh_token: this.configService.get('OAUTH_REFRESH_TOKEN'),
     });
   }
 
   async userVerify(emailAddress: string, code: string) {
+    const accessToken = await this.Google.getAccessToken();
+    const transporter = this.getTransporter(accessToken);
     const mailOptions = {
       from: this.configService.get('OAUTH_USER'),
       to: emailAddress,
@@ -37,16 +26,21 @@ export class EmailService {
       html: `${code}`,
     };
 
-    const result: { accepted: string[] } = await this.transporter.sendMail(
-      mailOptions,
-    );
+    const result = await transporter.sendMail(mailOptions);
     Logger.log(`Send mail to ${result.accepted[0]}`);
   }
 
-  private async getToken() {
-    const { tokens } = await this.Google.getToken(
-      this.configService.get('AUTH_CODE'),
-    );
-    return tokens;
+  private getTransporter(accessToken: any) {
+    return nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        type: 'OAuth2',
+        user: this.configService.get('OAUTH_USER'),
+        clientId: this.configService.get('OAUTH_CLIENT_ID'),
+        clientSecret: this.configService.get('OAUTH_CLIENT_SECRET'),
+        refreshToken: this.configService.get('OAUTH_REFRESH_TOKEN'),
+        accessToken,
+      },
+    });
   }
 }
