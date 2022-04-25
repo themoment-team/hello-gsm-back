@@ -113,10 +113,11 @@ export class AuthService {
       throw new BadRequestException('비밀번호가 올바르지 않습니다.');
 
     const tokens = await this.getTokens(user.email);
+    const rt = await bcrypt.hash(tokens.rt, 10);
     await this.prisma.user.update({
       where: { email: data.email },
       include: { token: true },
-      data: { token: { update: { refresh_token: tokens.rt } } },
+      data: { token: { update: { refresh_token: rt } } },
     });
     return tokens;
   }
@@ -128,6 +129,16 @@ export class AuthService {
       data: { token: { update: { refresh_token: '' } } },
     });
     return;
+  }
+
+  async refresh(email: string) {
+    const tokens = await this.getTokens(email);
+    const rt = await bcrypt.hash(tokens.rt, 10);
+    await this.prisma.user.update({
+      where: { email },
+      data: { token: { update: { refresh_token: rt } } },
+    });
+    return tokens;
   }
 
   private async getTokens(email: string) {

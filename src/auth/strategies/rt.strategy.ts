@@ -25,6 +25,7 @@ export class RtStrategy extends PassportStrategy(Strategy, 'jwt-rt') {
         },
       ]),
       secretOrKey: configService.get('JWT_REFRESH_SECRET'),
+      passReqToCallback: true,
     });
   }
 
@@ -37,9 +38,13 @@ export class RtStrategy extends PassportStrategy(Strategy, 'jwt-rt') {
 
     if (
       !user ||
-      !bcrypt.compareSync(req.cookies['refreshToken'], user.token.refresh_token)
+      !user.token.refresh_token ||
+      !(await bcrypt.compare(
+        req.cookies['refreshToken'],
+        user.token.refresh_token,
+      ))
     )
       return false;
-    return { ...payload, refreshToken: req.cookies['refreshToken'] };
+    return { ...payload };
   }
 }

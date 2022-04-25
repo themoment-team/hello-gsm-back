@@ -1,9 +1,18 @@
-import { Body, Controller, Logger, Post, Req, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Logger,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { Public } from './decorators/public.decorator';
 import { User } from './decorators/user.decorator';
 import { emailConfirmDto, SigninDto, SignupDto, verifyDto } from './dto';
+import { RtGuard } from './guards/rt.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -61,8 +70,18 @@ export class AuthController {
   }
 
   @Public()
+  @UseGuards(RtGuard)
   @Post('refresh')
-  refresh() {
-    return;
+  async refresh(@User('email') email: string, @Res() res: Response) {
+    const tokens = await this.authService.refresh(email);
+    res.cookie('accessToken', tokens.at, {
+      httpOnly: true,
+      expires: tokens.atExpired,
+    });
+    res.cookie('refreshToken', tokens.rt, {
+      httpOnly: true,
+      expires: tokens.rtExpired,
+    });
+    res.send('성공');
   }
 }
