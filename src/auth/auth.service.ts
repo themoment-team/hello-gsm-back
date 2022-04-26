@@ -11,12 +11,14 @@ import { JwtService } from '@nestjs/jwt';
 import { EmailService } from 'src/email/email.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { emailConfirmDto, SigninDto, SignupDto, verifyDto } from './dto';
-import { AuthEmail } from './types/auth.email.type';
+import { VerifyDataType } from './types/auth.email.type';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
-  authEmail: Record<string, AuthEmail> = {};
+  authEmail: Record<string, VerifyDataType> = {};
+  verifyPwd: Record<string, VerifyDataType> = {};
+
   constructor(
     private prisma: PrismaService,
     private emailService: EmailService,
@@ -41,7 +43,7 @@ export class AuthService {
 
     this.authEmail[data.email] = {
       code,
-      expiredAt: new Date(new Date().setMinutes(new Date().getMinutes() + 3)),
+      expiredAt: new Date(new Date().setMinutes(new Date().getMinutes() + 10)),
       confirm: false,
     };
     return '이메일 전송';
@@ -139,6 +141,27 @@ export class AuthService {
       data: { token: { update: { refresh_token: rt } } },
     });
     return tokens;
+  }
+
+  async verifyPassword({ email }: verifyDto) {
+    const user = await this.prisma.user.findFirst({ where: { email } });
+    if (!user) throw new BadRequestException('존재하지 않는 사용자입니다');
+
+    const code = this.getVerifyCode();
+
+    try {
+      await this.emailService.userVerify(email, code);
+
+      this.verifyPwd[email] = {
+        code,
+        confirm: false,
+        expiredAt: new Date(
+          new Date().setMinutes(new Date().getMinutes() + 10),
+        ),
+      };
+    } catch (e) {
+      throw new InternalServerErrorException('이메일 전송 실패');
+    }
   }
 
   private async getTokens(email: string) {

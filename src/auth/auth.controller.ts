@@ -84,4 +84,10 @@ export class AuthController {
     });
     res.send('성공');
   }
+
+  @Public()
+  @Post('/verifypassword')
+  async verifyPassword(@Body() data: verifyDto) {
+    return this.authService.verifyPassword(data);
+  }
 }
