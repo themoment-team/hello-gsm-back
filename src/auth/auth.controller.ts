@@ -11,7 +11,13 @@ import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { Public } from './decorators/public.decorator';
 import { User } from './decorators/user.decorator';
-import { emailConfirmDto, SigninDto, SignupDto, verifyDto } from './dto';
+import {
+  emailConfirmDto,
+  ModifyPwdDto,
+  SigninDto,
+  SignupDto,
+  verifyDto,
+} from './dto';
 import { RtGuard } from './guards/rt.guard';
 
 @Controller('auth')
@@ -83,5 +89,19 @@ export class AuthController {
       expires: tokens.rtExpired,
     });
     res.send('성공');
+  }
+
+  @Public()
+  @Post('/verifypwd')
+  async verifyPassword(@Body() data: verifyDto) {
+    await this.authService.verifyPassword(data);
+    return '인증코드 전송 완료';
+  }
+
+  @Public()
+  @Post('modifypwd')
+  async modifyPwd(@Body() data: ModifyPwdDto) {
+    await this.authService.modifypwd(data);
+    return '비밀번호 변경 완료';
   }
 }

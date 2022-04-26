@@ -10,13 +10,21 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { EmailService } from 'src/email/email.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { emailConfirmDto, SigninDto, SignupDto, verifyDto } from './dto';
-import { AuthEmail } from './types/auth.email.type';
+import {
+  emailConfirmDto,
+  ModifyPwdDto,
+  SigninDto,
+  SignupDto,
+  verifyDto,
+} from './dto';
+import { VerifyDataType } from './types/auth.email.type';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
-  authEmail: Record<string, AuthEmail> = {};
+  authEmail: Record<string, VerifyDataType> = {};
+  verifyPwd: Record<string, VerifyDataType> = {};
+
   constructor(
     private prisma: PrismaService,
     private emailService: EmailService,
@@ -41,7 +49,7 @@ export class AuthService {
 
     this.authEmail[data.email] = {
       code,
-      expiredAt: new Date(new Date().setMinutes(new Date().getMinutes() + 3)),
+      expiredAt: new Date(new Date().setMinutes(new Date().getMinutes() + 10)),
       confirm: false,
     };
     return '이메일 전송';
@@ -139,6 +147,50 @@ export class AuthService {
       data: { token: { update: { refresh_token: rt } } },
     });
     return tokens;
+  }
+
+  async verifyPassword({ email }: verifyDto) {
+    const user = await this.prisma.user.findFirst({ where: { email } });
+    if (!user) throw new BadRequestException('존재하지 않는 사용자입니다');
+
+    const code = this.getVerifyCode();
+
+    try {
+      await this.emailService.userVerify(email, code);
+
+      this.verifyPwd[email] = {
+        code,
+        confirm: false,
+        expiredAt: new Date(
+          new Date().setMinutes(new Date().getMinutes() + 10),
+        ),
+      };
+    } catch (e) {
+      throw new InternalServerErrorException('이메일 전송 실패');
+    }
+  }
+
+  async modifypwd(data: ModifyPwdDto) {
+    const user = this.verifyPwd[data.email];
+    if (!user) throw new BadRequestException('존재하지 않는 이메일입니다');
+    if (user.code !== data.code)
+      throw new BadRequestException('인증코드가 올바르지 않습니다.');
+    if (user.expiredAt < new Date())
+      throw new BadRequestException('인증 시간이 지났습니다');
+
+    if (data.password !== data.passwordConfirm)
+      throw new BadRequestException('비밀번호가 올바르지 않습니다.');
+
+    const hash = await bcrypt.hash(data.password, 10);
+
+    await this.prisma.user.update({
+      where: { email: data.email },
+      data: { password: hash },
+    });
+
+    delete this.verifyPwd[data.email];
+
+    return;
   }
 
   private async getTokens(email: string) {
