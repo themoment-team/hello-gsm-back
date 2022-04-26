@@ -10,7 +10,13 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { EmailService } from 'src/email/email.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { emailConfirmDto, SigninDto, SignupDto, verifyDto } from './dto';
+import {
+  emailConfirmDto,
+  ModifyPwdDto,
+  SigninDto,
+  SignupDto,
+  verifyDto,
+} from './dto';
 import { VerifyDataType } from './types/auth.email.type';
 import * as bcrypt from 'bcrypt';
 
@@ -162,6 +168,29 @@ export class AuthService {
     } catch (e) {
       throw new InternalServerErrorException('이메일 전송 실패');
     }
+  }
+
+  async modifypwd(data: ModifyPwdDto) {
+    const user = this.verifyPwd[data.email];
+    if (!user) throw new BadRequestException('존재하지 않는 이메일입니다');
+    if (user.code !== data.code)
+      throw new BadRequestException('인증코드가 올바르지 않습니다.');
+    if (user.expiredAt < new Date())
+      throw new BadRequestException('인증 시간이 지났습니다');
+
+    if (data.password !== data.passwordConfirm)
+      throw new BadRequestException('비밀번호가 올바르지 않습니다.');
+
+    const hash = await bcrypt.hash(data.password, 10);
+
+    await this.prisma.user.update({
+      where: { email: data.email },
+      data: { password: hash },
+    });
+
+    delete this.verifyPwd[data.email];
+
+    return;
   }
 
   private async getTokens(email: string) {
