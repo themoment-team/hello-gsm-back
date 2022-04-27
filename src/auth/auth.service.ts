@@ -80,7 +80,17 @@ export class AuthService {
     if (await this.prisma.user.findFirst({ where: { email: data.email } }))
       throw new ConflictException('같은 이메일이 존재합니다.');
     if (!cookie) throw new BadRequestException('인증되지 않았습니다.');
-    const token: any = this.jwtService.decode(cookie);
+
+    let token: { code: string; email: string };
+
+    try {
+      token = this.jwtService.verify(cookie, {
+        secret: this.configService.get('EMAIL_VERIFY'),
+      });
+    } catch (e) {
+      console.log(e);
+      throw new BadRequestException('잘못된 토큰입니다.');
+    }
 
     if (data.email !== token.email || !this.authEmail[data.email])
       throw new BadRequestException('인증되지 않은 이메일입니다.');
