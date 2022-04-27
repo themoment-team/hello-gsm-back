@@ -88,7 +88,6 @@ export class AuthService {
         secret: this.configService.get('EMAIL_VERIFY'),
       });
     } catch (e) {
-      console.log(e);
       throw new BadRequestException('잘못된 토큰입니다.');
     }
 
