@@ -19,6 +19,7 @@ import {
 } from './dto';
 import { VerifyDataType } from './types/auth.email.type';
 import * as bcrypt from 'bcrypt';
+import { ENV } from 'src/lib/env';
 
 @Injectable()
 export class AuthService {
@@ -69,7 +70,7 @@ export class AuthService {
     const [token, expiredAt] = await Promise.all([
       this.jwtService.sign(
         { ...data },
-        { expiresIn: 60 * 3, secret: this.configService.get('EMAIL_VERIFY') },
+        { expiresIn: 60 * 3, secret: this.configService.get(ENV.EMAIL_VERIFY) },
       ),
       new Date(new Date().setMinutes(new Date().getMinutes() + 3)),
     ]);
@@ -85,7 +86,7 @@ export class AuthService {
 
     try {
       token = this.jwtService.verify(cookie, {
-        secret: this.configService.get('EMAIL_VERIFY'),
+        secret: this.configService.get(ENV.EMAIL_VERIFY),
       });
     } catch (e) {
       throw new BadRequestException('잘못된 토큰입니다.');
@@ -207,14 +208,14 @@ export class AuthService {
       this.jwtService.sign(
         { email },
         {
-          secret: this.configService.get('JWT_ACCESS_SECRET'),
+          secret: this.configService.get(ENV.JWT_ACCESS_SECRET),
           expiresIn: 60 * 10,
         },
       ),
       this.jwtService.sign(
         { email },
         {
-          secret: this.configService.get('JWT_REFRESH_SECRET'),
+          secret: this.configService.get(ENV.JWT_REFRESH_SECRET),
           expiresIn: '1d',
         },
       ),

@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
+import { ENV } from 'src/lib/env';
 
 type JwtPayload = {
   email: string;
@@ -24,7 +25,7 @@ export class RtStrategy extends PassportStrategy(Strategy, 'jwt-rt') {
           return cookie;
         },
       ]),
-      secretOrKey: configService.get('JWT_REFRESH_SECRET'),
+      secretOrKey: configService.get(ENV.JWT_REFRESH_SECRET),
       passReqToCallback: true,
     });
   }
