@@ -10,7 +10,7 @@ datasource db {
 model token {
   user_idx      Int    @id @db.SmallInt
   refresh_token String? @db.VarChar(300)
-  user          user   @relation(fields: [user_idx], references: [idx], onUpdate: Restrict, map: "table_name_user_idx_fk")
+  user          user   @relation(fields: [user_idx], references: [idx], onUpdate: Restrict, map: "table_name_user_idx_fk", onDelete: Cascade)
 }
 
 model user {

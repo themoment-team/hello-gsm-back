@@ -19,6 +19,7 @@ import {
 } from './dto';
 import { VerifyDataType } from './types/auth.email.type';
 import * as bcrypt from 'bcrypt';
+import { ExitDto } from './dto/exit.dto';
 
 @Injectable()
 export class AuthService {
@@ -189,8 +190,21 @@ export class AuthService {
     });
 
     delete this.verifyPwd[data.email];
+  }
 
-    return;
+  async exit({ password }: ExitDto, email: string) {
+    const user = await this.prisma.user.findFirst({ where: { email } });
+    if (!(await bcrypt.compare(password, user.password)))
+      throw new BadRequestException('비밀번호가 올바르지 않습니다.');
+
+    try {
+      await this.prisma.user.delete({ where: { idx: user.idx } });
+      Logger.log(`${user.name} 탈퇴 성공`);
+    } catch (e) {
+      Logger.error('유저 삭제 실패');
+      console.log(e);
+      throw new InternalServerErrorException('회원 탈퇴 실패');
+    }
   }
 
   private async getTokens(email: string) {
