@@ -34,6 +34,8 @@ export class EmailService {
   private getTransporter(accessToken: any) {
     return nodemailer.createTransport({
       service: 'gmail',
+      host: 'smtp.gmlail.com',
+      port: 587,
       auth: {
         type: 'OAuth2',
         user: this.configService.get(ENV.OAUTH_USER),
@@ -44,4 +46,6 @@ export class EmailService {
       },
     });
   }
+}
+
 }
