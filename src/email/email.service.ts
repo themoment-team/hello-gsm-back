@@ -2,17 +2,18 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 import { google } from 'googleapis';
+import { ENV } from 'src/lib/env';
 
 @Injectable()
 export class EmailService {
   private Google = new google.auth.OAuth2(
-    this.configService.get('OAUTH_CLIENT_ID'),
-    this.configService.get('OAUTH_CLIENT_SECRET'),
+    this.configService.get(ENV.OAUTH_CLIENT_ID),
+    this.configService.get(ENV.OAUTH_CLIENT_SECRET),
   );
 
   constructor(private configService: ConfigService) {
     this.Google.setCredentials({
-      refresh_token: this.configService.get('OAUTH_REFRESH_TOKEN'),
+      refresh_token: this.configService.get(ENV.OAUTH_REFRESH_TOKEN),
     });
   }
 
@@ -20,7 +21,7 @@ export class EmailService {
     const accessToken = await this.Google.getAccessToken();
     const transporter = this.getTransporter(accessToken);
     const mailOptions = {
-      from: this.configService.get('OAUTH_USER'),
+      from: this.configService.get(ENV.OAUTH_USER),
       to: emailAddress,
       subject: 'Hello, GSM test 메일',
       html: `${code}`,
@@ -35,10 +36,10 @@ export class EmailService {
       service: 'gmail',
       auth: {
         type: 'OAuth2',
-        user: this.configService.get('OAUTH_USER'),
-        clientId: this.configService.get('OAUTH_CLIENT_ID'),
-        clientSecret: this.configService.get('OAUTH_CLIENT_SECRET'),
-        refreshToken: this.configService.get('OAUTH_REFRESH_TOKEN'),
+        user: this.configService.get(ENV.OAUTH_USER),
+        clientId: this.configService.get(ENV.OAUTH_CLIENT_ID),
+        clientSecret: this.configService.get(ENV.OAUTH_CLIENT_SECRET),
+        refreshToken: this.configService.get(ENV.OAUTH_REFRESH_TOKEN),
         accessToken,
       },
     });

@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Request } from 'express';
+import { ENV } from 'src/lib/env';
 
 type JwtPayload = {
   email: string;
@@ -23,7 +24,7 @@ export class AtStrategy extends PassportStrategy(Strategy, 'jwt') {
           return cookie;
         },
       ]),
-      secretOrKey: configService.get('JWT_ACCESS_SECRET'),
+      secretOrKey: configService.get(ENV.JWT_ACCESS_SECRET),
     });
   }
 
