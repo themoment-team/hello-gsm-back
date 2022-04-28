@@ -18,6 +18,7 @@ import {
   SignupDto,
   verifyDto,
 } from './dto';
+import { ExitDto } from './dto/exit.dto';
 import { RtGuard } from './guards/rt.guard';
 
 @Controller('auth')
@@ -100,8 +101,22 @@ export class AuthController {
 
   @Public()
   @Post('modifypwd')
-  async modifyPwd(@Body() data: ModifyPwdDto) {
+  async modifyPwd(@Body() data: ModifyPwdDto, @Res() res: Response) {
     await this.authService.modifypwd(data);
-    return '비밀번호 변경 완료';
+    res.clearCookie('accessToken');
+    res.clearCookie('refreshToken');
+    res.send('비밀번호 변경 완료');
+  }
+
+  @Post('exit')
+  async exit(
+    @Body() data: ExitDto,
+    @User('email') email: string,
+    @Res() res: Response,
+  ) {
+    await this.authService.exit(data, email);
+    res.clearCookie('accessToken');
+    res.clearCookie('refreshToken');
+    res.send();
   }
 }

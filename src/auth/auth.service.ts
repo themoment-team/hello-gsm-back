@@ -16,6 +16,7 @@ import {
   SigninDto,
   SignupDto,
   verifyDto,
+  ExitDto,
 } from './dto';
 import { VerifyDataType } from './types/auth.email.type';
 import * as bcrypt from 'bcrypt';
@@ -122,13 +123,9 @@ export class AuthService {
   }
 
   async signin(data: SigninDto) {
-    const user = await this.prisma.user.findFirst({
-      where: { email: data.email },
-    });
-    if (!user) throw new BadRequestException('유저를 찾을 수 없습니다.');
+    const user = await this.isEmailExist(data.email);
 
-    if (!(await bcrypt.compare(data.password, user.password)))
-      throw new BadRequestException('비밀번호가 올바르지 않습니다.');
+    await this.isMatchedPwd(data.password, user.password);
 
     const tokens = await this.getTokens(user.email);
     const rt = await bcrypt.hash(tokens.rt, 10);
@@ -160,8 +157,7 @@ export class AuthService {
   }
 
   async verifyPassword({ email }: verifyDto) {
-    const user = await this.prisma.user.findFirst({ where: { email } });
-    if (!user) throw new BadRequestException('존재하지 않는 사용자입니다');
+    await this.isEmailExist(email);
 
     const code = this.getVerifyCode();
 
@@ -199,7 +195,31 @@ export class AuthService {
     });
 
     delete this.verifyPwd[data.email];
+  }
 
+  async exit({ password }: ExitDto, email: string) {
+    const user = await this.isEmailExist(email);
+    await this.isMatchedPwd(password, user.password);
+
+    try {
+      await this.prisma.user.delete({ where: { idx: user.idx } });
+      Logger.log(`${user.name} 탈퇴 성공`);
+    } catch (e) {
+      Logger.error('유저 삭제 실패');
+      console.log(e);
+      throw new InternalServerErrorException('회원 탈퇴 실패');
+    }
+  }
+
+  private async isEmailExist(email: string) {
+    const user = await this.prisma.user.findFirst({ where: { email } });
+    if (!user) throw new BadRequestException('존재하지 않는 사용자입니다');
+    return user;
+  }
+
+  private async isMatchedPwd(data: string, encrypted: string): Promise<void> {
+    if (!(await bcrypt.compare(data, encrypted)))
+      throw new BadRequestException('비밀번호가 올바르지 않습니다.');
     return;
   }
 
