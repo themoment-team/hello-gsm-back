@@ -15,6 +15,7 @@ async function bootstrap() {
     .setTitle('Hello, GSM')
     .setDescription('Hello, GSM')
     .setVersion('1.0')
+    .addCookieAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
