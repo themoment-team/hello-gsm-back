@@ -3,12 +3,12 @@ import {
   Controller,
   Get,
   HttpCode,
-  Logger,
   Post,
   Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import {
   ApiCookieAuth,
   ApiOperation,
@@ -32,10 +32,19 @@ export class AuthController {
     summary: '카카오 로그인',
     description: '카카오로 로그인합니다.',
   })
+  @UseGuards(AuthGuard('kakao'))
   @Public()
   @Get('/kakao')
   @HttpCode(201)
-  async kakao(@Req() req: Request) {}
+  async kakao() {}
+
+  @Public()
+  @UseGuards(AuthGuard('kakao'))
+  @Get('/kakao/callback')
+  @HttpCode(200)
+  async kakaoLogin(@Req() req: Request) {
+    return req.user;
+  }
 
   @ApiResponse({ status: 401, description: '인증되지 않은 유저' })
   @ApiResponse({ status: 200, description: '성공' })
