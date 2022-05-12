@@ -1,73 +1,58 @@
 <p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
+  <svg width="628" height="111" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M.216 2.352h17.28V38.96h38.528V2.352h17.28V94h-17.28V55.344H17.496V94H.216V2.352ZM149.06 78.896c-2.901 5.12-6.827 9.259-11.776 12.416-4.864 3.157-10.837 4.736-17.92 4.736-4.779 0-9.216-.81-13.312-2.432-4.011-1.707-7.51-4.053-10.496-7.04-2.987-2.987-5.333-6.485-7.04-10.496-1.621-4.096-2.432-8.576-2.432-13.44 0-4.523.81-8.79 2.432-12.8 1.621-4.096 3.883-7.637 6.784-10.624 2.901-3.072 6.315-5.504 10.24-7.296 4.011-1.792 8.405-2.688 13.184-2.688 5.035 0 9.515.853 13.44 2.56 3.925 1.621 7.211 3.925 9.856 6.912 2.645 2.901 4.651 6.357 6.016 10.368 1.365 4.01 2.048 8.363 2.048 13.056v1.536a8.655 8.655 0 0 0-.128 1.408 7.218 7.218 0 0 0-.128 1.408h-47.232c.341 2.56 1.024 4.779 2.048 6.656 1.109 1.792 2.432 3.328 3.968 4.608a17.994 17.994 0 0 0 5.248 2.688 21.79 21.79 0 0 0 5.76.768c3.84 0 6.997-.853 9.472-2.56 2.56-1.792 4.565-4.01 6.016-6.656l13.952 6.912Zm-15.232-24.32c-.085-1.11-.469-2.347-1.152-3.712-.597-1.365-1.536-2.645-2.816-3.84-1.195-1.195-2.731-2.176-4.608-2.944-1.792-.768-3.968-1.152-6.528-1.152-3.584 0-6.741 1.024-9.472 3.072s-4.651 4.907-5.76 8.576h30.336ZM160.793 94V2.352h16.768V94h-16.768Zm31.125 0V2.352h16.768V94h-16.768Zm60.196-64.768c4.864 0 9.301.853 13.312 2.56 4.096 1.621 7.595 3.925 10.496 6.912 2.987 2.901 5.291 6.4 6.912 10.496 1.707 4.096 2.56 8.576 2.56 13.44 0 4.864-.853 9.344-2.56 13.44-1.621 4.096-3.925 7.637-6.912 10.624-2.901 2.901-6.4 5.205-10.496 6.912-4.011 1.621-8.448 2.432-13.312 2.432-4.864 0-9.344-.81-13.44-2.432-4.011-1.707-7.509-4.01-10.496-6.912-2.901-2.987-5.205-6.528-6.912-10.624-1.621-4.096-2.432-8.576-2.432-13.44 0-4.864.811-9.344 2.432-13.44 1.707-4.096 4.011-7.595 6.912-10.496 2.987-2.987 6.485-5.29 10.496-6.912 4.096-1.707 8.576-2.56 13.44-2.56Zm0 51.328c2.133 0 4.181-.384 6.144-1.152a16.491 16.491 0 0 0 5.376-3.584c1.536-1.536 2.731-3.413 3.584-5.632.939-2.219 1.408-4.736 1.408-7.552s-.469-5.333-1.408-7.552c-.853-2.219-2.048-4.096-3.584-5.632A14.926 14.926 0 0 0 258.258 46a15.253 15.253 0 0 0-6.144-1.28c-2.219 0-4.309.427-6.272 1.28-1.963.768-3.712 1.92-5.248 3.456s-2.773 3.413-3.712 5.632c-.853 2.219-1.28 4.736-1.28 7.552s.427 5.333 1.28 7.552c.939 2.219 2.176 4.096 3.712 5.632a16.882 16.882 0 0 0 5.248 3.584c1.963.768 4.053 1.152 6.272 1.152Zm42.518 24.832 7.552-11.648c-1.877-.683-3.499-1.92-4.864-3.712-1.28-1.792-1.92-3.925-1.92-6.4 0-3.072 1.067-5.675 3.2-7.808 2.219-2.133 4.864-3.2 7.936-3.2s5.675 1.067 7.808 3.2 3.2 4.736 3.2 7.808c0 1.621-.256 3.072-.768 4.352-.512 1.195-1.323 2.603-2.432 4.224l-12.16 18.176-7.552-4.992Zm107.479-61.696h44.928c.256 1.024.469 2.261.64 3.712.171 1.45.256 2.901.256 4.352 0 5.888-.896 11.435-2.688 16.64-1.792 5.205-4.608 9.856-8.448 13.952-4.096 4.352-9.003 7.723-14.72 10.112-5.717 2.39-12.245 3.584-19.584 3.584-6.656 0-12.928-1.195-18.816-3.584-5.888-2.39-11.008-5.717-15.36-9.984s-7.808-9.301-10.368-15.104c-2.56-5.888-3.84-12.288-3.84-19.2 0-6.912 1.28-13.27 3.84-19.072 2.56-5.888 6.016-10.965 10.368-15.232 4.352-4.267 9.472-7.595 15.36-9.984 5.888-2.39 12.16-3.584 18.816-3.584 7.424 0 14.037 1.28 19.84 3.84 5.888 2.56 10.923 6.101 15.104 10.624l-11.904 11.648c-2.987-3.157-6.315-5.547-9.984-7.168-3.669-1.707-8.064-2.56-13.184-2.56-4.181 0-8.149.768-11.904 2.304-3.755 1.45-7.04 3.541-9.856 6.272-2.816 2.73-5.077 6.059-6.784 9.984-1.621 3.84-2.432 8.15-2.432 12.928 0 4.779.811 9.13 2.432 13.056 1.707 3.84 3.968 7.125 6.784 9.856 2.901 2.73 6.229 4.864 9.984 6.4 3.755 1.45 7.765 2.176 12.032 2.176 4.864 0 8.96-.683 12.288-2.048 3.413-1.45 6.315-3.285 8.704-5.504 1.707-1.536 3.157-3.456 4.352-5.76 1.28-2.39 2.261-5.035 2.944-7.936h-28.8v-14.72Zm88.137 52.352c-3.925 0-7.68-.555-11.264-1.664a32.541 32.541 0 0 1-9.856-4.992c-2.987-2.219-5.589-4.907-7.808-8.064-2.219-3.243-3.968-6.997-5.248-11.264l16.256-6.4c1.195 4.608 3.285 8.448 6.272 11.52 2.987 2.987 6.912 4.48 11.776 4.48 1.792 0 3.499-.213 5.12-.64 1.707-.512 3.2-1.195 4.48-2.048 1.365-.939 2.432-2.09 3.2-3.456.768-1.365 1.152-2.944 1.152-4.736 0-1.707-.299-3.243-.896-4.608-.597-1.365-1.621-2.645-3.072-3.84-1.365-1.195-3.2-2.347-5.504-3.456-2.219-1.11-4.992-2.261-8.32-3.456l-5.632-2.048c-2.475-.853-4.992-2.005-7.552-3.456a33.559 33.559 0 0 1-6.784-5.248c-2.048-2.048-3.755-4.437-5.12-7.168-1.28-2.816-1.92-5.973-1.92-9.472 0-3.584.683-6.912 2.048-9.984a24.876 24.876 0 0 1 6.016-8.192c2.645-2.39 5.76-4.224 9.344-5.504 3.669-1.365 7.723-2.048 12.16-2.048 4.608 0 8.576.64 11.904 1.92 3.413 1.195 6.272 2.773 8.576 4.736 2.389 1.877 4.309 3.968 5.76 6.272 1.451 2.304 2.517 4.48 3.2 6.528l-15.232 6.4c-.853-2.56-2.432-4.864-4.736-6.912-2.219-2.048-5.291-3.072-9.216-3.072-3.755 0-6.869.896-9.344 2.688-2.475 1.707-3.712 3.968-3.712 6.784 0 2.73 1.195 5.077 3.584 7.04 2.389 1.877 6.187 3.712 11.392 5.504l5.76 1.92c3.669 1.28 6.997 2.773 9.984 4.48 3.072 1.621 5.675 3.584 7.808 5.888a22.73 22.73 0 0 1 4.992 7.936c1.195 2.901 1.792 6.272 1.792 10.112 0 4.779-.981 8.917-2.944 12.416-1.877 3.413-4.309 6.23-7.296 8.448-2.987 2.219-6.357 3.883-10.112 4.992-3.755 1.11-7.424 1.664-11.008 1.664Zm45.593-93.696h17.024l28.032 48.512h1.024l28.032-48.512h17.152V94h-17.152V48.816l1.024-15.36h-1.024l-23.296 41.088h-10.368l-23.424-41.088h-1.024l1.024 15.36V94h-17.024V2.352Z" fill="#000"/>
+  </svg>
 </p>
-
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Installation
-
-```bash
-$ npm install
-```
+> `Hello, GSM`은 쉽고 편하게 입학을 도와주는 입학 지원 서비스입니다.
 
 ## Running the app
 
 ```bash
-# development
-$ npm run start
+# git clone
+$ git clone https://github.com/themoment-team/hello-gsm-back.git
 
-# watch mode
-$ npm run start:dev
+# setting project
+$ npm i
 
-# production mode
-$ npm run start:prod
+# start project
+$ npm start
+
+# build
+$ npm build
+
+# deploy
+$ npm start:prod
 ```
 
-## Test
+## Project Dependencies
 
-```bash
-# unit tests
-$ npm run test
+<div align="left">
+  <img src="https://img.shields.io/badge/NestJs-E0234E?style=flat-square&logo=NestJs&logoColor=white" alt="NestJs" />
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=TypeScript&logoColor=white" alt="Let's Encrypt" />
+  <img src="https://img.shields.io/badge/Prisma-2D3748?style=flat-square&logo=Prisma&logoColor=white" alt="Prisma" />
+  <img src="https://img.shields.io/badge/Passport-34E27A?style=flat-square&logo=Passport&logoColor=white" alt="Passport" />
+  <img src="https://img.shields.io/badge/JWT-000000?style=flat-square&logo=JsonWebTokens&logoColor=white" alt="JWT" />
+  <img src="https://img.shields.io/badge/Gmail-EA4335?style=flat-square&logo=Gmail&logoColor=white" alt="Gmail" />
+  <img src="https://img.shields.io/badge/Swagger-85EA2D?style=flat-square&logo=swagger&logoColor=black" alt="Swagger" />
+  <img src="https://img.shields.io/badge/OAuth2.0-000?style=flat-square&logo=OAuth2.0&logoColor=black" alt="Swagger" />
+  <img src="https://img.shields.io/badge/MariaDB-003545?style=flat-square&logo=MariaDB&logoColor=white" alt="Swagger" />
+  <img src="https://img.shields.io/badge/Nodemailer-22B573?style=flat-square&logo=Nodemailer&logoColor=white" alt="Swagger" />
+</div>
 
-# e2e tests
-$ npm run test:e2e
+## Dev Tools
 
-# test coverage
-$ npm run test:cov
-```
+<div align="left">
+  <img src="https://img.shields.io/badge/Neovim-57A143?style=flat-square&logo=Neovim&logoColor=white" alt="Neovim" />
+  <img src="https://img.shields.io/badge/Prettier-F7B93E?style=flat-square&logo=Prettier&logoColor=black" alt="Neovim" />
+  <img src="https://img.shields.io/badge/ESLint-4B32C3?style=flat-square&logo=ESLint&logoColor=white" alt="ESLint" />
+</div>
 
-## Support
+## Deploy
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
+<div align="left">
+  <img src="https://img.shields.io/badge/AWS EC2-232F3E?style=flat-square&logo=Amazon AWS&logoColor=white" alt="AWS" />
+  <img src="https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=Docker&logoColor=white" alt="Docker" />
+</div>
