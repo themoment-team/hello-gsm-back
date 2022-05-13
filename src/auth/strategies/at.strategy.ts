@@ -28,6 +28,7 @@ export class AtStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   async validate(req: Request, { email }: JwtPayload) {
+    const accessToken = req.cookies['accessToken'];
     const user = await this.prisma.user.findFirst({
       where: { email },
     });
@@ -37,15 +38,14 @@ export class AtStrategy extends PassportStrategy(Strategy, 'jwt') {
     const token = await this.prisma.access_token_blacklist.findFirst({
       where: {
         user_idx: user.user_idx,
-        access_token: req.cookies['accessToken'],
+        access_token: accessToken,
       },
     });
 
     await this.clearAccessTokens(user.user_idx, req['accessToken']);
 
     if (token) return false;
-
-    return user;
+    return { email: user.email, user_idx: user.user_idx, accessToken };
   }
 
   private async clearAccessTokens(user_idx: number, accessToken: string) {

@@ -16,6 +16,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Request, Response } from 'express';
+import { AtUser } from 'src/types';
 import { AuthService } from './auth.service';
 import { Public } from './decorators/public.decorator';
 import { User } from './decorators/user.decorator';
@@ -52,8 +53,8 @@ export class AuthController {
   @ApiCookieAuth('accessToken')
   @Post('logout')
   @HttpCode(200)
-  async logout(@Res() res: Response, @User('email') email: string) {
-    await this.authService.logout(email);
+  async logout(@Res() res: Response, @User() data: AtUser) {
+    await this.authService.logout(data);
     res.clearCookie('accessToken');
     res.clearCookie('refreshToken');
     res.send('로그아웃 완료');
@@ -70,8 +71,8 @@ export class AuthController {
   @UseGuards(RtGuard)
   @Post('refresh')
   @HttpCode(200)
-  async refresh(@User('email') email: string, @Res() res: Response) {
-    const tokens = await this.authService.refresh(email);
+  async refresh(@User() data: AtUser, @Res() res: Response) {
+    const tokens = await this.authService.refresh(data);
     res.cookie('accessToken', tokens.at, {
       httpOnly: true,
       expires: tokens.atExpired,
