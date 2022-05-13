@@ -8,11 +8,12 @@ datasource db {
 }
 
 model user {
-  user_idx         Int         @id @default(autoincrement())
   name             String      @db.VarChar(20)
-  birth            DateTime    @db.Date
   gender           user_gender
+  birth            DateTime    @db.Date
   cellphone_number String      @db.VarChar(20)
+  user_idx         Int         @id @default(autoincrement())
+  email            String      @unique(map: "email") @db.VarChar(500)
 }
 
 model access_token_blacklist {
@@ -61,6 +62,7 @@ model application_details {
   score_total                       Int                                  @db.SmallInt
   first_wanted_major                Int                                  @db.SmallInt
   second_wanted_major               Int                                  @db.SmallInt
+  third_wanted_major                Int                                  @db.SmallInt
   application                       application                          @relation(fields: [application_idx], references: [application_idx], onDelete: Cascade, map: "application_details_application_application_idx_fk")
 }
 
@@ -76,8 +78,8 @@ enum application_screening {
 }
 
 enum application_social_screening {
-  equal_opportunity @map("equal opportunity")
-  social_diversity @map("social diversity")
+  equal_opportunity
+  social_diversity
   NONE
 }
 
