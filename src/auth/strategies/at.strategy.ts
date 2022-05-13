@@ -12,10 +12,8 @@ type JwtPayload = {
 
 @Injectable()
 export class AtStrategy extends PassportStrategy(Strategy, 'jwt') {
-  constructor(
-    private configService: ConfigService,
-    private prisma: PrismaService,
-  ) {
+  constructor(private prisma: PrismaService) {
+    const configService = new ConfigService();
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (req: Request) => {
@@ -25,14 +23,32 @@ export class AtStrategy extends PassportStrategy(Strategy, 'jwt') {
         },
       ]),
       secretOrKey: configService.get(ENV.JWT_ACCESS_SECRET),
+      passReqToCallback: true,
     });
   }
 
-  async validate(payload: JwtPayload) {
+  async validate(req: Request, { email }: JwtPayload) {
     const user = await this.prisma.user.findFirst({
-      where: { email: payload.email },
+      where: { email },
     });
+
     if (!user) return false;
+
+    const token = await this.prisma.access_token_blacklist.findFirst({
+      where: {
+        user_idx: user.user_idx,
+        access_token: req.cookies['accessToken'],
+      },
+    });
+
+    await this.clearAccessTokens(user.user_idx, req['accessToken']);
+
+    if (token) return false;
+
     return user;
+  }
+
+  private async clearAccessTokens(user_idx: number, accessToken: string) {
+    return;
   }
 }
