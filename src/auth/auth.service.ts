@@ -5,6 +5,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { ENV } from 'src/lib/env';
 import { AtUser } from 'src/types';
+import KakaoUserType from './types/kakao.user.type';
 
 @Injectable()
 export class AuthService {
@@ -13,6 +14,10 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
   ) {}
+
+  async kakaoLogin(user: KakaoUserType) {
+    console.log(user);
+  }
 
   async logout({ user_idx, accessToken }: AtUser): Promise<void> {
     await this.prisma.refresh_token.update({
@@ -33,11 +38,6 @@ export class AuthService {
       data: { refresh_token },
     });
     return tokens;
-  }
-
-  // 탈퇴기능 일단 보류
-  async exit() {
-    return;
   }
 
   private async getTokens(email: string) {
