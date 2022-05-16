@@ -7,6 +7,7 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
 import {
   ApiCookieAuth,
@@ -15,6 +16,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Request, Response } from 'express';
+import { ENV } from 'src/lib/env';
 import { AtUser } from 'src/types';
 import { AuthService } from './auth.service';
 import { Public } from './decorators/public.decorator';
@@ -24,7 +26,10 @@ import { RtGuard } from './guards/rt.guard';
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private configService: ConfigService,
+  ) {}
 
   @ApiResponse({ status: 200, description: '성공' })
   @ApiOperation({
@@ -41,10 +46,34 @@ export class AuthController {
   @UseGuards(AuthGuard('kakao'))
   @Get('/kakao/callback')
   @HttpCode(200)
-  async kakaoLogin(@Req() req: Request) {
+  async kakaoLogin(@Req() req: Request, @Res() res: Response) {
     const user: any = req.user;
-    await this.authService.kakaoLogin(user._json);
+    const tokens: any = await this.authService.kakaoLogin(user._json);
+
+    if (tokens.registerToken) {
+      res.cookie('registerToken', tokens.registerToken, {
+        httpOnly: true,
+        expires: tokens.expired,
+        domain: this.configService.get(ENV.DOMAIN),
+      });
+    } else {
+      res.cookie('accessToken', tokens.at, {
+        httpOnly: true,
+        expires: tokens.atExpired,
+        domain: this.configService.get(ENV.DOMAIN),
+      });
+      res.cookie('refreshToken', tokens.rt, {
+        httpOnly: true,
+        expires: tokens.rtExpired,
+        domain: this.configService.get(ENV.DOMAIN),
+      });
+    }
+
+    res.redirect(`${this.configService.get(ENV.FRONT_URL)}`);
   }
+
+  @Post('register')
+  async register() {}
 
   @ApiResponse({ status: 401, description: '인증되지 않은 유저' })
   @ApiResponse({ status: 200, description: '성공' })

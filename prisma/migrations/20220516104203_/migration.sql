@@ -1,6 +1,7 @@
 -- CreateTable
 CREATE TABLE `user` (
     `user_idx` INTEGER NOT NULL,
+    `user_img` VARCHAR(500) NULL,
     `name` VARCHAR(20) NULL,
     `birth` DATE NULL,
     `gender` VARCHAR(20) NULL,

@@ -42,8 +42,6 @@ export class AtStrategy extends PassportStrategy(Strategy, 'jwt') {
       },
     });
 
-    await this.clearAccessTokens(user.user_idx, req['accessToken']);
-
     if (token) return false;
     return { user_idx: user.user_idx, accessToken };
   }

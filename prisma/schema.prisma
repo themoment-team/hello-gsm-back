@@ -8,7 +8,8 @@ datasource db {
 }
 
 model user {
-  user_idx         Int           @id
+  user_idx         BigInt        @id
+  user_img         String?       @db.VarChar(500)
   name             String?       @db.VarChar(20)
   birth            DateTime?     @db.Date
   gender           String?       @db.VarChar(20)
@@ -17,7 +18,7 @@ model user {
 }
 
 model access_token_blacklist {
-  user_idx     Int      @id
+  user_idx     BigInt   @id
   access_token String   @db.VarChar(500)
   expired_date DateTime @default(dbgenerated("(current_timestamp() + interval 5 minute)")) @db.Timestamp(0)
 }
@@ -38,7 +39,7 @@ model application {
   school_name               String               @db.VarChar(50)
   screening                 String               @db.VarChar(20)
   social_screening          String               @db.VarChar(20)
-  user_idx                  Int
+  user_idx                  BigInt
   user                      user                 @relation(fields: [user_idx], references: [user_idx], onDelete: Cascade, onUpdate: Restrict, map: "application_user_user_idx_fk")
   application_details       application_details?
 
@@ -73,6 +74,6 @@ model application_details {
 }
 
 model refresh_token {
-  user_idx      Int    @id
+  user_idx      BigInt @id
   refresh_token String @db.VarChar(500)
 }
