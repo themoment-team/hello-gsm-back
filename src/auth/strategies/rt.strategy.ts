@@ -7,7 +7,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { ENV } from 'src/lib/env';
 
 type JwtPayload = {
-  email: string;
+  user_idx: number;
 };
 
 @Injectable()
@@ -27,14 +27,14 @@ export class RtStrategy extends PassportStrategy(Strategy, 'jwt-rt') {
     });
   }
 
-  async validate(req: Request, { email }: JwtPayload) {
-    if (!email) return false;
+  async validate(req: Request, { user_idx }: JwtPayload) {
+    if (!user_idx) return false;
 
-    const user = await this.prisma.user.findFirst({ where: { email } });
+    const user = await this.prisma.user.findFirst({ where: { user_idx } });
 
     const refresh = await this.prisma.refresh_token.findFirst({
       where: {
-        user_idx: user.user_idx,
+        user_idx,
         refresh_token: req.cookies['refreshToken'],
       },
     });
@@ -42,8 +42,7 @@ export class RtStrategy extends PassportStrategy(Strategy, 'jwt-rt') {
     if (!user || !refresh) return false;
 
     return {
-      email,
-      user_idx: user.user_idx,
+      user_idx,
       accessToken: req.cookies['accessToken'],
     };
   }

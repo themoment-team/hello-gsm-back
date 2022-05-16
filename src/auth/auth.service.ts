@@ -16,12 +16,12 @@ export class AuthService {
   ) {}
 
   async kakaoLogin(user: KakaoUserType) {
-    this.prisma.user.create({ data: { user_idx: user.id } });
+    await this.prisma.user.create({ data: { user_idx: user.id } });
   }
 
   async logout({ user_idx, accessToken }: AtUser): Promise<void> {
     await this.prisma.refresh_token.update({
-      where: { user_idx: user_idx },
+      where: { user_idx },
       data: { refresh_token: '' },
     });
     await this.prisma.access_token_blacklist.create({
@@ -30,27 +30,27 @@ export class AuthService {
     return;
   }
 
-  async refresh({ user_idx, email }: AtUser) {
-    const tokens = await this.getTokens(email);
+  async refresh({ user_idx }: AtUser) {
+    const tokens = await this.getTokens(user_idx);
     const refresh_token = await bcrypt.hash(tokens.rt, 10);
     await this.prisma.refresh_token.update({
-      where: { user_idx: user_idx },
+      where: { user_idx },
       data: { refresh_token },
     });
     return tokens;
   }
 
-  private async getTokens(email: string) {
+  private async getTokens(user_idx: number) {
     const [at, rt, atExpired, rtExpired] = await Promise.all([
       this.jwtService.sign(
-        { email },
+        { user_idx },
         {
           secret: this.configService.get(ENV.JWT_ACCESS_SECRET),
           expiresIn: 60 * 10,
         },
       ),
       this.jwtService.sign(
-        { email },
+        { user_idx },
         {
           secret: this.configService.get(ENV.JWT_REFRESH_SECRET),
           expiresIn: '1d',

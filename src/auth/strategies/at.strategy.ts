@@ -7,7 +7,7 @@ import { Request } from 'express';
 import { ENV } from 'src/lib/env';
 
 type JwtPayload = {
-  email: string;
+  user_idx: number;
 };
 
 @Injectable()
@@ -27,10 +27,10 @@ export class AtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
   }
 
-  async validate(req: Request, { email }: JwtPayload) {
+  async validate(req: Request, { user_idx }: JwtPayload) {
     const accessToken = req.cookies['accessToken'];
     const user = await this.prisma.user.findFirst({
-      where: { email },
+      where: { user_idx },
     });
 
     if (!user) return false;
@@ -45,7 +45,7 @@ export class AtStrategy extends PassportStrategy(Strategy, 'jwt') {
     await this.clearAccessTokens(user.user_idx, req['accessToken']);
 
     if (token) return false;
-    return { email: user.email, user_idx: user.user_idx, accessToken };
+    return { user_idx: user.user_idx, accessToken };
   }
 
   private async clearAccessTokens(user_idx: number, accessToken: string) {
