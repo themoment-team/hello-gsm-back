@@ -20,7 +20,6 @@ import { AuthService } from './auth.service';
 import { Public } from './decorators/public.decorator';
 import { User } from './decorators/user.decorator';
 import { RtGuard } from './guards/rt.guard';
-import { Profile } from 'passport-kakao';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -43,7 +42,7 @@ export class AuthController {
   @Get('/kakao/callback')
   @HttpCode(200)
   async kakaoLogin(@Req() req: Request) {
-    const user = req.user as Profile;
+    const user: any = req.user;
     await this.authService.kakaoLogin(user._json);
   }
 
@@ -57,7 +56,7 @@ export class AuthController {
     await this.authService.logout(data);
     res.clearCookie('accessToken');
     res.clearCookie('refreshToken');
-    res.send('로그아웃 완료');
+    res.send('로그아웃에 성공하였습니다.');
   }
 
   @ApiResponse({ status: 401, description: '인증되지 않은 유저' })
@@ -81,6 +80,6 @@ export class AuthController {
       httpOnly: true,
       expires: tokens.rtExpired,
     });
-    res.send('성공');
+    res.send('토큰 재발급에 성공하였습니다.');
   }
 }

@@ -16,7 +16,7 @@ export class AuthService {
   ) {}
 
   async kakaoLogin(user: KakaoUserType) {
-    console.log(user);
+    this.prisma.user.create({ data: { user_idx: user.id } });
   }
 
   async logout({ user_idx, accessToken }: AtUser): Promise<void> {

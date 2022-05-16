@@ -8,12 +8,12 @@ datasource db {
 }
 
 model user {
-  name             String      @db.VarChar(20)
-  gender           user_gender
-  birth            DateTime    @db.Date
-  cellphone_number String      @db.VarChar(20)
-  user_idx         Int         @id @default(autoincrement())
-  email            String      @unique(map: "email") @db.VarChar(500)
+  user_idx         Int           @id
+  name             String?       @db.VarChar(20)
+  birth            DateTime?     @db.Date
+  gender           String?       @db.VarChar(20)
+  cellphone_number String?       @db.VarChar(20)
+  application      application[]
 }
 
 model access_token_blacklist {
@@ -23,73 +23,56 @@ model access_token_blacklist {
 }
 
 model application {
-  application_idx           Int                          @id @default(autoincrement())
-  registration_number       Int?                         @unique(map: "application_registration_number_uindex") @db.SmallInt
-  al_submission             Boolean?
+  application_idx           Int                  @id @default(autoincrement())
+  registration_number       Int?                 @unique(map: "application_registration_number_uindex") @db.SmallInt
+  is_final_submission       Boolean?
   is_document_reception     Boolean?
   is_first_result           Boolean?
   is_final_result           Boolean?
-  ID_photo_url              String                       @db.VarChar(500)
-  guardian_name             String                       @db.VarChar(20)
-  guardian_cellphone_number String                       @db.VarChar(20)
-  teacher_name              String                       @db.VarChar(20)
-  teacher_cellephone_number String                       @db.VarChar(20)
-  school_location           String                       @db.VarChar(50)
-  school_name               String                       @db.VarChar(50)
-  screening                 application_screening
-  social_screening          application_social_screening
+  ID_photo_url              String               @db.VarChar(500)
+  guardian_name             String               @db.VarChar(20)
+  guardian_cellphone_number String               @db.VarChar(20)
+  teacher_name              String               @db.VarChar(20)
+  teacher_cellephone_number String               @db.VarChar(20)
+  school_location           String               @db.VarChar(50)
+  school_name               String               @db.VarChar(50)
+  screening                 String               @db.VarChar(20)
+  social_screening          String               @db.VarChar(20)
+  user_idx                  Int
+  user                      user                 @relation(fields: [user_idx], references: [user_idx], onDelete: Cascade, onUpdate: Restrict, map: "application_user_user_idx_fk")
   application_details       application_details?
+
+  @@index([user_idx], map: "application_user_user_idx_fk")
 }
 
 model application_details {
-  application_idx                   Int                                  @id
-  address                           String                               @db.VarChar(50)
-  telephone_number                  String                               @db.VarChar(20)
-  guardian_relation                 String                               @db.VarChar(20)
-  education_status                  application_details_education_status
-  school_telephone_number           String                               @db.VarChar(20)
-  score_1_1                         Int                                  @db.SmallInt
-  score_1_2                         Int                                  @db.SmallInt
-  score_2_1                         Int                                  @db.SmallInt
-  score_2_2                         Int                                  @db.SmallInt
-  score_3_1                         Int                                  @db.SmallInt
-  general_curriculum_score_subtotal Int                                  @db.SmallInt
-  art_sports_score                  Int                                  @db.SmallInt
-  curriculum_score_subtotal         Int                                  @db.SmallInt
-  attendance_score                  Int                                  @db.SmallInt
-  volunteer_score                   Int                                  @db.SmallInt
-  non_curriculum_score_subtotal     Int                                  @db.SmallInt
-  score_total                       Int                                  @db.SmallInt
-  first_wanted_major                Int                                  @db.SmallInt
-  second_wanted_major               Int                                  @db.SmallInt
-  third_wanted_major                Int                                  @db.SmallInt
-  application                       application                          @relation(fields: [application_idx], references: [application_idx], onDelete: Cascade, map: "application_details_application_application_idx_fk")
+  application_idx                   Int         @id
+  address                           String      @db.VarChar(50)
+  telephone_number                  String      @db.VarChar(20)
+  guardian_relation                 String      @db.VarChar(20)
+  education_status                  String      @db.VarChar(20)
+  graduation_year                   String      @db.VarChar(20)
+  graduation_month                  String      @db.VarChar(20)
+  school_telephone_number           String      @db.VarChar(20)
+  score_1_1                         Int         @db.SmallInt
+  score_1_2                         Int         @db.SmallInt
+  score_2_1                         Int         @db.SmallInt
+  score_2_2                         Int         @db.SmallInt
+  score_3_1                         Int         @db.SmallInt
+  general_curriculum_score_subtotal Int         @db.SmallInt
+  art_sports_score                  Int         @db.SmallInt
+  curriculum_score_subtotal         Int         @db.SmallInt
+  attendance_score                  Int         @db.SmallInt
+  volunteer_score                   Int         @db.SmallInt
+  non_curriculum_score_subtotal     Int         @db.SmallInt
+  score_total                       Int         @db.SmallInt
+  first_wanted_major                String      @db.VarChar(20)
+  second_wanted_major               String      @db.VarChar(20)
+  third_wanted_major                String      @db.VarChar(20)
+  application                       application @relation(fields: [application_idx], references: [application_idx], onDelete: Cascade, onUpdate: Restrict, map: "application_details_application_application_idx_fk")
 }
 
 model refresh_token {
   user_idx      Int    @id
   refresh_token String @db.VarChar(500)
-}
-
-enum application_screening {
-  normal
-  society
-  special
-}
-
-enum application_social_screening {
-  equal_opportunity
-  social_diversity
-  NONE
-}
-
-enum application_details_education_status {
-  planned
-  graduation
-  qualification_examination @map("qualification examination")
-}
-
-enum user_gender {
-  M
-  F
 }
