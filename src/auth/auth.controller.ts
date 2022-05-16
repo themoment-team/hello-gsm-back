@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   HttpCode,
@@ -21,6 +22,7 @@ import { AtUser } from 'src/types';
 import { AuthService } from './auth.service';
 import { Public } from './decorators/public.decorator';
 import { User } from './decorators/user.decorator';
+import { RegisterDto } from './dto/register.dto';
 import { RtGuard } from './guards/rt.guard';
 
 @ApiTags('Auth')
@@ -72,8 +74,16 @@ export class AuthController {
     res.redirect(`${this.configService.get(ENV.FRONT_URL)}`);
   }
 
+  @UseGuards(AuthGuard('register'))
   @Post('register')
-  async register() {}
+  @HttpCode(200)
+  async register(
+    @User('user_idx') user_idx: number,
+    @Body() data: RegisterDto,
+  ) {
+    await this.authService.register(user_idx, data);
+    return '저장되었습니다.';
+  }
 
   @ApiResponse({ status: 401, description: '인증되지 않은 유저' })
   @ApiResponse({ status: 200, description: '성공' })

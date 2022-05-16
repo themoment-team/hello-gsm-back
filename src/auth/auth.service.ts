@@ -6,6 +6,7 @@ import * as bcrypt from 'bcrypt';
 import { ENV } from 'src/lib/env';
 import { AtUser } from 'src/types';
 import KakaoUserType from './types/kakao.user.type';
+import { RegisterDto } from './dto/register.dto';
 
 @Injectable()
 export class AuthService {
@@ -47,6 +48,15 @@ export class AuthService {
 
       return this.getRegisterToken(kakaoUser.id);
     }
+  }
+
+  async register(user_idx: number, data: RegisterDto) {
+    await this.prisma.user.update({
+      where: { user_idx },
+      data: {
+        ...data,
+      },
+    });
   }
 
   async logout({ user_idx, accessToken }: AtUser): Promise<void> {
