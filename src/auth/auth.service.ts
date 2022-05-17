@@ -55,6 +55,7 @@ export class AuthService {
       where: { user_idx },
       data: {
         ...data,
+        birth: new Date(data.birth),
       },
     });
   }

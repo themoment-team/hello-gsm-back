@@ -74,15 +74,19 @@ export class AuthController {
     res.redirect(`${this.configService.get(ENV.FRONT_URL)}`);
   }
 
+  @Public()
   @UseGuards(AuthGuard('register'))
   @Post('register')
   @HttpCode(200)
   async register(
     @User('user_idx') user_idx: number,
     @Body() data: RegisterDto,
+    @Res() res: Response,
   ) {
     await this.authService.register(user_idx, data);
-    return '저장되었습니다.';
+
+    res.clearCookie('registerToken');
+    res.send('저장되었습니다');
   }
 
   @ApiResponse({ status: 401, description: '인증되지 않은 유저' })

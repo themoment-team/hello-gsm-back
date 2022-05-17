@@ -18,6 +18,7 @@ export class RegisterStrategy extends PassportStrategy(Strategy, 'register') {
       jwtFromRequest: ExtractJwt.fromExtractors([
         (req: Request) => {
           const cookie = req.cookies['registerToken'];
+
           if (!cookie) return null;
           return cookie;
         },
