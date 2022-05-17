@@ -58,6 +58,8 @@ export class AuthController {
         expires: tokens.expired,
         domain: this.configService.get(ENV.DOMAIN),
       });
+
+      res.redirect(`${this.configService.get(ENV.FRONT_URL)}/auth/signup`);
     } else {
       res.cookie('accessToken', tokens.at, {
         httpOnly: true,
@@ -69,9 +71,9 @@ export class AuthController {
         expires: tokens.rtExpired,
         domain: this.configService.get(ENV.DOMAIN),
       });
-    }
 
-    res.redirect(`${this.configService.get(ENV.FRONT_URL)}`);
+      res.redirect(`${this.configService.get(ENV.FRONT_URL)}`);
+    }
   }
 
   @Public()
