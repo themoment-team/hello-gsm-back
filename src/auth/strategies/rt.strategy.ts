@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ENV } from 'src/lib/env';
+import { refreshToken } from 'src/utils/token.name';
 
 type JwtPayload = {
   user_idx: number;
@@ -17,7 +18,7 @@ export class RtStrategy extends PassportStrategy(Strategy, 'jwt-rt') {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (req: Request) => {
-          const cookie = req.cookies['refreshToken'];
+          const cookie = req.cookies[refreshToken];
           if (!cookie) return null;
           return cookie;
         },
@@ -35,7 +36,7 @@ export class RtStrategy extends PassportStrategy(Strategy, 'jwt-rt') {
     const refresh = await this.prisma.refresh_token.findFirst({
       where: {
         user_idx,
-        refresh_token: req.cookies['refreshToken'],
+        refresh_token: req.cookies[refreshToken],
       },
     });
 
@@ -43,7 +44,6 @@ export class RtStrategy extends PassportStrategy(Strategy, 'jwt-rt') {
 
     return {
       user_idx,
-      accessToken: req.cookies['accessToken'],
     };
   }
 }

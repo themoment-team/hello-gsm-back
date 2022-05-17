@@ -60,20 +60,20 @@ export class AuthController {
       });
 
       res.redirect(`${this.configService.get(ENV.FRONT_URL)}/auth/signup`);
-    } else {
-      res.cookie('accessToken', tokens.at, {
-        httpOnly: true,
-        expires: tokens.atExpired,
-        domain: this.configService.get(ENV.DOMAIN),
-      });
-      res.cookie('refreshToken', tokens.rt, {
-        httpOnly: true,
-        expires: tokens.rtExpired,
-        domain: this.configService.get(ENV.DOMAIN),
-      });
-
-      res.redirect(`${this.configService.get(ENV.FRONT_URL)}`);
+      return;
     }
+    res.cookie('accessToken', tokens.at, {
+      httpOnly: true,
+      expires: tokens.atExpired,
+      domain: this.configService.get(ENV.DOMAIN),
+    });
+    res.cookie('refreshToken', tokens.rt, {
+      httpOnly: true,
+      expires: tokens.rtExpired,
+      domain: this.configService.get(ENV.DOMAIN),
+    });
+
+    res.redirect(`${this.configService.get(ENV.FRONT_URL)}`);
   }
 
   @Public()
