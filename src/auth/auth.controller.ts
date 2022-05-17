@@ -24,6 +24,7 @@ import { Public } from './decorators/public.decorator';
 import { User } from './decorators/user.decorator';
 import { RegisterDto } from './dto/register.dto';
 import { RtGuard } from './guards/rt.guard';
+import { accessToken, refreshToken, registerToken } from 'src/utils/token.name';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -53,7 +54,7 @@ export class AuthController {
     const tokens: any = await this.authService.kakaoLogin(user._json);
 
     if (tokens.registerToken) {
-      res.cookie('registerToken', tokens.registerToken, {
+      res.cookie(registerToken, tokens.registerToken, {
         httpOnly: true,
         expires: tokens.expired,
         domain: this.configService.get(ENV.DOMAIN),
@@ -62,17 +63,7 @@ export class AuthController {
       res.redirect(`${this.configService.get(ENV.FRONT_URL)}/auth/signup`);
       return;
     }
-    res.cookie('accessToken', tokens.at, {
-      httpOnly: true,
-      expires: tokens.atExpired,
-      domain: this.configService.get(ENV.DOMAIN),
-    });
-    res.cookie('refreshToken', tokens.rt, {
-      httpOnly: true,
-      expires: tokens.rtExpired,
-      domain: this.configService.get(ENV.DOMAIN),
-    });
-
+    this.ResCookie(res, tokens);
     res.redirect(`${this.configService.get(ENV.FRONT_URL)}`);
   }
 
@@ -87,20 +78,20 @@ export class AuthController {
   ) {
     await this.authService.register(user_idx, data);
 
-    res.clearCookie('registerToken');
+    res.clearCookie(registerToken);
     res.send('저장되었습니다');
   }
 
   @ApiResponse({ status: 401, description: '인증되지 않은 유저' })
   @ApiResponse({ status: 200, description: '성공' })
   @ApiOperation({ summary: '로그아웃' })
-  @ApiCookieAuth('accessToken')
+  @ApiCookieAuth(accessToken)
   @Post('logout')
   @HttpCode(200)
   async logout(@Res() res: Response, @User() data: AtUser) {
     await this.authService.logout(data);
-    res.clearCookie('accessToken');
-    res.clearCookie('refreshToken');
+    res.clearCookie(accessToken);
+    res.clearCookie(registerToken);
     res.send('로그아웃에 성공하였습니다.');
   }
 
@@ -110,21 +101,26 @@ export class AuthController {
     summary: '토큰 재발급',
     description: 'accessToken이 만료되었을 때 refreshToken으로 재발급해줍니다.',
   })
-  @ApiCookieAuth('refreshToken')
+  @ApiCookieAuth(refreshToken)
   @Public()
   @UseGuards(RtGuard)
   @Post('refresh')
   @HttpCode(200)
   async refresh(@User() data: AtUser, @Res() res: Response) {
     const tokens = await this.authService.refresh(data);
-    res.cookie('accessToken', tokens.at, {
+
+    this.ResCookie(res, tokens);
+    res.send('토큰 재발급에 성공하였습니다');
+  }
+
+  private ResCookie(res: Response, tokens: any) {
+    res.cookie(accessToken, tokens.at, {
       httpOnly: true,
       expires: tokens.atExpired,
     });
-    res.cookie('refreshToken', tokens.rt, {
+    res.cookie(refreshToken, tokens.rt, {
       httpOnly: true,
       expires: tokens.rtExpired,
     });
-    res.send('토큰 재발급에 성공하였습니다.');
   }
 }

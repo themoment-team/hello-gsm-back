@@ -87,7 +87,7 @@ export class AuthService {
         { user_idx },
         {
           secret: this.configService.get(ENV.JWT_ACCESS_SECRET),
-          expiresIn: 60 * 10,
+          expiresIn: 60 * 5,
         },
       ),
       this.jwtService.signAsync(
@@ -97,7 +97,7 @@ export class AuthService {
           expiresIn: '1d',
         },
       ),
-      new Date(new Date().setMinutes(new Date().getMinutes() + 10)),
+      new Date(new Date().setMinutes(new Date().getMinutes() + 5)),
       new Date(new Date().setDate(new Date().getDate() + 1)),
     ]);
     return { at, rt, atExpired, rtExpired };
