@@ -28,12 +28,14 @@ export class RegisterStrategy extends PassportStrategy(Strategy, 'register') {
   }
 
   async validate({ user_idx }: JwtPayload) {
+    if (!user_idx) return null;
+
     const user = await this.prisma.user.findFirst({
       where: { user_idx },
     });
 
-    if (!user) return false;
+    if (!user) return null;
 
-    return { user_idx: user.user_idx };
+    return { user_idx };
   }
 }

@@ -29,21 +29,23 @@ export class AtStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   async validate(req: Request, { user_idx }: JwtPayload) {
+    if (!user_idx) return null;
+
     const at = req.cookies[accessToken];
     const user = await this.prisma.user.findFirst({
       where: { user_idx },
     });
 
-    if (!user) return false;
+    if (!user) return null;
 
     const token = await this.prisma.access_token_blacklist.findFirst({
       where: {
-        user_idx: user.user_idx,
+        user_idx,
         access_token: at,
       },
     });
 
-    if (token) return false;
-    return { user_idx: user.user_idx };
+    if (token) return null;
+    return { user_idx };
   }
 }

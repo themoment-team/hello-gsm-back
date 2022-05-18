@@ -29,7 +29,7 @@ export class RtStrategy extends PassportStrategy(Strategy, 'jwt-rt') {
   }
 
   async validate(req: Request, { user_idx }: JwtPayload) {
-    if (!user_idx) return false;
+    if (!user_idx) return null;
 
     const user = await this.prisma.user.findFirst({ where: { user_idx } });
 
@@ -40,10 +40,8 @@ export class RtStrategy extends PassportStrategy(Strategy, 'jwt-rt') {
       },
     });
 
-    if (!user || !refresh) return false;
+    if (!user || !refresh) return null;
 
-    return {
-      user_idx,
-    };
+    return { user_idx };
   }
 }

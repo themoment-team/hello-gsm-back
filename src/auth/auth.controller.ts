@@ -123,4 +123,9 @@ export class AuthController {
       expires: tokens.rtExpired,
     });
   }
+
+  @Get('/check')
+  check() {
+    return '성공';
+  }
 }
