@@ -17,25 +17,12 @@ export class AuthService {
   ) {}
 
   async kakaoLogin(kakaoUser: KakaoUserType) {
-    const user = await this.prisma.user.findFirst({
+    let user = await this.prisma.user.findFirst({
       where: { user_idx: kakaoUser.id },
     });
 
-    if (
-      user &&
-      user.name &&
-      user.birth &&
-      user.gender &&
-      user.cellphone_number
-    ) {
-      return await this.getTokens(Number(user.user_idx));
-    } else if (
-      user &&
-      (!user.name || !user.birth || !user.gender || !user.cellphone_number)
-    ) {
-      return this.getRegisterToken(Number(user.user_idx));
-    } else {
-      await this.prisma.user.create({
+    if (!user)
+      user = await this.prisma.user.create({
         data: {
           user_idx: kakaoUser.id,
           user_img: kakaoUser.kakao_account.profile.profile_image_url,
@@ -46,8 +33,10 @@ export class AuthService {
         },
       });
 
+    if (!user.name || !user.birth || !user.gender || !user.cellphone_number)
       return this.getRegisterToken(kakaoUser.id);
-    }
+
+    return this.getTokens(Number(user.user_idx));
   }
 
   async register(user_idx: number, data: RegisterDto) {
