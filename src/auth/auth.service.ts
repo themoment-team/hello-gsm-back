@@ -1,269 +1,109 @@
-import {
-  BadRequestException,
-  ConflictException,
-  ForbiddenException,
-  Injectable,
-  InternalServerErrorException,
-  Logger,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { EmailService } from 'src/email/email.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import {
-  emailConfirmDto,
-  ModifyPwdDto,
-  SigninDto,
-  SignupDto,
-  verifyDto,
-  ExitDto,
-} from './dto';
-import { VerifyDataType } from './types/auth.email.type';
 import * as bcrypt from 'bcrypt';
 import { ENV } from 'src/lib/env';
+import { AtUser } from 'src/types';
+import KakaoUserType from './types/kakao.user.type';
+import { RegisterDto } from './dto/register.dto';
 
 @Injectable()
 export class AuthService {
-  authEmail: Record<string, VerifyDataType> = {};
-  verifyPwd: Record<string, VerifyDataType> = {};
-
   constructor(
     private prisma: PrismaService,
-    private emailService: EmailService,
     private jwtService: JwtService,
     private configService: ConfigService,
   ) {}
 
-  async verify(data: verifyDto): Promise<string> {
-    const user = await this.prisma.user.findFirst({
-      where: { email: data.email },
+  async kakaoLogin(kakaoUser: KakaoUserType) {
+    let user = await this.prisma.user.findFirst({
+      where: { user_idx: kakaoUser.id },
     });
-    if (user) throw new ConflictException('같은 이메일이 존재합니다');
 
-    const code = this.getVerifyCode();
-    try {
-      await this.emailService.userVerify(data.email, code);
-    } catch (e) {
-      Logger.error(`이메일 전송 실패 ${data.email}`);
-      console.log(e);
-      throw new InternalServerErrorException('이메일 전송 실패');
-    }
-
-    this.authEmail[data.email] = {
-      code,
-      expiredAt: new Date(new Date().setMinutes(new Date().getMinutes() + 10)),
-      confirm: false,
-    };
-    return '이메일 전송';
-  }
-
-  async emailConfirm(data: emailConfirmDto) {
-    const user = this.authEmail[data.email];
-    if (!user) throw new BadRequestException('존재하지 않는 이메일입니다');
-    if (user.code !== data.code)
-      throw new BadRequestException('인증코드가 올바르지 않습니다.');
-    if (user.expiredAt < new Date())
-      throw new BadRequestException('인증 시간이 지났습니다');
-    if (user.confirm) throw new ForbiddenException('이미 인증이 되었습니다');
-
-    this.authEmail[data.email].confirm = true;
-
-    const [token, expiredAt] = await Promise.all([
-      this.jwtService.sign(
-        { ...data },
-        { expiresIn: 60 * 3, secret: this.configService.get(ENV.EMAIL_VERIFY) },
-      ),
-      new Date(new Date().setMinutes(new Date().getMinutes() + 3)),
-    ]);
-    return { token, expiredAt };
-  }
-
-  async signup(data: SignupDto, cookie: string) {
-    if (await this.prisma.user.findFirst({ where: { email: data.email } }))
-      throw new ConflictException('같은 이메일이 존재합니다.');
-    if (!cookie) throw new BadRequestException('인증되지 않았습니다.');
-
-    let token: { code: string; email: string };
-
-    try {
-      token = this.jwtService.verify(cookie, {
-        secret: this.configService.get(ENV.EMAIL_VERIFY),
+    if (!user)
+      user = await this.prisma.user.create({
+        data: {
+          user_idx: kakaoUser.id,
+          user_img: kakaoUser.kakao_account.profile.profile_image_url,
+          gender: null,
+          cellphone_number: null,
+          birth: null,
+          name: null,
+        },
       });
-    } catch (e) {
-      throw new BadRequestException('잘못된 토큰입니다.');
-    }
 
-    if (data.email !== token.email || !this.authEmail[data.email])
-      throw new BadRequestException('인증되지 않은 이메일입니다.');
-    if (this.authEmail[data.email].expiredAt < new Date())
-      throw new ForbiddenException('시간이 만료되었습니다.');
-    if (!this.authEmail[data.email].confirm)
-      throw new BadRequestException('인증되지 않았습니다.');
-    if (this.authEmail[data.email].code !== token.code)
-      throw new BadRequestException('토큰이 올바르지 않습니다.');
-    if (data.password !== data.passwordConfirm)
-      throw new BadRequestException('비밀번호가 올바르지 않습니다.');
+    if (!user.name || !user.birth || !user.gender || !user.cellphone_number)
+      return this.getRegisterToken(kakaoUser.id);
 
-    const hash = await bcrypt.hash(data.password, 10);
+    return this.getTokens(Number(user.user_idx));
+  }
 
-    await this.prisma.user.create({
+  async register(user_idx: number, data: RegisterDto) {
+    await this.prisma.user.update({
+      where: { user_idx },
       data: {
-        email: data.email,
-        name: data.name,
-        password: hash,
-        gender: data.gender,
-        token: { create: { refresh_token: '' } },
+        ...data,
+        birth: new Date(data.birth),
       },
-      include: { token: true },
     });
+  }
 
-    delete this.authEmail[data.email];
-
+  async logout({ user_idx, accessToken }: AtUser): Promise<void> {
+    await this.prisma.refresh_token.update({
+      where: { user_idx },
+      data: { refresh_token: '' },
+    });
+    await this.prisma.access_token_blacklist.create({
+      data: { user_idx: user_idx, access_token: accessToken },
+    });
     return;
   }
 
-  async signin(data: SigninDto) {
-    const user = await this.isEmailExist(data.email);
-
-    await this.isMatchedPwd(data.password, user.password);
-
-    const tokens = await this.getTokens(user.email);
-    const rt = await bcrypt.hash(tokens.rt, 10);
-    await this.prisma.user.update({
-      where: { email: data.email },
-      include: { token: true },
-      data: { token: { update: { refresh_token: rt } } },
+  async refresh({ user_idx }: AtUser) {
+    const tokens = await this.getTokens(user_idx);
+    const refresh_token = await bcrypt.hash(tokens.rt, 10);
+    await this.prisma.refresh_token.update({
+      where: { user_idx },
+      data: { refresh_token },
     });
     return tokens;
   }
 
-  async logout(email: string): Promise<void> {
-    await this.prisma.user.update({
-      where: { email },
-      include: { token: true },
-      data: { token: { update: { refresh_token: '' } } },
-    });
-    return;
-  }
-
-  async refresh(email: string) {
-    const tokens = await this.getTokens(email);
-    const rt = await bcrypt.hash(tokens.rt, 10);
-    await this.prisma.user.update({
-      where: { email },
-      data: { token: { update: { refresh_token: rt } } },
-    });
-    return tokens;
-  }
-
-  async verifyPassword({ email }: verifyDto) {
-    await this.isEmailExist(email);
-
-    const code = this.getVerifyCode();
-
-    try {
-      await this.emailService.userVerify(email, code);
-
-      this.verifyPwd[email] = {
-        code,
-        confirm: false,
-        expiredAt: new Date(
-          new Date().setMinutes(new Date().getMinutes() + 10),
-        ),
-      };
-    } catch (e) {
-      throw new InternalServerErrorException('이메일 전송 실패');
-    }
-  }
-
-  async modifypwd(data: ModifyPwdDto) {
-    const user = this.verifyPwd[data.email];
-    if (!user) throw new BadRequestException('존재하지 않는 이메일입니다');
-    if (user.code !== data.code)
-      throw new BadRequestException('인증코드가 올바르지 않습니다.');
-    if (user.expiredAt < new Date())
-      throw new BadRequestException('인증 시간이 지났습니다');
-
-    if (data.password !== data.passwordConfirm)
-      throw new BadRequestException('비밀번호가 올바르지 않습니다.');
-
-    const hash = await bcrypt.hash(data.password, 10);
-
-    await this.prisma.user.update({
-      where: { email: data.email },
-      data: { password: hash },
-    });
-
-    delete this.verifyPwd[data.email];
-  }
-
-  async exit({ password }: ExitDto, email: string) {
-    const user = await this.isEmailExist(email);
-    await this.isMatchedPwd(password, user.password);
-
-    try {
-      await this.prisma.user.delete({ where: { idx: user.idx } });
-      Logger.log(`${user.name} 탈퇴 성공`);
-    } catch (e) {
-      Logger.error('유저 삭제 실패');
-      console.log(e);
-      throw new InternalServerErrorException('회원 탈퇴 실패');
-    }
-  }
-
-  private async isEmailExist(email: string) {
-    const user = await this.prisma.user.findFirst({ where: { email } });
-    if (!user) throw new BadRequestException('존재하지 않는 사용자입니다');
-    return user;
-  }
-
-  private async isMatchedPwd(data: string, encrypted: string): Promise<void> {
-    if (!(await bcrypt.compare(data, encrypted)))
-      throw new BadRequestException('비밀번호가 올바르지 않습니다.');
-    return;
-  }
-
-  private async getTokens(email: string) {
+  private async getTokens(user_idx: number) {
     const [at, rt, atExpired, rtExpired] = await Promise.all([
-      this.jwtService.sign(
-        { email },
+      this.jwtService.signAsync(
+        { user_idx },
         {
           secret: this.configService.get(ENV.JWT_ACCESS_SECRET),
-          expiresIn: 60 * 10,
+          expiresIn: 60 * 5,
         },
       ),
-      this.jwtService.sign(
-        { email },
+      this.jwtService.signAsync(
+        { user_idx },
         {
           secret: this.configService.get(ENV.JWT_REFRESH_SECRET),
           expiresIn: '1d',
         },
       ),
-      new Date(new Date().setMinutes(new Date().getMinutes() + 10)),
+      new Date(new Date().setMinutes(new Date().getMinutes() + 5)),
       new Date(new Date().setDate(new Date().getDate() + 1)),
     ]);
     return { at, rt, atExpired, rtExpired };
   }
 
-  private getVerifyCode(): string {
-    let code = '';
-    for (let i = 0; i < 6; i++) {
-      const rand = this.rand(0, 2);
-      switch (rand) {
-        case 0:
-          code += `${this.rand(0, 9)}`;
-          break;
-        case 1:
-          code += String.fromCharCode(this.rand(65, 90));
-          break;
-        case 2:
-          code += String.fromCharCode(this.rand(97, 122));
-      }
-    }
-    return code;
-  }
+  private async getRegisterToken(user_idx: number) {
+    const [registerToken, expired] = await Promise.all([
+      this.jwtService.signAsync(
+        { user_idx },
+        {
+          secret: this.configService.get(ENV.JWT_REGISTER_SECRET),
+          expiresIn: '5m',
+        },
+      ),
+      new Date(new Date().setMinutes(new Date().getMinutes() + 5)),
+    ]);
 
-  private rand(min: number, max: number): number {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+    return { registerToken, expired };
   }
 }

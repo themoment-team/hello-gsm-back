@@ -4,23 +4,21 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
 import { PrismaService } from 'src/prisma/prisma.service';
-import * as bcrypt from 'bcrypt';
 import { ENV } from 'src/lib/env';
+import { refreshToken } from 'src/utils/token.name';
 
 type JwtPayload = {
-  email: string;
+  user_idx: number;
 };
 
 @Injectable()
 export class RtStrategy extends PassportStrategy(Strategy, 'jwt-rt') {
-  constructor(
-    private configService: ConfigService,
-    private prisma: PrismaService,
-  ) {
+  constructor(private prisma: PrismaService) {
+    const configService = new ConfigService();
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (req: Request) => {
-          const cookie = req.cookies['refreshToken'];
+          const cookie = req.cookies[refreshToken];
           if (!cookie) return null;
           return cookie;
         },
@@ -30,22 +28,20 @@ export class RtStrategy extends PassportStrategy(Strategy, 'jwt-rt') {
     });
   }
 
-  async validate(req: Request, payload: JwtPayload) {
-    if (!payload.email) return false;
-    const user = await this.prisma.user.findFirst({
-      where: { email: payload.email },
-      include: { token: true },
+  async validate(req: Request, { user_idx }: JwtPayload) {
+    if (!user_idx) return null;
+
+    const user = await this.prisma.user.findFirst({ where: { user_idx } });
+
+    const refresh = await this.prisma.refresh_token.findFirst({
+      where: {
+        user_idx,
+        refresh_token: req.cookies[refreshToken],
+      },
     });
 
-    if (
-      !user ||
-      !user.token.refresh_token ||
-      !(await bcrypt.compare(
-        req.cookies['refreshToken'],
-        user.token.refresh_token,
-      ))
-    )
-      return false;
-    return { ...payload };
+    if (!user || !refresh) return null;
+
+    return { user_idx };
   }
 }
