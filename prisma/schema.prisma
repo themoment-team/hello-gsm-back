@@ -18,9 +18,11 @@ model user {
 }
 
 model access_token_blacklist {
-  user_idx     BigInt   @id
+  user_idx     BigInt
   access_token String   @db.VarChar(500)
   expired_date DateTime @default(dbgenerated("(current_timestamp() + interval 5 minute)")) @db.Timestamp(0)
+
+  @@id([user_idx, access_token])
 }
 
 model application {
@@ -34,7 +36,7 @@ model application {
   guardian_name             String               @db.VarChar(20)
   guardian_cellphone_number String               @db.VarChar(20)
   teacher_name              String               @db.VarChar(20)
-  teacher_cellephone_number String               @db.VarChar(20)
+  teacher_cellphone_number  String               @db.VarChar(20)
   school_location           String               @db.VarChar(50)
   school_name               String               @db.VarChar(50)
   screening                 String               @db.VarChar(20)
@@ -76,4 +78,10 @@ model application_details {
 model refresh_token {
   user_idx      BigInt @id
   refresh_token String @db.VarChar(500)
+}
+
+model admin {
+  admin_idx Int      @id @default(autoincrement())
+  id        String   @db.VarChar(50)
+  password  DateTime @db.Date
 }
