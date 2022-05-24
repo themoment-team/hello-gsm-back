@@ -8,19 +8,21 @@ datasource db {
 }
 
 model user {
-  user_idx         BigInt        @id
-  user_img         String?       @db.VarChar(500)
-  name             String?       @db.VarChar(20)
-  birth            DateTime?     @db.Date
-  gender           String?       @db.VarChar(20)
-  cellphone_number String?       @db.VarChar(20)
-  application      application[]
+  user_idx         BigInt       @id
+  user_img         String?      @db.VarChar(500)
+  name             String?      @db.VarChar(20)
+  birth            DateTime?    @db.Date
+  gender           String?      @db.VarChar(20)
+  cellphone_number String?      @db.VarChar(20)
+  application      application?
 }
 
 model access_token_blacklist {
-  user_idx     BigInt   @id
+  user_idx     BigInt
   access_token String   @db.VarChar(500)
   expired_date DateTime @default(dbgenerated("(current_timestamp() + interval 5 minute)")) @db.Timestamp(0)
+
+  @@id([user_idx, access_token])
 }
 
 model application {
@@ -28,33 +30,51 @@ model application {
   registration_number       Int?                 @unique(map: "application_registration_number_uindex") @db.SmallInt
   is_final_submission       Boolean?
   is_document_reception     Boolean?
-  is_first_result           Boolean?
-  is_final_result           Boolean?
-  ID_photo_url              String               @db.VarChar(500)
-  guardian_name             String               @db.VarChar(20)
+  first_result_screening    Boolean?
+  final_result_screening    Boolean?
+  major_result              String?              @db.VarChar(20)
   guardian_cellphone_number String               @db.VarChar(20)
-  teacher_name              String               @db.VarChar(20)
-  teacher_cellephone_number String               @db.VarChar(20)
-  school_location           String               @db.VarChar(50)
+  teacher_cellphone_number  String               @db.VarChar(20)
   school_name               String               @db.VarChar(50)
   screening                 String               @db.VarChar(20)
-  social_screening          String               @db.VarChar(20)
-  user_idx                  BigInt
+  user_idx                  BigInt               @unique(map: "application_user_user_idx_fk")
   user                      user                 @relation(fields: [user_idx], references: [user_idx], onDelete: Cascade, onUpdate: Restrict, map: "application_user_user_idx_fk")
   application_details       application_details?
-
-  @@index([user_idx], map: "application_user_user_idx_fk")
+  application_score         application_score?
 }
 
 model application_details {
+  application_idx         Int         @id
+  ID_photo_url            String      @db.VarChar(500)
+  address                 String      @db.VarChar(50)
+  telephone_number        String      @db.VarChar(20)
+  guardian_name           String      @db.VarChar(20)
+  guardian_relation       String      @db.VarChar(20)
+  teacher_name            String      @db.VarChar(20)
+  school_location         String      @db.VarChar(50)
+  education_status        String      @db.VarChar(20)
+  graduation_year         String      @db.VarChar(20)
+  graduation_month        String      @db.VarChar(20)
+  school_telephone_number String      @db.VarChar(20)
+  first_wanted_major      String      @db.VarChar(20)
+  second_wanted_major     String      @db.VarChar(20)
+  third_wanted_major      String      @db.VarChar(20)
+  application             application @relation(fields: [application_idx], references: [application_idx], onDelete: Cascade, onUpdate: Restrict, map: "application_details_application_application_idx_fk")
+}
+
+model refresh_token {
+  user_idx      BigInt @id
+  refresh_token String @db.VarChar(500)
+}
+
+model admin {
+  admin_idx Int      @id @default(autoincrement())
+  id        String   @db.VarChar(50)
+  password  DateTime @db.Date
+}
+
+model application_score {
   application_idx                   Int         @id
-  address                           String      @db.VarChar(50)
-  telephone_number                  String      @db.VarChar(20)
-  guardian_relation                 String      @db.VarChar(20)
-  education_status                  String      @db.VarChar(20)
-  graduation_year                   String      @db.VarChar(20)
-  graduation_month                  String      @db.VarChar(20)
-  school_telephone_number           String      @db.VarChar(20)
   score_1_1                         Int         @db.SmallInt
   score_1_2                         Int         @db.SmallInt
   score_2_1                         Int         @db.SmallInt
@@ -67,13 +87,5 @@ model application_details {
   volunteer_score                   Int         @db.SmallInt
   non_curriculum_score_subtotal     Int         @db.SmallInt
   score_total                       Int         @db.SmallInt
-  first_wanted_major                String      @db.VarChar(20)
-  second_wanted_major               String      @db.VarChar(20)
-  third_wanted_major                String      @db.VarChar(20)
-  application                       application @relation(fields: [application_idx], references: [application_idx], onDelete: Cascade, onUpdate: Restrict, map: "application_details_application_application_idx_fk")
-}
-
-model refresh_token {
-  user_idx      BigInt @id
-  refresh_token String @db.VarChar(500)
+  application                       application @relation(fields: [application_idx], references: [application_idx], onDelete: Cascade, onUpdate: Restrict, map: "application_score_application_application_idx_fk")
 }
