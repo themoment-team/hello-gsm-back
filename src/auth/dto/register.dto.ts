@@ -1,15 +1,23 @@
-import { IsDateString, IsEnum, IsPhoneNumber, IsString } from 'class-validator';
+import {
+  IsEnum,
+  IsPhoneNumber,
+  IsString,
+  MaxLength,
+  IsDateString,
+} from 'class-validator';
 
 export class RegisterDto {
   @IsString()
+  @MaxLength(20)
   name: string;
 
+  @MaxLength(20)
   @IsPhoneNumber('KR')
   cellphone_number: string;
 
   @IsDateString()
-  birth: Date;
+  birth: string;
 
-  @IsEnum(['M', 'F'])
-  gender: 'M' | 'F';
+  @IsEnum(['남', '여'])
+  gender: '남' | '여';
 }
