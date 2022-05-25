@@ -22,4 +22,16 @@ export class UserService {
       },
     });
   }
+
+  async getUserInfo(user_idx: number) {
+    return this.prisma.user.findFirst({
+      where: { user_idx },
+      select: {
+        name: true,
+        birth: true,
+        gender: true,
+        cellphone_number: true,
+      },
+    });
+  }
 }

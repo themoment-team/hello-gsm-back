@@ -10,4 +10,9 @@ export class UserController {
   async getUserState(@User('user_idx') user_idx: number) {
     return this.userService.getUserState(user_idx);
   }
+
+  @Get('/info')
+  async getUserInfo(@User('user_idx') user_idx: number) {
+    return this.userService.getUserInfo(user_idx);
+  }
 }
