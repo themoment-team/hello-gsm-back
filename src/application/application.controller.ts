@@ -1,4 +1,11 @@
-import { Body, Controller, Post, UseInterceptors } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Post,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { ApplicationService } from './application.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FirstSubmission } from './dto';
@@ -11,9 +18,13 @@ export class ApplicationController {
   @Post('/firstSubmission')
   @UseInterceptors(FileInterceptor('photo'))
   async firstSubmission(
+    @UploadedFile() photo: Express.Multer.File,
     @User('user_idx') user_idx: number,
     @Body() data: FirstSubmission,
   ) {
-    await this.applicationService.firstSubmission(user_idx, data);
+    if (!photo) throw new BadRequestException('Not Found file');
+
+    const ID_photo_url = await this.applicationService.s3_upload(photo);
+    await this.applicationService.firstSubmission(user_idx, data, ID_photo_url);
   }
 }

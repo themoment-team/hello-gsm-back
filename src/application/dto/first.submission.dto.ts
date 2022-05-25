@@ -1,34 +1,41 @@
-import { Optional } from '@nestjs/common';
 import {
   IsDateString,
   IsEnum,
   IsPhoneNumber,
   IsString,
   MaxLength,
-  IsOptional,
 } from 'class-validator';
 
 export class FirstSubmission {
+  user: UserDto;
+  application: ApplicationDto;
+}
+
+class UserDto {
+  @MaxLength(20)
+  @IsString()
+  name: string;
+
+  @IsEnum(['남', '여'])
+  gender: '남' | '여';
+
+  @IsDateString()
+  birth: string;
+
+  @IsString()
+  @IsPhoneNumber('KR')
+  @MaxLength(20)
+  cellphone_number: string;
+}
+
+class ApplicationDto {
   @MaxLength(50)
   @IsString()
   address: string;
 
   @MaxLength(50)
   @IsString()
-  address_detail: string;
-
-  @IsOptional()
-  @MaxLength(20)
-  @IsString()
-  name?: string;
-
-  @IsOptional()
-  @IsEnum(['남', '여'])
-  gender?: '남' | '여';
-
-  @IsOptional()
-  @IsDateString()
-  birth?: string;
+  address_details: string;
 
   @IsString()
   @MaxLength(20)
@@ -68,12 +75,6 @@ export class FirstSubmission {
   @MaxLength(20)
   telephone_number: string;
 
-  @IsString()
-  @IsPhoneNumber('KR')
-  @MaxLength(20)
-  @Optional()
-  cellphone_number?: string;
-
   @IsEnum(['인공지능과', '스마트IOT과', '소프트웨어개발과'])
   first_wanted_major: '인공지능과' | '스마트IOT과' | '소프트웨어개발과';
 
@@ -94,4 +95,13 @@ export class FirstSubmission {
   @IsString()
   @IsEnum(['졸업예정', '졸업', '검정고시'])
   education_status: '졸업예정' | '졸업' | '검정고시';
+
+  @IsString()
+  @MaxLength(20)
+  guardian_relation: string;
+
+  @IsString()
+  @IsPhoneNumber('KR')
+  @MaxLength(20)
+  school_telephone_number: string;
 }
