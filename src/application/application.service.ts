@@ -19,21 +19,49 @@ export class ApplicationService {
 
   async firstSubmission(
     user_idx: number,
-    data: FirstSubmission,
+    { user, application }: FirstSubmission,
     idPhotoUrl: string,
   ) {
     await this.prisma.user.update({
       where: { user_idx },
       data: {
-        ...data.user,
+        ...user,
       },
     });
+
+    if (
+      application.firstWantedMajor === application.secondWantedMajor ||
+      application.firstWantedMajor === application.thirdWantedMajor ||
+      application.secondWantedMajor === application.thirdWantedMajor
+    )
+      throw new BadRequestException(
+        '각 지망학과는 각각 다르게 지원해야 합니다.',
+      );
+
+    if (application.educationStatus === '검정고시') {
+      await this.prisma.application_details.create({
+        data: {
+          applicationIdx: user_idx,
+          idPhotoUrl,
+          ...application,
+          teacherName: 'none',
+          schoolLocation: 'none',
+          schoolTelephoneNumber: 'none',
+          telephoneNumber: application.telephoneNumber || 'none',
+          addressDetails: application.addressDetails || 'none',
+        },
+      });
+
+      return;
+    }
 
     await this.prisma.application_details.create({
       data: {
         applicationIdx: user_idx,
         idPhotoUrl,
-        ...data.application,
+        ...application,
+        telephoneNumber: application.telephoneNumber || 'none',
+        addressDetails: application.addressDetails || 'none',
       },
     });
   }

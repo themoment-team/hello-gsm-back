@@ -1,3 +1,4 @@
+import { Optional } from '@nestjs/common';
 import {
   IsDateString,
   IsEnum,
@@ -69,13 +70,11 @@ class ApplicationDto {
   @IsEnum(['일반전형', '사회통합전형', '특별전형'])
   screening: '일반전형' | '사회통합전형' | '특별전형'; // 전형 나중에 enum으로
 
-  @IsString()
-  socialScreening: string; // 사회전형대상구분 이것도 나중에 enum으로
-
   @IsPhoneNumber('KR')
   @IsString()
   @MaxLength(20)
-  telephoneNumber: string;
+  @Optional()
+  telephoneNumber?: string;
 
   @IsEnum(['인공지능과', '스마트IOT과', '소프트웨어개발과'])
   firstWantedMajor: '인공지능과' | '스마트IOT과' | '소프트웨어개발과';
