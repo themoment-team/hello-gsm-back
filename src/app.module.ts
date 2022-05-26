@@ -3,12 +3,14 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { LoggerMiddleware } from './lib/logger.middleware';
 import { PrismaModule } from './prisma/prisma.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ envFilePath: ['.env'], isGlobal: true }),
     AuthModule,
     PrismaModule,
+    UserModule,
   ],
   controllers: [],
   providers: [],

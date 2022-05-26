@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -40,6 +40,9 @@ export class AuthService {
   }
 
   async register(user_idx: number, data: RegisterDto) {
+    if (new Date(data.birth).toString() === 'Invalid Date')
+      throw new BadRequestException('잘못된 날짜 형식입니다');
+
     await this.prisma.user.update({
       where: { user_idx },
       data: {
