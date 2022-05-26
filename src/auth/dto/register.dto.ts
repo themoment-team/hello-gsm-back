@@ -5,7 +5,7 @@ export class RegisterDto {
   name: string;
 
   @IsPhoneNumber('KR')
-  cellphone_number: string;
+  cellphoneNumber: string;
 
   @IsDateString()
   birth: Date;

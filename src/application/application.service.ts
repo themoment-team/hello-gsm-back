@@ -20,7 +20,7 @@ export class ApplicationService {
   async firstSubmission(
     user_idx: number,
     data: FirstSubmission,
-    ID_photo_url: string,
+    idPhotoUrl: string,
   ) {
     await this.prisma.user.update({
       where: { user_idx },
@@ -31,8 +31,8 @@ export class ApplicationService {
 
     await this.prisma.application_details.create({
       data: {
-        application_idx: user_idx,
-        ID_photo_url,
+        applicationIdx: user_idx,
+        idPhotoUrl,
         ...data.application,
       },
     });
