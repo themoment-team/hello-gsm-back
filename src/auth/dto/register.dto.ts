@@ -1,9 +1,17 @@
-import { IsEnum, IsPhoneNumber, IsString, IsDateString } from 'class-validator';
+import {
+  IsEnum,
+  IsPhoneNumber,
+  IsString,
+  MaxLength,
+  IsDateString,
+} from 'class-validator';
 
 export class RegisterDto {
   @IsString()
+  @MaxLength(20)
   name: string;
 
+  @MaxLength(20)
   @IsPhoneNumber('KR')
   cellphone_number: string;
 
