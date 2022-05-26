@@ -30,9 +30,8 @@ model application {
   registration_number       Int?                 @unique(map: "application_registration_number_uindex") @db.SmallInt
   is_final_submission       Boolean?
   is_document_reception     Boolean?
-  first_result_screening    Boolean?
-  final_result_screening    Boolean?
-  major_result              String?              @db.VarChar(20)
+  first_result_screening    String?              @db.VarChar(20)
+  final_result_screening    String?              @db.VarChar(20)
   guardian_cellphone_number String               @db.VarChar(20)
   teacher_cellphone_number  String               @db.VarChar(20)
   school_name               String               @db.VarChar(50)
@@ -47,6 +46,7 @@ model application_details {
   application_idx         Int         @id
   ID_photo_url            String      @db.VarChar(500)
   address                 String      @db.VarChar(50)
+  address_details         String      @db.VarChar(50)
   telephone_number        String      @db.VarChar(20)
   guardian_name           String      @db.VarChar(20)
   guardian_relation       String      @db.VarChar(20)
@@ -59,6 +59,7 @@ model application_details {
   first_wanted_major      String      @db.VarChar(20)
   second_wanted_major     String      @db.VarChar(20)
   third_wanted_major      String      @db.VarChar(20)
+  major_result            String?     @db.VarChar(20)
   application             application @relation(fields: [application_idx], references: [application_idx], onDelete: Cascade, onUpdate: Restrict, map: "application_details_application_application_idx_fk")
 }
 
@@ -68,9 +69,9 @@ model refresh_token {
 }
 
 model admin {
-  admin_idx Int      @id @default(autoincrement())
-  id        String   @db.VarChar(50)
-  password  DateTime @db.Date
+  admin_idx Int    @id @default(autoincrement())
+  id        String @db.VarChar(50)
+  password  String @db.VarChar(50)
 }
 
 model application_score {
