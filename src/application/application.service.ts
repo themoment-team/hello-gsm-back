@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ENV } from 'src/lib/env';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { FirstSubmission } from './dto';
+import { FirstSubmission, SecondsSubmissionDto } from './dto';
 import * as AWS from 'aws-sdk';
 
 @Injectable()
@@ -19,7 +19,7 @@ export class ApplicationService {
 
   async firstSubmission(
     user_idx: number,
-    { user, application }: FirstSubmission,
+    { user, application, applicationDetail }: FirstSubmission,
     idPhotoUrl: string,
   ) {
     await this.prisma.user.update({
@@ -30,38 +30,53 @@ export class ApplicationService {
     });
 
     if (
-      application.firstWantedMajor === application.secondWantedMajor ||
-      application.firstWantedMajor === application.thirdWantedMajor ||
-      application.secondWantedMajor === application.thirdWantedMajor
+      applicationDetail.firstWantedMajor ===
+        applicationDetail.secondWantedMajor ||
+      applicationDetail.firstWantedMajor ===
+        applicationDetail.thirdWantedMajor ||
+      applicationDetail.secondWantedMajor === applicationDetail.thirdWantedMajor
     )
       throw new BadRequestException(
         '각 지망학과는 각각 다르게 지원해야 합니다.',
       );
 
-    if (application.educationStatus === '검정고시') {
+    const newApplication = await this.prisma.application.create({
+      data: {
+        ...application,
+        teacherCellphoneNumber: application.teacherCellphoneNumber || 'null',
+        schoolName: application.schoolName || 'null',
+        user: { connect: { user_idx } },
+      },
+    });
+
+    if (applicationDetail.educationStatus === '검정고시') {
       await this.prisma.application_details.create({
         data: {
-          applicationIdx: user_idx,
+          ...applicationDetail,
           idPhotoUrl,
-          ...application,
-          teacherName: 'none',
-          schoolLocation: 'none',
-          schoolTelephoneNumber: 'none',
-          telephoneNumber: application.telephoneNumber || 'none',
-          addressDetails: application.addressDetails || 'none',
+          telephoneNumber: 'null',
+          addressDetails: applicationDetail.addressDetails || 'null',
+          schoolTelephoneNumber: 'null',
+          schoolLocation: 'null',
+          application: {
+            connect: { applicationIdx: newApplication.applicationIdx },
+          },
         },
       });
-
       return;
     }
 
     await this.prisma.application_details.create({
       data: {
-        applicationIdx: user_idx,
+        ...applicationDetail,
         idPhotoUrl,
-        ...application,
-        telephoneNumber: application.telephoneNumber || 'none',
-        addressDetails: application.addressDetails || 'none',
+        telephoneNumber: applicationDetail.telephoneNumber || 'null',
+        addressDetails: applicationDetail.addressDetails || 'null',
+        schoolTelephoneNumber:
+          applicationDetail.schoolTelephoneNumber || 'null',
+        application: {
+          connect: { applicationIdx: newApplication.applicationIdx },
+        },
       },
     });
   }
@@ -88,5 +103,16 @@ export class ApplicationService {
       Logger.error(`${photo.filename} failed upload`, e);
       throw new BadRequestException('업로드에 실패했습니다.');
     }
+  }
+
+  async secondsSubmission(data: SecondsSubmissionDto, user_idx: number) {
+    this.prisma.application_score.create({
+      data: {
+        ...data,
+        score1_2: 1,
+        score1_1: 1,
+        applicationIdx: user_idx,
+      },
+    });
   }
 }
