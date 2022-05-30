@@ -4,6 +4,7 @@ import { AuthModule } from './auth/auth.module';
 import { LoggerMiddleware } from './lib/logger.middleware';
 import { PrismaModule } from './prisma/prisma.module';
 import { ApplicationModule } from './application/application.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { ApplicationModule } from './application/application.module';
     AuthModule,
     PrismaModule,
     ApplicationModule,
+    UserModule,
   ],
   controllers: [],
   providers: [],
