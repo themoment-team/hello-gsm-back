@@ -5,6 +5,7 @@ import {
   Post,
   UploadedFile,
   UseInterceptors,
+  Patch,
 } from '@nestjs/common';
 import { ApplicationService } from './application.service';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -30,6 +31,27 @@ export class ApplicationController {
 
   @Post('/secondsSubmission')
   async secondsSubmission(
+    @Body() data: SecondsSubmissionDto,
+    @User('user_idx') user_idx: number,
+  ) {
+    return this.applicationService.secondsSubmission(data, user_idx);
+  }
+
+  @Patch('/firstSubmission')
+  @UseInterceptors(FileInterceptor('photo'))
+  async firstSubmissionPatch(
+    @UploadedFile() photo: Express.Multer.File,
+    @User('user_idx') user_idx: number,
+    @Body() data: FirstSubmission,
+  ) {
+    if (!photo) throw new BadRequestException('Not Found file');
+
+    const ID_photo_url = await this.applicationService.s3_upload(photo);
+    await this.applicationService.firstSubmission(user_idx, data, ID_photo_url);
+  }
+
+  @Patch('/secondsSubmission')
+  async secondsSubmissionPatch(
     @Body() data: SecondsSubmissionDto,
     @User('user_idx') user_idx: number,
   ) {
