@@ -22,6 +22,9 @@ export class ApplicationService {
     { user, application, applicationDetail }: FirstSubmission,
     idPhotoUrl: string,
   ) {
+    if (new Date(user.birth).toString() === 'Invalid Date')
+      throw new BadRequestException('잘못된 날짜 형식입니다');
+
     await this.prisma.user.update({
       where: { user_idx },
       data: {
@@ -116,18 +119,25 @@ export class ApplicationService {
     }
   }
 
-  async secondsSubmission(data: SecondsSubmissionDto, user_idx: number) {
+  async secondsSubmission(
+    data: SecondsSubmissionDto,
+    user_idx: number,
+  ): Promise<string> {
     this.prisma.application_score.create({
       data: {
         ...data,
-        score1_2: 1,
-        score1_1: 1,
+        score1_1: 0,
+        score1_2: 0,
         applicationIdx: user_idx,
       },
     });
+
+    return '저장에 성공했습니다';
   }
 
   CellphoneNumberReplace(cellphoneNumber: string) {
+    if (cellphoneNumber.includes('+82'))
+      throw new BadRequestException('잘못된 전화번호 입력 방식입니다');
     return cellphoneNumber.replace(/[- /]/g, '');
   }
 }
