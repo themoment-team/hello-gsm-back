@@ -43,8 +43,13 @@ export class ApplicationService {
     const newApplication = await this.prisma.application.create({
       data: {
         ...application,
-        teacherCellphoneNumber: application.teacherCellphoneNumber || 'null',
+        teacherCellphoneNumber:
+          this.CellphoneNumberReplace(application.teacherCellphoneNumber) ||
+          'null',
         schoolName: application.schoolName || 'null',
+        guardianCellphoneNumber: this.CellphoneNumberReplace(
+          application.guardianCellphoneNumber,
+        ),
         user: { connect: { user_idx } },
       },
     });
@@ -70,10 +75,16 @@ export class ApplicationService {
       data: {
         ...applicationDetail,
         idPhotoUrl,
-        telephoneNumber: applicationDetail.telephoneNumber || 'null',
-        addressDetails: applicationDetail.addressDetails || 'null',
+        telephoneNumber:
+          this.CellphoneNumberReplace(applicationDetail.telephoneNumber) ||
+          'null',
+        addressDetails:
+          this.CellphoneNumberReplace(applicationDetail.addressDetails) ||
+          'null',
         schoolTelephoneNumber:
-          applicationDetail.schoolTelephoneNumber || 'null',
+          this.CellphoneNumberReplace(
+            applicationDetail.schoolTelephoneNumber,
+          ) || 'null',
         application: {
           connect: { applicationIdx: newApplication.applicationIdx },
         },
@@ -114,5 +125,9 @@ export class ApplicationService {
         applicationIdx: user_idx,
       },
     });
+  }
+
+  CellphoneNumberReplace(cellphoneNumber: string) {
+    return cellphoneNumber.replace(/[- /]/g, '');
   }
 }

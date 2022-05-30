@@ -45,6 +45,7 @@ export class AuthService {
       data: {
         ...data,
         birth: new Date(data.birth),
+        cellphoneNumber: data.cellphoneNumber.replace(/[- /]/g, ''),
       },
     });
   }
