@@ -2,7 +2,13 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ENV } from 'src/lib/env';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { FirstSubmissionDto, SecondsSubmissionDto } from './dto';
+import {
+  ApplicationDetailDto,
+  ApplicationDto,
+  FirstSubmissionDto,
+  SecondsSubmissionDto,
+  UserDto,
+} from './dto';
 import * as AWS from 'aws-sdk';
 
 @Injectable()
@@ -19,78 +25,30 @@ export class ApplicationService {
 
   async firstSubmission(
     user_idx: number,
-    { user, application, applicationDetail }: FirstSubmissionDto,
+    data: FirstSubmissionDto,
     photo: Express.Multer.File,
   ) {
-    if (new Date(user.birth).toString() === 'Invalid Date')
-      throw new BadRequestException('잘못된 날짜 형식입니다');
-
     await this.prisma.user.update({
       where: { user_idx },
       data: {
-        ...user,
-        birth: new Date(user.birth),
+        ...this.checkUser(data),
       },
     });
 
-    if (
-      applicationDetail.firstWantedMajor ===
-        applicationDetail.secondWantedMajor ||
-      applicationDetail.firstWantedMajor ===
-        applicationDetail.thirdWantedMajor ||
-      applicationDetail.secondWantedMajor === applicationDetail.thirdWantedMajor
-    )
-      throw new BadRequestException(
-        '각 지망학과는 각각 다르게 지원해야 합니다.',
-      );
+    this.checkMajor(data);
 
     const newApplication = await this.prisma.application.create({
       data: {
-        ...application,
-        teacherCellphoneNumber:
-          this.CellphoneNumberReplace(application.teacherCellphoneNumber) ||
-          'null',
-        schoolName: application.schoolName || 'null',
-        guardianCellphoneNumber: this.CellphoneNumberReplace(
-          application.guardianCellphoneNumber,
-        ),
+        ...this.checkApplication(data),
         user: { connect: { user_idx } },
       },
     });
 
     // const idPhotoUrl = await this.s3_upload(photo);
 
-    if (applicationDetail.educationStatus === '검정고시') {
-      await this.prisma.application_details.create({
-        data: {
-          ...applicationDetail,
-          idPhotoUrl: '아무튼 이미지',
-          telephoneNumber: 'null',
-          addressDetails: applicationDetail.addressDetails || 'null',
-          schoolTelephoneNumber: 'null',
-          schoolLocation: 'null',
-          application: {
-            connect: { applicationIdx: newApplication.applicationIdx },
-          },
-        },
-      });
-      return;
-    }
-
     await this.prisma.application_details.create({
       data: {
-        ...applicationDetail,
-        idPhotoUrl: '아무튼 이미지',
-        telephoneNumber:
-          this.CellphoneNumberReplace(applicationDetail.telephoneNumber) ||
-          'null',
-        addressDetails:
-          this.CellphoneNumberReplace(applicationDetail.addressDetails) ||
-          'null',
-        schoolTelephoneNumber:
-          this.CellphoneNumberReplace(
-            applicationDetail.schoolTelephoneNumber,
-          ) || 'null',
+        ...this.checkApplicationDetail(data, '어쨌든 이미지'),
         application: {
           connect: { applicationIdx: newApplication.applicationIdx },
         },
@@ -153,20 +111,22 @@ export class ApplicationService {
     if (!application || !application.application_details)
       throw new BadRequestException('작성된 원서가 없습니다');
 
+    this.checkDate(data.birth);
+    this.checkMajor(data);
+
     // const idPhotoUrl = await this.s3_upload(photo);
 
     await this.prisma.user.update({
       where: { user_idx },
       data: {
-        ...data.user,
-        birth: new Date(data.user.birth),
+        ...data,
+        birth: new Date(data.birth),
         application: {
           update: {
-            ...data.application,
+            ...this.checkApplication(data),
             application_details: {
               update: {
-                idPhotoUrl: '어쨌든 이미지',
-                ...data.applicationDetail,
+                ...this.checkApplicationDetail(data, '어쨌든 이미지'),
               },
             },
           },
@@ -177,7 +137,112 @@ export class ApplicationService {
     return '수정에 성공했습니다';
   }
 
-  CellphoneNumberReplace(cellphoneNumber: string) {
+  private checkUser(data: FirstSubmissionDto): UserDto {
+    this.checkDate(data.birth);
+
+    return {
+      name: data.name,
+      gender: data.gender,
+      birth: new Date(data.birth),
+      cellphoneNumber: this.checkPhoneNumber(data.cellphoneNumber),
+    };
+  }
+
+  private checkMajor(data: FirstSubmissionDto) {
+    if (
+      data.firstWantedMajor === data.secondWantedMajor ||
+      data.firstWantedMajor === data.thirdWantedMajor ||
+      data.secondWantedMajor === data.thirdWantedMajor
+    )
+      throw new BadRequestException(
+        '각 지망학과는 각각 다르게 지원해야 합니다.',
+      );
+  }
+
+  private checkApplication(data: FirstSubmissionDto): ApplicationDto {
+    if (data.educationStatus === '검정고시') {
+      return {
+        screening: data.screening,
+        teacherCellphoneNumber: 'null',
+        schoolName: 'null',
+        guardianCellphoneNumber: this.checkPhoneNumber(
+          data.guardianCellphoneNumber,
+        ),
+      };
+    }
+
+    if (!data.teacherCellphoneNumber || !data.schoolName)
+      throw new BadRequestException('학교 정보를 입력해 주세요');
+
+    return {
+      screening: data.screening,
+      schoolName: data.schoolName,
+      teacherCellphoneNumber: this.checkPhoneNumber(
+        data.teacherCellphoneNumber,
+      ),
+      guardianCellphoneNumber: this.checkPhoneNumber(
+        data.guardianCellphoneNumber,
+      ),
+    };
+  }
+
+  private checkApplicationDetail(
+    data: FirstSubmissionDto,
+    idPhotoUrl: string,
+  ): ApplicationDetailDto {
+    if (data.educationStatus === '검정고시')
+      return {
+        idPhotoUrl,
+        address: data.address,
+        guardianName: data.guardianName,
+        guardianRelation: data.guardianRelation,
+        teacherName: null,
+        educationStatus: data.educationStatus,
+        graduationYear: data.graduationYear,
+        graduationMonth: data.graduationMonth,
+        firstWantedMajor: data.firstWantedMajor,
+        secondWantedMajor: data.secondWantedMajor,
+        thirdWantedMajor: data.thirdWantedMajor,
+        telephoneNumber: this.checkPhoneNumber(data.telephoneNumber) || 'null',
+        addressDetails: data.addressDetails || 'null',
+        schoolTelephoneNumber: 'null',
+        schoolLocation: 'null',
+      };
+
+    if (
+      !data.teacherName ||
+      !data.schoolTelephoneNumber ||
+      !data.schoolLocation
+    )
+      throw new BadRequestException('학교 정보를 입력해 주세요');
+
+    return {
+      idPhotoUrl,
+      address: data.address,
+      guardianName: data.guardianName,
+      guardianRelation: data.guardianRelation,
+      teacherName: null,
+      educationStatus: data.educationStatus,
+      graduationYear: data.graduationYear,
+      graduationMonth: data.graduationMonth,
+      firstWantedMajor: data.firstWantedMajor,
+      secondWantedMajor: data.secondWantedMajor,
+      thirdWantedMajor: data.thirdWantedMajor,
+      telephoneNumber: this.checkPhoneNumber(data.telephoneNumber) || 'null',
+      addressDetails: data.addressDetails || 'null',
+      schoolTelephoneNumber:
+        this.checkPhoneNumber(data.schoolTelephoneNumber) || 'null',
+      schoolLocation: data.schoolLocation,
+    };
+  }
+
+  private checkDate(birth: string): Date {
+    if (new Date(birth).toString() === 'Invalid Date')
+      throw new BadRequestException('잘못된 날짜 형식입니다');
+    return new Date(birth);
+  }
+
+  private checkPhoneNumber(cellphoneNumber: string) {
     if (cellphoneNumber.includes('+82'))
       throw new BadRequestException('잘못된 전화번호 입력 방식입니다');
     return cellphoneNumber.replace(/[- /]/g, '');

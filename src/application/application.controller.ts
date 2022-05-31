@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Post,
@@ -23,8 +22,6 @@ export class ApplicationController {
     @User('user_idx') user_idx: number,
     @Body() data: FirstSubmissionDto,
   ) {
-    console.log(data);
-
     return this.applicationService.firstSubmission(user_idx, data, photo);
   }
 
