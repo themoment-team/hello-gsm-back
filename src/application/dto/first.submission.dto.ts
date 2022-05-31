@@ -8,7 +8,7 @@ import {
   IsOptional,
 } from 'class-validator';
 
-export class FirstSubmission {
+export class FirstSubmissionDto {
   user: UserDto;
   application: ApplicationDto;
   applicationDetail: ApplicationDetail;

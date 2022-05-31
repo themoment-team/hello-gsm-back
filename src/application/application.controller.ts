@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { ApplicationService } from './application.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { FirstSubmission, SecondsSubmissionDto } from './dto';
+import { FirstSubmissionDto, SecondsSubmissionDto } from './dto';
 import { User } from 'src/auth/decorators/user.decorator';
 
 @Controller('application')
@@ -21,12 +21,11 @@ export class ApplicationController {
   async firstSubmission(
     @UploadedFile() photo: Express.Multer.File,
     @User('user_idx') user_idx: number,
-    @Body() data: FirstSubmission,
+    @Body() data: FirstSubmissionDto,
   ) {
-    if (!photo) throw new BadRequestException('Not Found file');
+    console.log(data);
 
-    const ID_photo_url = await this.applicationService.s3_upload(photo);
-    await this.applicationService.firstSubmission(user_idx, data, ID_photo_url);
+    return this.applicationService.firstSubmission(user_idx, data, photo);
   }
 
   @Post('/secondsSubmission')
@@ -42,12 +41,9 @@ export class ApplicationController {
   async firstSubmissionPatch(
     @UploadedFile() photo: Express.Multer.File,
     @User('user_idx') user_idx: number,
-    @Body() data: FirstSubmission,
+    @Body() data: FirstSubmissionDto,
   ) {
-    if (!photo) throw new BadRequestException('Not Found file');
-
-    const ID_photo_url = await this.applicationService.s3_upload(photo);
-    await this.applicationService.firstSubmission(user_idx, data, ID_photo_url);
+    return this.applicationService.firstSubmissionPatch(user_idx, data, photo);
   }
 
   @Patch('/secondsSubmission')
