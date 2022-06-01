@@ -28,32 +28,34 @@ export class ApplicationService {
     data: FirstSubmissionDto,
     photo: Express.Multer.File,
   ) {
-    await this.prisma.user.update({
+    const user = await this.prisma.user.update({
       where: { user_idx },
       data: {
         ...this.checkUser(data),
       },
+      include: { application: true },
     });
+
+    if (user.application)
+      throw new BadRequestException('이미 작성된 원서가 있습니다.');
 
     this.checkMajor(data);
 
-    const newApplication = await this.prisma.application.create({
+    // const idPhotoUrl = await this.s3_upload(photo);
+
+    await this.prisma.application.create({
       data: {
         ...this.checkApplication(data),
         user: { connect: { user_idx } },
-      },
-    });
-
-    // const idPhotoUrl = await this.s3_upload(photo);
-
-    await this.prisma.application_details.create({
-      data: {
-        ...this.checkApplicationDetail(data, '어쨌든 이미지'),
-        application: {
-          connect: { applicationIdx: newApplication.applicationIdx },
+        application_details: {
+          create: {
+            ...this.checkApplicationDetail(data, '어쨌든 이미지'),
+          },
         },
       },
     });
+
+    return '1차 서류 저장에 성공했습니다';
   }
 
   async s3_upload(photo: Express.Multer.File): Promise<string> {
@@ -119,7 +121,7 @@ export class ApplicationService {
     await this.prisma.user.update({
       where: { user_idx },
       data: {
-        ...data,
+        ...this.checkUser(data),
         birth: new Date(data.birth),
         application: {
           update: {
@@ -196,7 +198,7 @@ export class ApplicationService {
         address: data.address,
         guardianName: data.guardianName,
         guardianRelation: data.guardianRelation,
-        teacherName: null,
+        teacherName: 'null',
         educationStatus: data.educationStatus,
         graduationYear: data.graduationYear,
         graduationMonth: data.graduationMonth,
@@ -221,7 +223,7 @@ export class ApplicationService {
       address: data.address,
       guardianName: data.guardianName,
       guardianRelation: data.guardianRelation,
-      teacherName: null,
+      teacherName: 'null',
       educationStatus: data.educationStatus,
       graduationYear: data.graduationYear,
       graduationMonth: data.graduationMonth,
