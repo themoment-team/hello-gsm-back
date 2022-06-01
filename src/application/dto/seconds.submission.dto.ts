@@ -1,17 +1,16 @@
-import { Optional } from '@nestjs/common';
-import { IsNumber, Max, Min } from 'class-validator';
+import { IsNumber, IsOptional, Max, Min } from 'class-validator';
 
 export class SecondsSubmissionDto {
   @Min(0)
   @Max(108)
   @IsNumber()
-  @Optional()
+  @IsOptional()
   score1_1?: number;
 
   @Min(0)
   @Max(108)
   @IsNumber()
-  @Optional()
+  @IsOptional()
   score1_2?: number;
 
   @Min(10.8)

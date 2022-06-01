@@ -48,6 +48,6 @@ export class ApplicationController {
     @Body() data: SecondsSubmissionDto,
     @User('user_idx') user_idx: number,
   ) {
-    return this.applicationService.secondsSubmission(data, user_idx);
+    return this.applicationService.secondsSubmissionPatch(data, user_idx);
   }
 }

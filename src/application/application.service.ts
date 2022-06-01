@@ -89,12 +89,19 @@ export class ApplicationService {
     data: SecondsSubmissionDto,
     user_idx: number,
   ): Promise<string> {
-    this.prisma.application_score.create({
+    const user = await this.getUserApplication(user_idx);
+
+    if (user.application.application_score)
+      throw new BadRequestException('이미 작성된 원서가 있습니다');
+
+    await this.prisma.application_score.create({
       data: {
         ...data,
         score1_1: 0,
         score1_2: 0,
-        applicationIdx: user_idx,
+        application: {
+          connect: { applicationIdx: user.application.applicationIdx },
+        },
       },
     });
 
@@ -138,6 +145,27 @@ export class ApplicationService {
     });
 
     return '수정에 성공했습니다';
+  }
+
+  async secondsSubmissionPatch(
+    data: SecondsSubmissionDto,
+    user_idx: number,
+  ): Promise<string> {
+    const user = await this.getUserApplication(user_idx);
+
+    if (!user.application.application_score)
+      throw new BadRequestException('작성된 원서가 없습니다');
+
+    await this.prisma.application_score.update({
+      where: { applicationIdx: user.application.applicationIdx },
+      data: {
+        ...data,
+        score1_1: 0,
+        score1_2: 0,
+      },
+    });
+
+    return '저장에 성공했습니다';
   }
 
   private checkUser(data: FirstSubmissionDto): UserDto {
@@ -249,5 +277,25 @@ export class ApplicationService {
     if (cellphoneNumber.includes('+82'))
       throw new BadRequestException('잘못된 전화번호 입력 방식입니다');
     return cellphoneNumber.replace(/[- /]/g, '');
+  }
+
+  private async getUserApplication(user_idx: number) {
+    const user = await this.prisma.user.findFirst({
+      where: { user_idx },
+      select: {
+        application: {
+          select: {
+            applicationIdx: true,
+            application_score: true,
+          },
+        },
+      },
+    });
+
+    if (!user) throw new BadRequestException('유저가 존재하지 않습니다');
+    if (!user.application)
+      throw new BadRequestException('1차 서류가 작성되지 않았습니다.');
+
+    return user;
   }
 }
