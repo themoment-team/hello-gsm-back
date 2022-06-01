@@ -6,6 +6,7 @@ import {
   UseInterceptors,
   Patch,
   Get,
+  Delete,
 } from '@nestjs/common';
 import { ApplicationService } from './application.service';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -19,6 +20,11 @@ export class ApplicationController {
   @Get('/')
   async getAllUserInfo(@User('user_idx') user_idx: number) {
     return this.applicationService.getAllUserInfo(user_idx);
+  }
+
+  @Delete()
+  async deleteApplication(@User('user_idx') user_idx: number) {
+    return this.applicationService.deleteApplication(user_idx);
   }
 
   @Post('/firstSubmission')

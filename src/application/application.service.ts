@@ -109,6 +109,27 @@ export class ApplicationService {
     }
   }
 
+  async deleteApplication(user_idx: number) {
+    const user = await this.prisma.user.findFirst({
+      where: { user_idx },
+      include: { application: true },
+    });
+
+    if (!user) throw new BadRequestException('존재하지 않는 사용자입니다');
+    if (!user.application)
+      throw new BadRequestException('저장된 원서가 없습니다');
+
+    await this.prisma.application.delete({
+      where: { applicationIdx: user.application.applicationIdx },
+      include: {
+        application_score: true,
+        application_details: true,
+      },
+    });
+
+    return '원서 제거에 성공했습니다';
+  }
+
   async secondsSubmission(
     data: SecondsSubmissionDto,
     user_idx: number,
