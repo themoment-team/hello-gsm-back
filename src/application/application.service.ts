@@ -24,6 +24,30 @@ export class ApplicationService {
     secretAccessKey: this.configService.get<string>('AWS_S3_KEY_SECRET'),
   });
 
+  async getAllUserInfo(user_idx: number) {
+    const user = await this.prisma.user.findFirst({
+      where: { user_idx: user_idx },
+      select: {
+        name: true,
+        birth: true,
+        cellphoneNumber: true,
+        gender: true,
+        application: {
+          select: {
+            schoolName: true,
+            screening: true,
+            teacherCellphoneNumber: true,
+            guardianCellphoneNumber: true,
+            application_details: true,
+            application_score: true,
+          },
+        },
+      },
+    });
+
+    return JSON.stringify(user);
+  }
+
   async firstSubmission(
     user_idx: number,
     data: FirstSubmissionDto,
@@ -105,7 +129,7 @@ export class ApplicationService {
       },
     });
 
-    return '저장에 성공했습니다';
+    return '2차 서류 작성에 성공했습니다';
   }
 
   async firstSubmissionPatch(

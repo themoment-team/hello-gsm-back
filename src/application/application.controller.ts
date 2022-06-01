@@ -5,6 +5,7 @@ import {
   UploadedFile,
   UseInterceptors,
   Patch,
+  Get,
 } from '@nestjs/common';
 import { ApplicationService } from './application.service';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -14,6 +15,11 @@ import { User } from 'src/auth/decorators/user.decorator';
 @Controller('application')
 export class ApplicationController {
   constructor(private applicationService: ApplicationService) {}
+
+  @Get('/')
+  async getAllUserInfo(@User('user_idx') user_idx: number) {
+    return this.applicationService.getAllUserInfo(user_idx);
+  }
 
   @Post('/firstSubmission')
   @UseInterceptors(FileInterceptor('photo'))
