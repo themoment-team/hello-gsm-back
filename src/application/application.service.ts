@@ -9,6 +9,7 @@ import {
   SecondsSubmissionDto,
   UserDto,
 } from './dto';
+import { v1 } from 'uuid';
 import * as AWS from 'aws-sdk';
 
 @Injectable()
@@ -63,7 +64,7 @@ export class ApplicationService {
 
     const params = {
       Bucket: this.configService.get(ENV.AWS_S3_BUCKET_NAME),
-      Key: photo.filename,
+      Key: v1(),
       Body: photo.buffer,
       ACL: 'public-read',
       ContentType: photo.mimetype,
