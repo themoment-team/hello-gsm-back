@@ -170,10 +170,10 @@ export class ApplicationService {
       include: { application_details: true },
     });
 
-    if (application.isFinalSubmission)
-      throw new BadRequestException('최종 제출된 원서는 수정할 수 없습니다');
     if (!application || !application.application_details)
       throw new BadRequestException('작성된 원서가 없습니다');
+    if (application.isFinalSubmission)
+      throw new BadRequestException('최종 제출된 원서는 수정할 수 없습니다');
 
     this.checkDate(data.birth);
     this.checkMajor(data);
