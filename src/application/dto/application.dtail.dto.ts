@@ -1,47 +1,9 @@
-import {
-  IsDateString,
-  IsEnum,
-  IsPhoneNumber,
-  IsString,
-  MaxLength,
-  IsOptional,
-} from 'class-validator';
+import { IsEnum, IsPhoneNumber, IsString, MaxLength } from 'class-validator';
 
-export class FirstSubmissionDto {
-  @MaxLength(20)
+export class ApplicationDetailDto {
+  @MaxLength(500)
   @IsString()
-  name: string;
-
-  @IsEnum(['남', '여'])
-  gender: '남' | '여';
-
-  @IsDateString()
-  birth: string;
-
-  @IsString()
-  @IsPhoneNumber('KR')
-  @MaxLength(20)
-  cellphoneNumber: string;
-
-  @IsPhoneNumber('KR')
-  @IsString()
-  @MaxLength(20)
-  guardianCellphoneNumber: string;
-
-  @IsString()
-  @IsPhoneNumber('KR')
-  @MaxLength(20)
-  @IsOptional()
-  teacherCellphoneNumber: string;
-
-  @IsString()
-  @MaxLength(50)
-  @IsOptional()
-  schoolName: string;
-
-  @IsString()
-  @IsEnum(['일반전형', '사회통합전형', '특별전형'])
-  screening: '일반전형' | '사회통합전형' | '특별전형';
+  idPhotoUrl: string;
 
   @MaxLength(50)
   @IsString()
@@ -49,14 +11,12 @@ export class FirstSubmissionDto {
 
   @MaxLength(50)
   @IsString()
-  @IsOptional()
-  addressDetails?: string;
+  addressDetails: string;
 
   @IsPhoneNumber('KR')
   @IsString()
   @MaxLength(20)
-  @IsOptional()
-  telephoneNumber?: string;
+  telephoneNumber: string;
 
   @IsString()
   @MaxLength(20)
@@ -68,12 +28,10 @@ export class FirstSubmissionDto {
 
   @IsString()
   @MaxLength(20)
-  @IsOptional()
   teacherName: string;
 
   @IsString()
   @MaxLength(50)
-  @IsOptional()
   schoolLocation: string;
 
   @IsString()
@@ -91,8 +49,7 @@ export class FirstSubmissionDto {
   @IsString()
   @IsPhoneNumber('KR')
   @MaxLength(20)
-  @IsOptional()
-  schoolTelephoneNumber?: string;
+  schoolTelephoneNumber: string;
 
   @IsEnum(['인공지능과', '스마트IOT과', '소프트웨어개발과'])
   firstWantedMajor: '인공지능과' | '스마트IOT과' | '소프트웨어개발과';
