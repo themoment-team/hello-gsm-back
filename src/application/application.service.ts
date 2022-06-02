@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ENV } from 'src/lib/env';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -20,8 +25,8 @@ export class ApplicationService {
   ) {}
 
   s3 = new AWS.S3({
-    accessKeyId: this.configService.get<string>('AWS_S3_ACCESS_KEY'),
-    secretAccessKey: this.configService.get<string>('AWS_S3_KEY_SECRET'),
+    accessKeyId: this.configService.get<string>(ENV.AWS_ACCESS_KEY_ID),
+    secretAccessKey: this.configService.get<string>(ENV.AWS_SECRET_ACCESS_KEY),
   });
 
   async getAllUserInfo(user_idx: number) {
@@ -66,7 +71,7 @@ export class ApplicationService {
 
     this.checkMajor(data);
 
-    // const idPhotoUrl = await this.s3_upload(photo);
+    const idPhotoUrl = await this.s3Upload(photo);
 
     await this.prisma.application.create({
       data: {
@@ -74,7 +79,7 @@ export class ApplicationService {
         user: { connect: { user_idx } },
         application_details: {
           create: {
-            ...this.checkApplicationDetail(data, '어쨌든 이미지'),
+            ...this.checkApplicationDetail(data, idPhotoUrl),
           },
         },
       },
@@ -83,8 +88,9 @@ export class ApplicationService {
     return '1차 서류 저장에 성공했습니다';
   }
 
-  async s3_upload(photo: Express.Multer.File): Promise<string> {
-    if (!photo) throw new BadRequestException('Not Found file');
+  async s3Upload(photo: Express.Multer.File): Promise<string> {
+    if (!photo || !photo.mimetype.includes('image'))
+      throw new BadRequestException('Not Found photo');
 
     const params = {
       Bucket: this.configService.get(ENV.AWS_S3_BUCKET_NAME),
@@ -104,7 +110,7 @@ export class ApplicationService {
 
       return result.Location;
     } catch (e) {
-      Logger.error(`${photo.filename} failed upload`, e);
+      Logger.error(`${photo.originalname} failed upload`, e);
       throw new BadRequestException('업로드에 실패했습니다.');
     }
   }
@@ -112,7 +118,7 @@ export class ApplicationService {
   async deleteApplication(user_idx: number) {
     const user = await this.prisma.user.findFirst({
       where: { user_idx },
-      include: { application: true },
+      include: { application: { include: { application_details: true } } },
     });
 
     if (!user.application)
@@ -164,7 +170,7 @@ export class ApplicationService {
       include: { application_details: true },
     });
 
-    if (!application.isFinalSubmission)
+    if (application.isFinalSubmission)
       throw new BadRequestException('최종 제출된 원서는 수정할 수 없습니다');
     if (!application || !application.application_details)
       throw new BadRequestException('작성된 원서가 없습니다');
@@ -172,7 +178,9 @@ export class ApplicationService {
     this.checkDate(data.birth);
     this.checkMajor(data);
 
-    // const idPhotoUrl = await this.s3_upload(photo);
+    this.deleteImg(application.application_details.idPhotoUrl);
+
+    const idPhotoUrl = await this.s3Upload(photo);
 
     await this.prisma.user.update({
       where: { user_idx },
@@ -184,7 +192,7 @@ export class ApplicationService {
             ...this.checkApplication(data),
             application_details: {
               update: {
-                ...this.checkApplicationDetail(data, '어쨌든 이미지'),
+                ...this.checkApplicationDetail(data, idPhotoUrl),
               },
             },
           },
@@ -230,6 +238,19 @@ export class ApplicationService {
     });
 
     return '최종 제출에 성공했습니다';
+  }
+
+  private async deleteImg(imgUrl: string) {
+    try {
+      await this.s3
+        .deleteObject({
+          Bucket: this.configService.get(ENV.AWS_S3_BUCKET_NAME),
+          Key: imgUrl.replace(this.configService.get(ENV.AWS_S3_URL), ''),
+        })
+        .promise();
+    } catch (e) {
+      throw new ServiceUnavailableException('원서 수정을 할 수 없습니다.');
+    }
   }
 
   private checkUser(data: FirstSubmissionDto): UserDto {
@@ -331,10 +352,9 @@ export class ApplicationService {
     };
   }
 
-  private checkDate(birth: string): Date {
+  private checkDate(birth: string) {
     if (new Date(birth).toString() === 'Invalid Date')
       throw new BadRequestException('잘못된 날짜 형식입니다');
-    return new Date(birth);
   }
 
   private checkPhoneNumber(cellphoneNumber: string) {
