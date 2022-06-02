@@ -12,7 +12,6 @@ import {
   ApplicationDto,
   FirstSubmissionDto,
   SecondsSubmissionDto,
-  UserDto,
 } from './dto';
 import { v1 } from 'uuid';
 import * as AWS from 'aws-sdk';
@@ -32,20 +31,9 @@ export class ApplicationService {
   async getAllUserInfo(user_idx: number) {
     const user = await this.prisma.user.findFirst({
       where: { user_idx: user_idx },
-      select: {
-        name: true,
-        birth: true,
-        cellphoneNumber: true,
-        gender: true,
+      include: {
         application: {
-          select: {
-            schoolName: true,
-            screening: true,
-            teacherCellphoneNumber: true,
-            guardianCellphoneNumber: true,
-            application_details: true,
-            application_score: true,
-          },
+          include: { application_score: true, application_details: true },
         },
       },
     });
@@ -58,11 +46,8 @@ export class ApplicationService {
     data: FirstSubmissionDto,
     photo: Express.Multer.File,
   ) {
-    const user = await this.prisma.user.update({
+    const user = await this.prisma.user.findFirst({
       where: { user_idx },
-      data: {
-        ...this.checkUser(data),
-      },
       include: { application: true },
     });
 
@@ -175,7 +160,6 @@ export class ApplicationService {
     if (application.isFinalSubmission)
       throw new BadRequestException('최종 제출된 원서는 수정할 수 없습니다');
 
-    this.checkDate(data.birth);
     this.checkMajor(data);
 
     this.deleteImg(application.application_details.idPhotoUrl);
@@ -185,8 +169,6 @@ export class ApplicationService {
     await this.prisma.user.update({
       where: { user_idx },
       data: {
-        ...this.checkUser(data),
-        birth: new Date(data.birth),
         application: {
           update: {
             ...this.checkApplication(data),
@@ -251,17 +233,6 @@ export class ApplicationService {
     } catch (e) {
       throw new ServiceUnavailableException('원서 수정을 할 수 없습니다.');
     }
-  }
-
-  private checkUser(data: FirstSubmissionDto): UserDto {
-    this.checkDate(data.birth);
-
-    return {
-      name: data.name,
-      gender: data.gender,
-      birth: new Date(data.birth),
-      cellphoneNumber: this.checkPhoneNumber(data.cellphoneNumber),
-    };
   }
 
   private checkMajor(data: FirstSubmissionDto) {
@@ -350,11 +321,6 @@ export class ApplicationService {
         this.checkPhoneNumber(data.schoolTelephoneNumber) || 'null',
       schoolLocation: data.schoolLocation,
     };
-  }
-
-  private checkDate(birth: string) {
-    if (new Date(birth).toString() === 'Invalid Date')
-      throw new BadRequestException('잘못된 날짜 형식입니다');
   }
 
   private checkPhoneNumber(cellphoneNumber: string) {

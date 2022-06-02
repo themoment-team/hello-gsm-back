@@ -1,5 +1,4 @@
 import {
-  IsDateString,
   IsEnum,
   IsPhoneNumber,
   IsString,
@@ -8,21 +7,6 @@ import {
 } from 'class-validator';
 
 export class FirstSubmissionDto {
-  @MaxLength(20)
-  @IsString()
-  name: string;
-
-  @IsEnum(['남', '여'])
-  gender: '남' | '여';
-
-  @IsDateString()
-  birth: string;
-
-  @IsString()
-  @IsPhoneNumber('KR')
-  @MaxLength(20)
-  cellphoneNumber: string;
-
   @IsPhoneNumber('KR')
   @IsString()
   @MaxLength(20)
