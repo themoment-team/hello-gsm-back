@@ -115,9 +115,10 @@ export class ApplicationService {
       include: { application: true },
     });
 
-    if (!user) throw new BadRequestException('존재하지 않는 사용자입니다');
     if (!user.application)
       throw new BadRequestException('저장된 원서가 없습니다');
+    if (user.application.isFinalSubmission)
+      throw new BadRequestException('최종 제출된 서류는 삭제할 수 없습니다');
 
     await this.prisma.application.delete({
       where: { applicationIdx: user.application.applicationIdx },
@@ -163,6 +164,8 @@ export class ApplicationService {
       include: { application_details: true },
     });
 
+    if (!application.isFinalSubmission)
+      throw new BadRequestException('최종 제출된 원서는 수정할 수 없습니다');
     if (!application || !application.application_details)
       throw new BadRequestException('작성된 원서가 없습니다');
 
@@ -211,6 +214,22 @@ export class ApplicationService {
     });
 
     return '저장에 성공했습니다';
+  }
+
+  async finalSubmission(user_idx: number) {
+    const { isFinalSubmission } = await this.prisma.application.findFirst({
+      where: { user_idx },
+    });
+
+    if (isFinalSubmission)
+      throw new BadRequestException('이미 최종 제출이 되어있습니다');
+
+    await this.prisma.application.update({
+      where: { user_idx },
+      data: { isFinalSubmission: true },
+    });
+
+    return '최종 제출에 성공했습니다';
   }
 
   private checkUser(data: FirstSubmissionDto): UserDto {
@@ -332,14 +351,16 @@ export class ApplicationService {
           select: {
             applicationIdx: true,
             application_score: true,
+            isFinalSubmission: true,
           },
         },
       },
     });
 
-    if (!user) throw new BadRequestException('유저가 존재하지 않습니다');
     if (!user.application)
-      throw new BadRequestException('1차 서류가 작성되지 않았습니다.');
+      throw new BadRequestException('1차 서류가 작성되지 않았습니다');
+    if (user.application.isFinalSubmission)
+      throw new BadRequestException('최종 제출된 서류는 수정할 수 없습니다');
 
     return user;
   }

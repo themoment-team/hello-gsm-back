@@ -62,4 +62,9 @@ export class ApplicationController {
   ) {
     return this.applicationService.secondsSubmissionPatch(data, user_idx);
   }
+
+  @Patch('/finalSubmission')
+  async finalSubmission(@User('user_idx') user_idx: number) {
+    return this.applicationService.finalSubmission(user_idx);
+  }
 }
