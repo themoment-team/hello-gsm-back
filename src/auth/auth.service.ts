@@ -25,15 +25,15 @@ export class AuthService {
       user = await this.prisma.user.create({
         data: {
           user_idx: kakaoUser.id,
-          user_img: kakaoUser.kakao_account.profile.profile_image_url,
+          userImg: kakaoUser.kakao_account.profile.profile_image_url,
           gender: null,
-          cellphone_number: null,
+          cellphoneNumber: null,
           birth: null,
           name: null,
         },
       });
 
-    if (!user.name || !user.birth || !user.gender || !user.cellphone_number)
+    if (!user.name || !user.birth || !user.gender || !user.cellphoneNumber)
       return this.getRegisterToken(kakaoUser.id);
 
     return this.getTokens(Number(user.user_idx));
