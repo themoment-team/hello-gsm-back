@@ -10,13 +10,13 @@ export class UserService {
       where: { user_idx },
       select: {
         name: true,
-        user_img: true,
+        userImg: true,
         application: {
           select: {
-            is_final_submission: true,
-            is_document_reception: true,
-            first_result_screening: true,
-            final_result_screening: true,
+            isFinalSubmission: true,
+            isDocumentReception: true,
+            firstResultScreening: true,
+            finalResultScreening: true,
           },
         },
       },
@@ -30,7 +30,7 @@ export class UserService {
         name: true,
         birth: true,
         gender: true,
-        cellphone_number: true,
+        cellphoneNumber: true,
       },
     });
   }

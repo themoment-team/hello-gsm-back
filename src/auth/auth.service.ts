@@ -49,7 +49,7 @@ export class AuthService {
       where: { user_idx },
       data: {
         ...data,
-        cellphone_number: data.cellphone_number.replace(/[- /]/g, ''),
+        cellphoneNumber: data.cellphone_number.replace(/[- /]/g, ''),
         birth: new Date(data.birth),
       },
     });
