@@ -8,13 +8,13 @@ datasource db {
 }
 
 model user {
-  user_idx         BigInt       @id
-  user_img         String?      @db.VarChar(500)
-  name             String?      @db.VarChar(20)
-  birth            DateTime?    @db.Date
-  gender           String?      @db.VarChar(20)
-  cellphone_number String?      @db.VarChar(20)
-  application      application?
+  user_idx        BigInt       @id
+  userImg         String?      @map("user_img") @db.VarChar(500)
+  name            String?      @db.VarChar(20)
+  birth           DateTime?    @db.Date
+  gender          String?      @db.VarChar(20)
+  cellphoneNumber String?      @map("cellphone_number") @db.VarChar(20)
+  application     application?
 }
 
 model access_token_blacklist {
@@ -26,41 +26,41 @@ model access_token_blacklist {
 }
 
 model application {
-  application_idx           Int                  @id @default(autoincrement())
-  registration_number       Int?                 @unique(map: "application_registration_number_uindex") @db.SmallInt
-  is_final_submission       Boolean?
-  is_document_reception     Boolean?
-  first_result_screening    String?              @db.VarChar(20)
-  final_result_screening    String?              @db.VarChar(20)
-  guardian_cellphone_number String               @db.VarChar(20)
-  teacher_cellphone_number  String               @db.VarChar(20)
-  school_name               String               @db.VarChar(50)
-  screening                 String               @db.VarChar(20)
-  user_idx                  BigInt               @unique(map: "application_user_user_idx_fk")
-  user                      user                 @relation(fields: [user_idx], references: [user_idx], onDelete: Cascade, onUpdate: Restrict, map: "application_user_user_idx_fk")
-  application_details       application_details?
-  application_score         application_score?
+  applicationIdx          Int                  @id @default(autoincrement()) @map("application_idx")
+  registrationNumber      Int?                 @unique(map: "application_registration_number_uindex") @map("registration_number") @db.SmallInt
+  isFinalSubmission       Boolean?             @map("is_final_submission")
+  isDocumentReception     Boolean?             @map("is_document_reception")
+  firstResultScreening    String?              @map("first_result_screening") @db.VarChar(20)
+  finalResultScreening    String?              @map("final_result_screening") @db.VarChar(20)
+  guardianCellphoneNumber String               @map("guardian_cellphone_number") @db.VarChar(20)
+  teacherCellphoneNumber  String               @map("teacher_cellphone_number") @db.VarChar(20)
+  schoolName              String               @map("school_name") @db.VarChar(50)
+  screening               String               @db.VarChar(20)
+  user_idx                BigInt               @unique(map: "application_user_user_idx_fk")
+  user                    user                 @relation(fields: [user_idx], references: [user_idx], onDelete: Cascade, onUpdate: Restrict, map: "application_user_user_idx_fk")
+  application_details     application_details?
+  application_score       application_score?
 }
 
 model application_details {
-  application_idx         Int         @id
-  ID_photo_url            String      @db.VarChar(500)
-  address                 String      @db.VarChar(50)
-  address_details         String      @db.VarChar(50)
-  telephone_number        String      @db.VarChar(20)
-  guardian_name           String      @db.VarChar(20)
-  guardian_relation       String      @db.VarChar(20)
-  teacher_name            String      @db.VarChar(20)
-  school_location         String      @db.VarChar(50)
-  education_status        String      @db.VarChar(20)
-  graduation_year         String      @db.VarChar(20)
-  graduation_month        String      @db.VarChar(20)
-  school_telephone_number String      @db.VarChar(20)
-  first_wanted_major      String      @db.VarChar(20)
-  second_wanted_major     String      @db.VarChar(20)
-  third_wanted_major      String      @db.VarChar(20)
-  major_result            String?     @db.VarChar(20)
-  application             application @relation(fields: [application_idx], references: [application_idx], onDelete: Cascade, onUpdate: Restrict, map: "application_details_application_application_idx_fk")
+  applicationIdx        Int         @id @map("application_idx")
+  idPhotoUrl            String      @map("ID_photo_url") @db.VarChar(500)
+  address               String      @db.VarChar(50)
+  addressDetails        String      @map("address_details") @db.VarChar(50)
+  telephoneNumber       String      @map("telephone_number") @db.VarChar(20)
+  guardianName          String      @map("guardian_name") @db.VarChar(20)
+  guardianRelation      String      @map("guardian_relation") @db.VarChar(20)
+  teacherName           String      @map("teacher_name") @db.VarChar(20)
+  schoolLocation        String      @map("school_location") @db.VarChar(50)
+  educationStatus       String      @map("education_status") @db.VarChar(20)
+  graduationYear        String      @map("graduation_year") @db.VarChar(20)
+  graduationMonth       String      @map("graduation_month") @db.VarChar(20)
+  schoolTelephoneNumber String      @map("school_telephone_number") @db.VarChar(20)
+  firstWantedMajor      String      @map("first_wanted_major") @db.VarChar(20)
+  secondWantedMajor     String      @map("second_wanted_major") @db.VarChar(20)
+  thirdWantedMajor      String      @map("third_wanted_major") @db.VarChar(20)
+  majorResult           String?     @map("major_result") @db.VarChar(20)
+  application           application @relation(fields: [applicationIdx], references: [applicationIdx], onDelete: Cascade, onUpdate: Restrict, map: "application_details_application_application_idx_fk")
 }
 
 model refresh_token {
@@ -75,18 +75,19 @@ model admin {
 }
 
 model application_score {
-  application_idx                   Int         @id
-  score_1_1                         Int         @db.SmallInt
-  score_1_2                         Int         @db.SmallInt
-  score_2_1                         Int         @db.SmallInt
-  score_2_2                         Int         @db.SmallInt
-  score_3_1                         Int         @db.SmallInt
-  general_curriculum_score_subtotal Int         @db.SmallInt
-  art_sports_score                  Int         @db.SmallInt
-  curriculum_score_subtotal         Int         @db.SmallInt
-  attendance_score                  Int         @db.SmallInt
-  volunteer_score                   Int         @db.SmallInt
-  non_curriculum_score_subtotal     Int         @db.SmallInt
-  score_total                       Int         @db.SmallInt
-  application                       application @relation(fields: [application_idx], references: [application_idx], onDelete: Cascade, onUpdate: Restrict, map: "application_score_application_application_idx_fk")
+  applicationIdx                 Int         @id @map("application_idx")
+  score1_1                       Int         @map("score_1_1") @db.SmallInt
+  score1_2                       Int         @map("score_1_2") @db.SmallInt
+  score2_1                       Int         @map("score_2_1") @db.SmallInt
+  score2_2                       Int         @map("score_2_2") @db.SmallInt
+  score3_1                       Int         @map("score_3_1") @db.SmallInt
+  generalCurriculumScoreSubtotal Int         @map("general_curriculum_score_subtotal") @db.SmallInt
+  artSportsScore                 Int         @map("art_sports_score") @db.SmallInt
+  curriculumScoreSubtotal        Int         @map("curriculum_score_subtotal") @db.SmallInt
+  attendanceScore                Int         @map("attendance_score") @db.SmallInt
+  volunteerScore                 Int         @map("volunteer_score") @db.SmallInt
+  nonCurriculumScoreSubtotal     Int         @map("non_curriculum_score_subtotal") @db.SmallInt
+  scoreTotal                     Int         @map("score_total") @db.SmallInt
+  personalityEvaluationScore     Int?        @map("personality_evaluation_score") @db.SmallInt
+  application                    application @relation(fields: [applicationIdx], references: [applicationIdx], onDelete: Cascade, onUpdate: Restrict, map: "application_score_application_application_idx_fk")
 }
