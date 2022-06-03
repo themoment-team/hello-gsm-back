@@ -88,5 +88,6 @@ model application_score {
   volunteerScore                 Int         @map("volunteer_score") @db.SmallInt
   nonCurriculumScoreSubtotal     Int         @map("non_curriculum_score_subtotal") @db.SmallInt
   scoreTotal                     Int         @map("score_total") @db.SmallInt
+  personalityEvaluationScore     Int?        @map("personality_evaluation_score") @db.SmallInt
   application                    application @relation(fields: [applicationIdx], references: [applicationIdx], onDelete: Cascade, onUpdate: Restrict, map: "application_score_application_application_idx_fk")
 }
