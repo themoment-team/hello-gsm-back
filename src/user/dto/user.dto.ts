@@ -15,9 +15,9 @@ export class UserDto {
   @IsDateString()
   birth: string;
 
-  @IsEnum(['남', '여'])
+  @IsEnum(['남자', '여자'])
   @MaxLength(20)
-  gender: '남' | '여';
+  gender: '남자' | '여자';
 
   @IsPhoneNumber('KR')
   @MaxLength(20)
