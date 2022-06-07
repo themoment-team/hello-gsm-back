@@ -63,6 +63,7 @@ export class AuthController {
       res.redirect(`${this.configService.get(ENV.FRONT_URL)}/auth/signup`);
       return;
     }
+
     this.ResCookie(res, tokens);
     res.redirect(`${this.configService.get(ENV.FRONT_URL)}`);
   }
@@ -117,10 +118,12 @@ export class AuthController {
     res.cookie(accessToken, tokens.at, {
       httpOnly: true,
       expires: tokens.atExpired,
+      domain: this.configService.get(ENV.DOMAIN),
     });
     res.cookie(refreshToken, tokens.rt, {
       httpOnly: true,
       expires: tokens.rtExpired,
+      domain: this.configService.get(ENV.DOMAIN),
     });
   }
 
