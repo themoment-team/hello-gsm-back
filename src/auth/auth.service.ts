@@ -21,7 +21,7 @@ export class AuthService {
       where: { user_idx: kakaoUser.id },
     });
 
-    if (!user)
+    if (!user) {
       user = await this.prisma.user.create({
         data: {
           user_idx: kakaoUser.id,
@@ -32,11 +32,19 @@ export class AuthService {
           name: null,
         },
       });
+      await this.prisma.refresh_token.create({
+        data: { user_idx: kakaoUser.id },
+      });
+    }
 
     if (!user.name || !user.birth || !user.gender || !user.cellphoneNumber)
       return this.getRegisterToken(kakaoUser.id);
 
-    return this.getTokens(Number(user.user_idx));
+    const tokens = await this.getTokens(Number(user.user_idx));
+
+    await this.saveRefresh(tokens, kakaoUser.id);
+
+    return tokens;
   }
 
   async register(user_idx: number, data: RegisterDto) {
@@ -58,7 +66,7 @@ export class AuthService {
   async logout({ user_idx, accessToken }: AtUser): Promise<void> {
     await this.prisma.refresh_token.update({
       where: { user_idx },
-      data: { refresh_token: '' },
+      data: { refresh_token: null },
     });
     await this.prisma.access_token_blacklist.create({
       data: { user_idx: user_idx, access_token: accessToken },
@@ -68,12 +76,17 @@ export class AuthService {
 
   async refresh({ user_idx }: AtUser) {
     const tokens = await this.getTokens(user_idx);
+    await this.saveRefresh(tokens, user_idx);
+    return tokens;
+  }
+
+  private async saveRefresh(tokens: any, user_idx: number) {
     const refresh_token = await bcrypt.hash(tokens.rt, 10);
+
     await this.prisma.refresh_token.update({
       where: { user_idx },
       data: { refresh_token },
     });
-    return tokens;
   }
 
   private async getTokens(user_idx: number) {

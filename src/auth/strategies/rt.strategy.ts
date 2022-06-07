@@ -6,6 +6,7 @@ import { Request } from 'express';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ENV } from 'src/lib/env';
 import { refreshToken } from 'src/utils/token.name';
+import * as bcrypt from 'bcrypt';
 
 type JwtPayload = {
   user_idx: number;
@@ -34,13 +35,15 @@ export class RtStrategy extends PassportStrategy(Strategy, 'jwt-rt') {
     const user = await this.prisma.user.findFirst({ where: { user_idx } });
 
     const refresh = await this.prisma.refresh_token.findFirst({
-      where: {
-        user_idx,
-        refresh_token: req.cookies[refreshToken],
-      },
+      where: { user_idx },
     });
 
-    if (!user || !refresh) return null;
+    if (
+      !user ||
+      !refresh ||
+      !bcrypt.compareSync(req.cookies[refreshToken], refresh.refresh_token)
+    )
+      return null;
 
     return { user_idx };
   }
