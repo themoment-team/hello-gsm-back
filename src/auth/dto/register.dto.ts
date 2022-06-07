@@ -13,7 +13,7 @@ export class RegisterDto {
 
   @MaxLength(20)
   @IsPhoneNumber('KR')
-  cellphone_number: string;
+  cellphoneNumber: string;
 
   @IsDateString()
   birth: string;

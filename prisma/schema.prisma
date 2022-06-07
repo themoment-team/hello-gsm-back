@@ -64,8 +64,8 @@ model application_details {
 }
 
 model refresh_token {
-  user_idx      BigInt @id
-  refresh_token String @db.VarChar(500)
+  user_idx      BigInt  @id
+  refresh_token String? @db.VarChar(500)
 }
 
 model admin {
