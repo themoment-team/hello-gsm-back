@@ -5,6 +5,7 @@ import { LoggerMiddleware } from './lib/logger.middleware';
 import { PrismaModule } from './prisma/prisma.module';
 import { ApplicationModule } from './application/application.module';
 import { UserModule } from './user/user.module';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -14,7 +15,7 @@ import { UserModule } from './user/user.module';
     ApplicationModule,
     UserModule,
   ],
-  controllers: [],
+  controllers: [AppController],
   providers: [],
 })
 export class AppModule implements NestModule {
