@@ -29,6 +29,12 @@ import { accessToken, refreshToken, registerToken } from 'src/utils/token.name';
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
+  private cookieOption = {
+    httpOnly: true,
+    domain: this.configService.get(ENV.DOMAIN),
+    secure: process.env.NODE_ENV === 'prod',
+  };
+
   constructor(
     private authService: AuthService,
     private configService: ConfigService,
@@ -55,9 +61,9 @@ export class AuthController {
 
     if (tokens.registerToken) {
       res.cookie(registerToken, tokens.registerToken, {
-        httpOnly: true,
         expires: tokens.expired,
-        domain: this.configService.get(ENV.DOMAIN),
+        path: '/auth/register',
+        ...this.cookieOption,
       });
 
       res.redirect(`${this.configService.get(ENV.FRONT_URL)}/auth/signup`);
@@ -79,7 +85,10 @@ export class AuthController {
   ) {
     await this.authService.register(user_idx, data);
 
-    res.clearCookie(registerToken);
+    res.clearCookie(registerToken, {
+      path: '/auth/register',
+      ...this.cookieOption,
+    });
     res.send('저장되었습니다');
   }
 
@@ -116,14 +125,12 @@ export class AuthController {
 
   private ResCookie(res: Response, tokens: any) {
     res.cookie(accessToken, tokens.at, {
-      httpOnly: true,
       expires: tokens.atExpired,
-      domain: this.configService.get(ENV.DOMAIN),
+      ...this.cookieOption,
     });
     res.cookie(refreshToken, tokens.rt, {
-      httpOnly: true,
       expires: tokens.rtExpired,
-      domain: this.configService.get(ENV.DOMAIN),
+      ...this.cookieOption,
     });
   }
 
