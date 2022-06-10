@@ -131,6 +131,8 @@ export class ApplicationService {
     if (user.application.application_score)
       throw new BadRequestException('이미 작성된 원서가 있습니다');
 
+    this.calcScore(data);
+
     await this.prisma.application_score.create({
       data: {
         ...data,
@@ -193,6 +195,10 @@ export class ApplicationService {
 
     if (!user.application.application_score)
       throw new BadRequestException('작성된 원서가 없습니다');
+    if (user.application.isFinalSubmission)
+      throw new BadRequestException('최종 제출된 원서는 수정할 수 없습니다');
+
+    this.calcScore(data);
 
     await this.prisma.application_score.update({
       where: { applicationIdx: user.application.applicationIdx },
@@ -321,6 +327,18 @@ export class ApplicationService {
         this.checkPhoneNumber(data.schoolTelephoneNumber) || 'null',
       schoolLocation: data.schoolLocation,
     };
+  }
+
+  private calcScore(data: SecondsSubmissionDto) {
+    const total = data.score2_2 + data.score2_1 + data.score3_1;
+    if (total !== data.generalCurriculumScoreSubtotal)
+      throw new BadRequestException('계산 결과가 올바르지 않습니다');
+    if (data.artSportsScore + data.generalCurriculumScoreSubtotal === data.curriculumScoreSubtotal)
+      throw new BadRequestException('계산 결과가 올바르지 않습니다');
+    if (data.nonCurriculumScoreSubtotal === data.attendanceScore + data.volunteerScore)
+      throw new BadRequestException('계산 결과가 올바르지 않습니다');
+    if (data.curriculumScoreSubtotal + data.nonCurriculumScoreSubtotal === data.scoreTotal)
+      throw new BadRequestException('계산 결과가 올바르지 않습니다');
   }
 
   private checkPhoneNumber(cellphoneNumber: string) {
