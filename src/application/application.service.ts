@@ -28,6 +28,10 @@ export class ApplicationService {
     secretAccessKey: this.configService.get<string>(ENV.AWS_SECRET_ACCESS_KEY),
   });
 
+  /**
+   * 유저 정보 모두 가져오기
+   * @param {number} user_idx
+   */
   async getAllUserInfo(user_idx: number) {
     const user = await this.prisma.user.findFirst({
       where: { user_idx: user_idx },
@@ -41,11 +45,19 @@ export class ApplicationService {
     return JSON.stringify(user);
   }
 
+  /**
+   * 1차 서류 제출
+   * @param {number} user_idx
+   * @param {FirstSubmissionDto} data
+   * @param {Express.Multer.File} photo
+   * @returns {Promise<string>} 1차 서류 저장에 성공했습니다
+   * @throws {BadRequestException} BadRequestException
+   */
   async firstSubmission(
     user_idx: number,
     data: FirstSubmissionDto,
     photo: Express.Multer.File,
-  ) {
+  ): Promise<string> {
     const user = await this.prisma.user.findFirst({
       where: { user_idx },
       include: { application: true },
@@ -73,6 +85,12 @@ export class ApplicationService {
     return '1차 서류 저장에 성공했습니다';
   }
 
+  /**
+   * 이미지 업로드
+   * @param {Express.Multer.File} photo
+   * @returns {Promise<string>} 이미지 url
+   * @throws {BadRequestException} BadRequestException
+   */
   async s3Upload(photo: Express.Multer.File): Promise<string> {
     if (!photo || !photo.mimetype.includes('image'))
       throw new BadRequestException('Not Found photo');
@@ -100,7 +118,12 @@ export class ApplicationService {
     }
   }
 
-  async deleteApplication(user_idx: number) {
+  /**
+   * 원서 삭제
+   * @param {number} user_idx
+   * @returns {Promise<string>} 원서 제거에 성공했습니다
+   */
+  async deleteApplication(user_idx: number): Promise<string> {
     const user = await this.prisma.user.findFirst({
       where: { user_idx },
       include: { application: { include: { application_details: true } } },
@@ -122,6 +145,13 @@ export class ApplicationService {
     return '원서 제거에 성공했습니다';
   }
 
+  /**
+   * 2차 서류 제출
+   * @param {SecondsSubmissionDto} data
+   * @param {number} user_idx
+   * @returns {Promise<string>} 2차 서류 작성에 성공했습니다
+   * @throws {BadRequestException} BadRequestException
+   */
   async secondsSubmission(
     data: SecondsSubmissionDto,
     user_idx: number,
@@ -147,11 +177,18 @@ export class ApplicationService {
     return '2차 서류 작성에 성공했습니다';
   }
 
+  /**
+   * @param {number} user_idx
+   * @param {FirstSubmissionDto} data
+   * @param {Express.Multer.File} photo
+   * @returns {Promise<string>} 수정에 성공했습니다
+   * @throws {BadRequestException} BadRequestException
+   */
   async firstSubmissionPatch(
     user_idx: number,
     data: FirstSubmissionDto,
     photo: Express.Multer.File,
-  ) {
+  ): Promise<string> {
     const application = await this.prisma.application.findFirst({
       where: { user_idx },
       include: { application_details: true },
@@ -187,6 +224,13 @@ export class ApplicationService {
     return '수정에 성공했습니다';
   }
 
+  /**
+   * 2차 서류 제출 수정
+   * @param {SecondsSubmissionDto} data
+   * @param {number} user_idx
+   * @returns {Promise<sting>} 저장에 성공했습니다
+   * @throws {BadRequestException} BadRequestException
+   */
   async secondsSubmissionPatch(
     data: SecondsSubmissionDto,
     user_idx: number,
@@ -212,7 +256,13 @@ export class ApplicationService {
     return '저장에 성공했습니다';
   }
 
-  async finalSubmission(user_idx: number) {
+  /**
+   * 서류 최종 제출
+   * @param {number} user_idx
+   * @returns {Promise<string>} 최종 제출에 성공했습니다
+   * @throws {BadRequestException} BadRequestException
+   */
+  async finalSubmission(user_idx: number): Promise<string> {
     const { isFinalSubmission } = await this.prisma.application.findFirst({
       where: { user_idx },
     });
@@ -228,6 +278,11 @@ export class ApplicationService {
     return '최종 제출에 성공했습니다';
   }
 
+  /**
+   * 증명사진 삭제
+   * @param {string} imgUrl
+   * @throws {ServiceUnavailableException} ServiceUnavailableException
+   */
   private async deleteImg(imgUrl: string) {
     try {
       await this.s3
@@ -241,6 +296,10 @@ export class ApplicationService {
     }
   }
 
+  /**
+   * @param {FirstSubmissionDto} data
+   * @throws {BadRequestException} BadRequestException
+   */
   private checkMajor(data: FirstSubmissionDto) {
     if (
       data.firstWantedMajor === data.secondWantedMajor ||
@@ -252,6 +311,12 @@ export class ApplicationService {
       );
   }
 
+  /**
+   * 원서 검사 및 필터링
+   * @param {FirstSubmissionDto} data
+   * @returns {ApplicationDto}
+   * @throws {BadRequestException} BadRequestException
+   */
   private checkApplication(data: FirstSubmissionDto): ApplicationDto {
     if (data.educationStatus === '검정고시') {
       return {
@@ -279,6 +344,12 @@ export class ApplicationService {
     };
   }
 
+  /**
+   * applicationDetail 테이블에 들어갈 데이터 필터링 및 검사
+   * @param {FirstSubmissionDto} data
+   * @param {string} idPhotoUrl
+   * @returns {ApplicationDetailDto}
+   */
   private checkApplicationDetail(
     data: FirstSubmissionDto,
     idPhotoUrl: string,
@@ -329,24 +400,42 @@ export class ApplicationService {
     };
   }
 
+  /**
+   * 성적 계산 체크
+   * @param { SecondsSubmissionDto } data
+   * @throws { BadRequestException } BadRequestException
+   */
   private calcScore(data: SecondsSubmissionDto) {
     const total = data.score2_2 + data.score2_1 + data.score3_1;
-    if (total !== data.generalCurriculumScoreSubtotal)
-      throw new BadRequestException('계산 결과가 올바르지 않습니다');
-    if (data.artSportsScore + data.generalCurriculumScoreSubtotal === data.curriculumScoreSubtotal)
-      throw new BadRequestException('계산 결과가 올바르지 않습니다');
-    if (data.nonCurriculumScoreSubtotal === data.attendanceScore + data.volunteerScore)
-      throw new BadRequestException('계산 결과가 올바르지 않습니다');
-    if (data.curriculumScoreSubtotal + data.nonCurriculumScoreSubtotal === data.scoreTotal)
+    if (
+      total !== data.generalCurriculumScoreSubtotal ||
+      data.artSportsScore + data.generalCurriculumScoreSubtotal ===
+        data.curriculumScoreSubtotal ||
+      data.nonCurriculumScoreSubtotal ===
+        data.attendanceScore + data.volunteerScore ||
+      data.curriculumScoreSubtotal + data.nonCurriculumScoreSubtotal ===
+        data.scoreTotal
+    )
       throw new BadRequestException('계산 결과가 올바르지 않습니다');
   }
 
-  private checkPhoneNumber(cellphoneNumber: string) {
+  /**
+   * 전화번호 검사
+   * @param {string} cellphoneNumber
+   * @returns {string} 01012341234
+   * @throws {BadRequestException} BadRequestException
+   */
+  private checkPhoneNumber(cellphoneNumber: string): string {
     if (cellphoneNumber.includes('+82'))
       throw new BadRequestException('잘못된 전화번호 입력 방식입니다');
     return cellphoneNumber.replace(/[- /]/g, '');
   }
 
+  /**
+   * Application 조회
+   * @param {number} user_idx
+   * @throws {BadRequestException} BadRequestException
+   */
   private async getUserApplication(user_idx: number) {
     const user = await this.prisma.user.findFirst({
       where: { user_idx },
