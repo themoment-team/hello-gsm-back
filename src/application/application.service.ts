@@ -263,11 +263,22 @@ export class ApplicationService {
    * @throws {BadRequestException} BadRequestException
    */
   async finalSubmission(user_idx: number): Promise<string> {
-    const { isFinalSubmission } = await this.prisma.application.findFirst({
+    const user = await this.prisma.user.findFirst({
       where: { user_idx },
+      include: {
+        application: {
+          include: { application_score: true, application_details: true },
+        },
+      },
     });
 
-    if (isFinalSubmission)
+    if (
+      !user.application ||
+      !user.application.application_details ||
+      !user.application.application_score
+    )
+      throw new BadRequestException('서류가 완전히 작성되지 않았습니다');
+    if (user.application.isFinalSubmission)
       throw new BadRequestException('이미 최종 제출이 되어있습니다');
 
     await this.prisma.application.update({
