@@ -12,6 +12,10 @@ import {
   ApplicationDto,
   FirstSubmissionDto,
   SecondsSubmissionDto,
+  QualificationFirstDto,
+  ApplicationGraduationDto,
+  ApplicationDetailGraduationDto,
+  ApplicationDetailQualificationDto,
 } from './dto';
 import { v1 } from 'uuid';
 import * as AWS from 'aws-sdk';
@@ -30,7 +34,7 @@ export class ApplicationService {
   });
 
   /**
-   * 유저 정보 모두 가져오기
+   * 유저 원서 정보 모두 가져오기
    * @param {number} user_idx
    */
   async getAllUserInfo(user_idx: number) {
@@ -67,17 +71,20 @@ export class ApplicationService {
     if (user.application)
       throw new BadRequestException('이미 작성된 원서가 있습니다.');
 
-    this.checkMajor(data);
+    this.checkMajor(data.applicationDetail);
 
     const idPhotoUrl = await this.s3Upload(photo);
 
     await this.prisma.application.create({
       data: {
-        ...this.checkApplication(data),
+        ...this.checkApplication(
+          data.application,
+          data.applicationDetail.educationStatus,
+        ),
         user: { connect: { user_idx } },
         application_details: {
           create: {
-            ...this.checkApplicationDetail(data, idPhotoUrl),
+            ...this.checkApplicationDetail(data.applicationDetail, idPhotoUrl),
           },
         },
       },
@@ -200,7 +207,7 @@ export class ApplicationService {
     if (application.isFinalSubmission)
       throw new BadRequestException('최종 제출된 원서는 수정할 수 없습니다');
 
-    this.checkMajor(data);
+    this.checkMajor(data.applicationDetail);
 
     this.deleteImg(application.application_details.idPhotoUrl);
 
@@ -211,10 +218,16 @@ export class ApplicationService {
       data: {
         application: {
           update: {
-            ...this.checkApplication(data),
+            ...this.checkApplication(
+              data.application,
+              data.applicationDetail.educationStatus,
+            ),
             application_details: {
               update: {
-                ...this.checkApplicationDetail(data, idPhotoUrl),
+                ...this.checkApplicationDetail(
+                  data.applicationDetail,
+                  idPhotoUrl,
+                ),
               },
             },
           },
@@ -312,7 +325,7 @@ export class ApplicationService {
    * @param {FirstSubmissionDto} data
    * @throws {BadRequestException} BadRequestException
    */
-  private checkMajor(data: FirstSubmissionDto) {
+  private checkMajor(data: ApplicationDetailDto) {
     if (
       data.firstWantedMajor === data.secondWantedMajor ||
       data.firstWantedMajor === data.thirdWantedMajor ||
@@ -329,22 +342,23 @@ export class ApplicationService {
    * @returns {ApplicationDto}
    * @throws {BadRequestException} BadRequestException
    */
-  private checkApplication(data: FirstSubmissionDto): ApplicationDto {
-    if (data.educationStatus === EducationStatus.검정고시) {
-      return {
-        screening: data.screening,
-        teacherCellphoneNumber: 'null',
-        schoolName: 'null',
+  private checkApplication(
+    data: ApplicationDto,
+    educationStatus: EducationStatus,
+  ): ApplicationGraduationDto | QualificationFirstDto {
+    if (educationStatus === EducationStatus.검정고시) {
+      const application: QualificationFirstDto = {
+        ...data,
         guardianCellphoneNumber: this.checkPhoneNumber(
           data.guardianCellphoneNumber,
         ),
+        schoolName: 'null',
+        teacherCellphoneNumber: 'null',
       };
+      return application;
     }
 
-    if (!data.teacherCellphoneNumber || !data.schoolName)
-      throw new BadRequestException('학교 정보를 입력해 주세요');
-
-    return {
+    const application: ApplicationGraduationDto = {
       screening: data.screening,
       schoolName: data.schoolName,
       teacherCellphoneNumber: this.checkPhoneNumber(
@@ -354,6 +368,8 @@ export class ApplicationService {
         data.guardianCellphoneNumber,
       ),
     };
+
+    return application;
   }
 
   /**
@@ -363,53 +379,33 @@ export class ApplicationService {
    * @returns {ApplicationDetailDto}
    */
   private checkApplicationDetail(
-    data: FirstSubmissionDto,
+    data: ApplicationDetailDto,
     idPhotoUrl: string,
-  ): ApplicationDetailDto {
-    if (data.educationStatus === EducationStatus.검정고시)
-      return {
+  ): ApplicationDetailGraduationDto | ApplicationDetailQualificationDto {
+    if (data.educationStatus === EducationStatus.검정고시) {
+      const application: ApplicationDetailQualificationDto = {
+        ...data,
         idPhotoUrl,
-        address: data.address,
-        guardianName: data.guardianName,
-        guardianRelation: data.guardianRelation,
         teacherName: 'null',
-        educationStatus: data.educationStatus,
-        graduationYear: data.graduationYear,
-        graduationMonth: data.graduationMonth,
-        firstWantedMajor: data.firstWantedMajor,
-        secondWantedMajor: data.secondWantedMajor,
-        thirdWantedMajor: data.thirdWantedMajor,
-        telephoneNumber: this.checkPhoneNumber(data.telephoneNumber) || 'null',
-        addressDetails: data.addressDetails || 'null',
-        schoolTelephoneNumber: 'null',
         schoolLocation: 'null',
+        schoolTelephoneNumber: 'null',
+        educationStatus: EducationStatus.검정고시,
       };
+      return application;
+    }
 
-    if (
-      !data.teacherName ||
-      !data.schoolTelephoneNumber ||
-      !data.schoolLocation
-    )
-      throw new BadRequestException('학교 정보를 입력해 주세요');
-
-    return {
+    const application: ApplicationDetailGraduationDto = {
+      ...data,
       idPhotoUrl,
-      address: data.address,
-      guardianName: data.guardianName,
-      guardianRelation: data.guardianRelation,
-      teacherName: 'null',
-      educationStatus: data.educationStatus,
-      graduationYear: data.graduationYear,
-      graduationMonth: data.graduationMonth,
-      firstWantedMajor: data.firstWantedMajor,
-      secondWantedMajor: data.secondWantedMajor,
-      thirdWantedMajor: data.thirdWantedMajor,
-      telephoneNumber: this.checkPhoneNumber(data.telephoneNumber) || 'null',
-      addressDetails: data.addressDetails || 'null',
-      schoolTelephoneNumber:
-        this.checkPhoneNumber(data.schoolTelephoneNumber) || 'null',
-      schoolLocation: data.schoolLocation,
+      telephoneNumber: this.checkPhoneNumber(data.telephoneNumber),
+      schoolTelephoneNumber: this.checkPhoneNumber(data.schoolTelephoneNumber),
+      educationStatus:
+        data.educationStatus === EducationStatus.졸업
+          ? EducationStatus.졸업
+          : EducationStatus.졸업예정,
     };
+
+    return application;
   }
 
   /**

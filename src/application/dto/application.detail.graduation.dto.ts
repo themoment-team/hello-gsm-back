@@ -1,26 +1,24 @@
-import { Optional } from '@nestjs/common';
 import { IsEnum, IsPhoneNumber, IsString, MaxLength } from 'class-validator';
 import { EducationStatus } from 'src/types';
 import { ApplicationDetailSuperDto } from './application.detail.super';
 
-export class ApplicationDetailDto extends ApplicationDetailSuperDto {
+export class ApplicationDetailGraduationDto extends ApplicationDetailSuperDto {
+  @IsString()
+  idPhotoUrl: string;
+
   @IsString()
   @MaxLength(20)
-  @Optional()
   teacherName: string;
 
   @IsString()
   @MaxLength(50)
-  @Optional()
   schoolLocation: string;
 
-  @IsString()
-  @IsEnum(EducationStatus)
-  educationStatus: EducationStatus;
+  @IsEnum([EducationStatus.졸업, EducationStatus.졸업예정])
+  educationStatus: EducationStatus.졸업예정 | EducationStatus.졸업;
 
   @IsString()
   @IsPhoneNumber('KR')
   @MaxLength(20)
-  @Optional()
   schoolTelephoneNumber: string;
 }
