@@ -26,10 +26,6 @@ export class AuthService {
         data: {
           user_idx: kakaoUser.id,
           userImg: kakaoUser.kakao_account.profile.profile_image_url,
-          gender: null,
-          cellphoneNumber: null,
-          birth: null,
-          name: null,
         },
       });
       await this.prisma.refresh_token.create({
