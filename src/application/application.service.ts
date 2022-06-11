@@ -15,6 +15,7 @@ import {
 } from './dto';
 import { v1 } from 'uuid';
 import * as AWS from 'aws-sdk';
+import { EducationStatus } from 'src/types';
 
 @Injectable()
 export class ApplicationService {
@@ -329,7 +330,7 @@ export class ApplicationService {
    * @throws {BadRequestException} BadRequestException
    */
   private checkApplication(data: FirstSubmissionDto): ApplicationDto {
-    if (data.educationStatus === '검정고시') {
+    if (data.educationStatus === EducationStatus.검정고시) {
       return {
         screening: data.screening,
         teacherCellphoneNumber: 'null',
@@ -365,7 +366,7 @@ export class ApplicationService {
     data: FirstSubmissionDto,
     idPhotoUrl: string,
   ): ApplicationDetailDto {
-    if (data.educationStatus === '검정고시')
+    if (data.educationStatus === EducationStatus.검정고시)
       return {
         idPhotoUrl,
         address: data.address,

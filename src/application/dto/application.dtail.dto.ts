@@ -1,4 +1,5 @@
 import { IsEnum, IsPhoneNumber, IsString, MaxLength } from 'class-validator';
+import { EducationStatus, Major } from 'src/types';
 
 export class ApplicationDetailDto {
   @MaxLength(500)
@@ -35,8 +36,8 @@ export class ApplicationDetailDto {
   schoolLocation: string;
 
   @IsString()
-  @IsEnum(['졸업예정', '졸업', '검정고시'])
-  educationStatus: '졸업예정' | '졸업' | '검정고시';
+  @IsEnum(EducationStatus)
+  educationStatus: EducationStatus;
 
   @IsString()
   @MaxLength(4)
@@ -51,12 +52,12 @@ export class ApplicationDetailDto {
   @MaxLength(20)
   schoolTelephoneNumber: string;
 
-  @IsEnum(['인공지능과', '스마트IOT과', '소프트웨어개발과'])
-  firstWantedMajor: '인공지능과' | '스마트IOT과' | '소프트웨어개발과';
+  @IsEnum(Major)
+  firstWantedMajor: Major;
 
-  @IsEnum(['인공지능과', '스마트IOT과', '소프트웨어개발과'])
-  secondWantedMajor: '인공지능과' | '스마트IOT과' | '소프트웨어개발과';
+  @IsEnum(Major)
+  secondWantedMajor: Major;
 
-  @IsEnum(['인공지능과', '스마트IOT과', '소프트웨어개발과'])
-  thirdWantedMajor: '인공지능과' | '스마트IOT과' | '소프트웨어개발과';
+  @IsEnum(Major)
+  thirdWantedMajor: Major;
 }

@@ -5,6 +5,7 @@ import {
   IsString,
   MaxLength,
 } from 'class-validator';
+import { Screening } from 'src/types';
 
 export class ApplicationDto {
   @IsPhoneNumber('KR')
@@ -23,6 +24,6 @@ export class ApplicationDto {
   schoolName: string;
 
   @IsString()
-  @IsEnum(['일반전형', '사회통합전형', '특별전형'])
-  screening: '일반전형' | '사회통합전형' | '특별전형';
+  @IsEnum(Screening)
+  screening: Screening;
 }

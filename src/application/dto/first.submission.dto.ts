@@ -5,6 +5,7 @@ import {
   MaxLength,
   IsOptional,
 } from 'class-validator';
+import { EducationStatus, Major, Screening } from 'src/types';
 
 export class FirstSubmissionDto {
   @IsPhoneNumber('KR')
@@ -24,8 +25,8 @@ export class FirstSubmissionDto {
   schoolName: string;
 
   @IsString()
-  @IsEnum(['일반전형', '사회통합전형', '특별전형'])
-  screening: '일반전형' | '사회통합전형' | '특별전형';
+  @IsEnum(Screening)
+  screening: Screening;
 
   @MaxLength(50)
   @IsString()
@@ -61,8 +62,8 @@ export class FirstSubmissionDto {
   schoolLocation: string;
 
   @IsString()
-  @IsEnum(['졸업예정', '졸업', '검정고시'])
-  educationStatus: '졸업예정' | '졸업' | '검정고시';
+  @IsEnum(EducationStatus)
+  educationStatus: EducationStatus;
 
   @IsString()
   @MaxLength(4)
@@ -78,12 +79,12 @@ export class FirstSubmissionDto {
   @IsOptional()
   schoolTelephoneNumber?: string;
 
-  @IsEnum(['인공지능과', '스마트IOT과', '소프트웨어개발과'])
-  firstWantedMajor: '인공지능과' | '스마트IOT과' | '소프트웨어개발과';
+  @IsEnum(Major)
+  firstWantedMajor: Major;
 
-  @IsEnum(['인공지능과', '스마트IOT과', '소프트웨어개발과'])
-  secondWantedMajor: '인공지능과' | '스마트IOT과' | '소프트웨어개발과';
+  @IsEnum(Major)
+  secondWantedMajor: Major;
 
-  @IsEnum(['인공지능과', '스마트IOT과', '소프트웨어개발과'])
-  thirdWantedMajor: '인공지능과' | '스마트IOT과' | '소프트웨어개발과';
+  @IsEnum(Major)
+  thirdWantedMajor: Major;
 }
