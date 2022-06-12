@@ -3,10 +3,6 @@ import { IsEnum, IsPhoneNumber, IsString, MaxLength } from 'class-validator';
 import { Major } from 'src/types';
 
 export class ApplicationDetailSuperDto {
-  @MaxLength(500)
-  @IsString()
-  idPhotoUrl: string;
-
   @MaxLength(50)
   @IsString()
   address: string;

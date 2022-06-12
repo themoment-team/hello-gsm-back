@@ -186,6 +186,7 @@ export class ApplicationService {
   }
 
   /**
+   * 1차 서류 제출 수정
    * @param {number} user_idx
    * @param {FirstSubmissionDto} data
    * @param {Express.Multer.File} photo
@@ -417,11 +418,11 @@ export class ApplicationService {
     const total = data.score2_2 + data.score2_1 + data.score3_1;
     if (
       total !== data.generalCurriculumScoreSubtotal ||
-      data.artSportsScore + data.generalCurriculumScoreSubtotal ===
+      data.artSportsScore + data.generalCurriculumScoreSubtotal !==
         data.curriculumScoreSubtotal ||
-      data.nonCurriculumScoreSubtotal ===
+      data.nonCurriculumScoreSubtotal !==
         data.attendanceScore + data.volunteerScore ||
-      data.curriculumScoreSubtotal + data.nonCurriculumScoreSubtotal ===
+      data.curriculumScoreSubtotal + data.nonCurriculumScoreSubtotal !==
         data.scoreTotal
     )
       throw new BadRequestException('계산 결과가 올바르지 않습니다');
