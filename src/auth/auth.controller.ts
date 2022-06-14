@@ -100,8 +100,12 @@ export class AuthController {
   @HttpCode(200)
   async logout(@Res() res: Response, @User() data: AtUser) {
     await this.authService.logout(data);
-    res.clearCookie(accessToken);
-    res.clearCookie(registerToken);
+    res.clearCookie(accessToken, {
+      ...this.cookieOption,
+    });
+    res.clearCookie(registerToken, {
+      ...this.cookieOption,
+    });
     res.send('로그아웃에 성공하였습니다.');
   }
 
