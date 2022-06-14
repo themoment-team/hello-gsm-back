@@ -18,11 +18,8 @@ model user {
 }
 
 model access_token_blacklist {
-  user_idx     BigInt
-  access_token String   @db.VarChar(500)
+  access_token String   @id @db.VarChar(500)
   expired_date DateTime @default(dbgenerated("(current_timestamp() + interval 5 minute)")) @db.Timestamp(0)
-
-  @@id([user_idx, access_token])
 }
 
 model application {
@@ -90,4 +87,47 @@ model application_score {
   scoreTotal                     Int         @map("score_total") @db.SmallInt
   personalityEvaluationScore     Int?        @map("personality_evaluation_score") @db.SmallInt
   application                    application @relation(fields: [applicationIdx], references: [applicationIdx], onDelete: Cascade, onUpdate: Restrict, map: "application_score_application_application_idx_fk")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model deleted_application {
+  user_idx                      BigInt?   @unique(map: "user_idx")
+  application_idx               Int?      @unique(map: "application_idx")
+  registration_number           Int?      @unique(map: "registration_number") @db.SmallInt
+  name                          String?   @db.VarChar(20)
+  gender                        String?   @db.VarChar(20)
+  birth                         DateTime? @db.Date
+  ID_photo_url                  String?   @db.VarChar(500)
+  address                       String?   @db.VarChar(50)
+  address_details               String?   @db.VarChar(50)
+  telephone_number              String?   @db.VarChar(20)
+  cellphone_number              String?   @db.VarChar(20)
+  guardian_name                 String?   @db.VarChar(20)
+  guardian_relation             String?   @db.VarChar(20)
+  guardian_cellphone_number     String?   @db.VarChar(20)
+  teacher_name                  String?   @db.VarChar(20)
+  teacher_cellphone_number      String?   @db.VarChar(20)
+  school_name                   String?   @db.VarChar(50)
+  school_location               String?   @db.VarChar(50)
+  graduation_year               String?   @db.VarChar(20)
+  graduation_month              String?   @db.VarChar(20)
+  education_status              String?   @db.VarChar(20)
+  screening                     String?   @db.VarChar(20)
+  score_1_1                     Int?      @db.SmallInt
+  score_1_2                     Int?      @db.SmallInt
+  score_2_1                     Int?      @db.SmallInt
+  score_2_2                     Int?      @db.SmallInt
+  score_3_1                     Int?      @db.SmallInt
+  art_sports_score              Int?      @db.SmallInt
+  curriculum_score_subtotal     Int?      @db.SmallInt
+  attendance_score              Int?      @db.SmallInt
+  volunteer_score               Int?      @db.SmallInt
+  non_curriculum_score_subtotal Int?      @db.SmallInt
+  score_total                   Int?      @db.SmallInt
+  first_wanted_major            Int?      @db.SmallInt
+  second_wanted_major           Int?      @db.SmallInt
+  third_wanted_major            Int?      @db.SmallInt
+  del_datetime                  DateTime? @default(now()) @db.DateTime(0)
+
+  @@ignore
 }
