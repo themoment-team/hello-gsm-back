@@ -2,11 +2,11 @@ FROM node:16.14.2-alpine
 
 WORKDIR /app
 
-COPY ./package.json ./package-lock.json ./
+COPY ./package.json ./yarn.lock ./
 
-RUN npm i
+RUN yarn
 
-RUN npm i -g prisma
+RUN yarn global add prisma
 
 COPY ./src ./src
 
@@ -20,6 +20,6 @@ RUN prisma db pull
 
 RUN prisma generate
 
-RUN npm run build
+RUN yarn build
 
-CMD ["npm", "run", "start:prod"]
+CMD ["yarn", "start:prod"]
