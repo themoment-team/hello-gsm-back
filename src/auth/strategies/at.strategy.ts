@@ -40,7 +40,6 @@ export class AtStrategy extends PassportStrategy(Strategy, 'jwt') {
 
     const token = await this.prisma.access_token_blacklist.findFirst({
       where: {
-        user_idx,
         access_token: at,
       },
     });
