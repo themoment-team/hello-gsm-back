@@ -46,6 +46,6 @@ export class AtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
 
     if (token) return null;
-    return { user_idx };
+    return { user_idx, accessToken: at };
   }
 }
