@@ -323,6 +323,7 @@ export class ApplicationService {
   }
 
   /**
+   * 전공 겹침 체크
    * @param {ApplicationDetailDto} data
    * @throws {BadRequestException} BadRequestException
    */
