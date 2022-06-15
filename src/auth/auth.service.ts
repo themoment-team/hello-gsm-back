@@ -66,7 +66,7 @@ export class AuthService {
     });
 
     await this.prisma.access_token_blacklist.create({
-      data: { user_idx: user_idx, access_token: accessToken },
+      data: { access_token: accessToken },
     });
     return;
   }
