@@ -103,7 +103,7 @@ export class AuthController {
     res.clearCookie(accessToken, {
       ...this.cookieOption,
     });
-    res.clearCookie(registerToken, {
+    res.clearCookie(refreshToken, {
       ...this.cookieOption,
     });
     res.send('로그아웃에 성공하였습니다.');
