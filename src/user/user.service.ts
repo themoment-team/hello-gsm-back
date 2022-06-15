@@ -18,6 +18,7 @@ export class UserService {
             isDocumentReception: true,
             firstResultScreening: true,
             finalResultScreening: true,
+            registrationNumber: true,
           },
         },
       },
