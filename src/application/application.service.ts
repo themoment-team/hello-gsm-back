@@ -435,9 +435,9 @@ export class ApplicationService {
    * @throws {BadRequestException} BadRequestException
    */
   private checkPhoneNumber(cellphoneNumber: string): string {
-    if (cellphoneNumber.includes('+82'))
+    if (!/^0\d{2}\d{3,4}\d{4}/g.test(cellphoneNumber))
       throw new BadRequestException('잘못된 전화번호 입력 방식입니다');
-    return cellphoneNumber.replace(/[- /]/g, '');
+    return cellphoneNumber;
   }
 
   /**
