@@ -323,7 +323,7 @@ export class ApplicationService {
   }
 
   /**
-   * @param {FirstSubmissionDto} data
+   * @param {ApplicationDetailDto} data
    * @throws {BadRequestException} BadRequestException
    */
   private checkMajor(data: ApplicationDetailDto) {
@@ -339,8 +339,9 @@ export class ApplicationService {
 
   /**
    * 원서 검사 및 필터링
-   * @param {FirstSubmissionDto} data
-   * @returns {ApplicationDto}
+   * @param {ApplicationDto} data
+   * @param {EducationStatus}educationStatus
+   * @returns {ApplicationGraduationDto | QualificationFirstDto}
    * @throws {BadRequestException} BadRequestException
    */
   private checkApplication(
@@ -375,9 +376,9 @@ export class ApplicationService {
 
   /**
    * applicationDetail 테이블에 들어갈 데이터 필터링 및 검사
-   * @param {FirstSubmissionDto} data
+   * @param {ApplicationDetailDto} data
    * @param {string} idPhotoUrl
-   * @returns {ApplicationDetailDto}
+   * @returns {ApplicationDetailGraduationDto | ApplicationDetailQualificationDto}
    */
   private checkApplicationDetail(
     data: ApplicationDetailDto,
