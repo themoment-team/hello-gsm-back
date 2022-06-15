@@ -277,7 +277,7 @@ export class ApplicationService {
    * @returns {Promise<string>} 최종 제출에 성공했습니다
    * @throws {BadRequestException} BadRequestException
    */
-  async finalSubmission(user_idx: number): Promise<string> {
+  async finalSubmission(user_idx: number): Promise<number> {
     const user = await this.prisma.user.findFirst({
       where: { user_idx },
       include: {
@@ -296,12 +296,16 @@ export class ApplicationService {
     if (user.application.isFinalSubmission)
       throw new BadRequestException('이미 최종 제출이 되어있습니다');
 
-    await this.prisma.application.update({
-      where: { user_idx },
-      data: { isFinalSubmission: true },
-    });
+    await this.prisma.$transaction([
+      this.prisma
+        .$executeRaw`CALL usp_set_registration_number([${user.application.applicationIdx}])`,
+      this.prisma.application.update({
+        where: { user_idx },
+        data: { isFinalSubmission: true },
+      }),
+    ]);
 
-    return '최종 제출에 성공했습니다';
+    return user.application.applicationIdx;
   }
 
   /**
