@@ -2,40 +2,49 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { PrismaService } from 'apps/hello-gsm-back/src/prisma/prisma.service';
+import { PrismaService } from 'apps/client/src/prisma/prisma.service';
 import { Request } from 'express';
-import { ENV } from 'apps/hello-gsm-back/src/lib/env';
+import { ENV } from 'apps/client/src/lib/env';
+import { accessToken } from 'apps/client/src/utils/token.name';
 
 type JwtPayload = {
   user_idx: number;
 };
 
 @Injectable()
-export class RegisterStrategy extends PassportStrategy(Strategy, 'register') {
+export class AtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(private prisma: PrismaService) {
     const configService = new ConfigService();
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (req: Request) => {
-          const cookie = req.cookies['registerToken'];
-
+          const cookie = req.cookies[accessToken];
           if (!cookie) return null;
           return cookie;
         },
       ]),
-      secretOrKey: configService.get(ENV.JWT_REGISTER_SECRET),
+      secretOrKey: configService.get(ENV.JWT_ACCESS_SECRET),
+      passReqToCallback: true,
     });
   }
 
-  async validate({ user_idx }: JwtPayload) {
+  async validate(req: Request, { user_idx }: JwtPayload) {
     if (!user_idx) return null;
 
+    const at = req.cookies[accessToken];
     const user = await this.prisma.user.findFirst({
       where: { user_idx },
     });
 
     if (!user) return null;
 
-    return { user_idx };
+    const token = await this.prisma.access_token_blacklist.findFirst({
+      where: {
+        access_token: at,
+      },
+    });
+
+    if (token) return null;
+    return { user_idx, accessToken: at };
   }
 }

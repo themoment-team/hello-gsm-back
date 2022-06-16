@@ -5,8 +5,8 @@ import {
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ENV } from 'apps/hello-gsm-back/src/lib/env';
-import { PrismaService } from 'apps/hello-gsm-back/src/prisma/prisma.service';
+import { ENV } from 'apps/client/src/lib/env';
+import { PrismaService } from 'apps/client/src/prisma/prisma.service';
 import {
   ApplicationDetailDto,
   ApplicationDto,
@@ -19,7 +19,7 @@ import {
 } from './dto';
 import { v1 } from 'uuid';
 import * as AWS from 'aws-sdk';
-import { EducationStatus } from 'apps/hello-gsm-back/src/types';
+import { EducationStatus } from 'apps/client/src/types';
 
 @Injectable()
 export class ApplicationService {

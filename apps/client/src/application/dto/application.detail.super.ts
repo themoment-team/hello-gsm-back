@@ -1,6 +1,6 @@
 import { Optional } from '@nestjs/common';
 import { IsEnum, IsPhoneNumber, IsString, MaxLength } from 'class-validator';
-import { Major } from 'apps/hello-gsm-back/src/types';
+import { Major } from 'apps/client/src/types';
 
 export class ApplicationDetailSuperDto {
   @MaxLength(50)

@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Patch } from '@nestjs/common';
-import { User } from 'apps/hello-gsm-back/src/auth/decorators/user.decorator';
+import { User } from 'apps/client/src/auth/decorators/user.decorator';
 import { UserDto } from './dto/user.dto';
 import { UserService } from './user.service';
 

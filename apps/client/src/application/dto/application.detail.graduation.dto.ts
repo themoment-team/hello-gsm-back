@@ -1,5 +1,5 @@
 import { IsEnum, IsPhoneNumber, IsString, MaxLength } from 'class-validator';
-import { EducationStatus } from 'apps/hello-gsm-back/src/types';
+import { EducationStatus } from 'apps/client/src/types';
 import { ApplicationDetailSuperDto } from './application.detail.super';
 
 export class ApplicationDetailGraduationDto extends ApplicationDetailSuperDto {

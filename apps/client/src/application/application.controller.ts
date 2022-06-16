@@ -11,7 +11,7 @@ import {
 import { ApplicationService } from './application.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FirstSubmissionDto, SecondsSubmissionDto } from './dto';
-import { User } from 'apps/hello-gsm-back/src/auth/decorators/user.decorator';
+import { User } from 'apps/client/src/auth/decorators/user.decorator';
 
 @Controller('application')
 export class ApplicationController {

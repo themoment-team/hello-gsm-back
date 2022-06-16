@@ -2,28 +2,29 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { PrismaService } from 'apps/hello-gsm-back/src/prisma/prisma.service';
 import { Request } from 'express';
-import { ENV } from 'apps/hello-gsm-back/src/lib/env';
-import { accessToken } from 'apps/hello-gsm-back/src/utils/token.name';
+import { PrismaService } from 'apps/client/src/prisma/prisma.service';
+import { ENV } from 'apps/client/src/lib/env';
+import { refreshToken } from 'apps/client/src/utils/token.name';
+import * as bcrypt from 'bcrypt';
 
 type JwtPayload = {
   user_idx: number;
 };
 
 @Injectable()
-export class AtStrategy extends PassportStrategy(Strategy, 'jwt') {
+export class RtStrategy extends PassportStrategy(Strategy, 'jwt-rt') {
   constructor(private prisma: PrismaService) {
     const configService = new ConfigService();
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (req: Request) => {
-          const cookie = req.cookies[accessToken];
+          const cookie = req.cookies[refreshToken];
           if (!cookie) return null;
           return cookie;
         },
       ]),
-      secretOrKey: configService.get(ENV.JWT_ACCESS_SECRET),
+      secretOrKey: configService.get(ENV.JWT_REFRESH_SECRET),
       passReqToCallback: true,
     });
   }
@@ -31,20 +32,19 @@ export class AtStrategy extends PassportStrategy(Strategy, 'jwt') {
   async validate(req: Request, { user_idx }: JwtPayload) {
     if (!user_idx) return null;
 
-    const at = req.cookies[accessToken];
-    const user = await this.prisma.user.findFirst({
+    const user = await this.prisma.user.findFirst({ where: { user_idx } });
+
+    const refresh = await this.prisma.refresh_token.findFirst({
       where: { user_idx },
     });
 
-    if (!user) return null;
+    if (
+      !user ||
+      !refresh.refresh_token ||
+      !bcrypt.compareSync(req.cookies[refreshToken], refresh.refresh_token)
+    )
+      return null;
 
-    const token = await this.prisma.access_token_blacklist.findFirst({
-      where: {
-        access_token: at,
-      },
-    });
-
-    if (token) return null;
-    return { user_idx, accessToken: at };
+    return { user_idx };
   }
 }
