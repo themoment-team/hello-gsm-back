@@ -1,6 +1,6 @@
 import { Optional } from '@nestjs/common';
 import { IsEnum, IsPhoneNumber, IsString, MaxLength } from 'class-validator';
-import { EducationStatus } from 'src/types';
+import { EducationStatus } from 'apps/hello-gsm-back/src/types';
 import { ApplicationDetailSuperDto } from './application.detail.super';
 
 export class ApplicationDetailDto extends ApplicationDetailSuperDto {

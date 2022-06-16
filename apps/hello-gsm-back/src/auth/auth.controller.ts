@@ -17,14 +17,18 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Request, Response } from 'express';
-import { ENV } from 'src/lib/env';
-import { AtUser } from 'src/types';
+import { ENV } from 'apps/hello-gsm-back/src/lib/env';
+import { AtUser } from 'apps/hello-gsm-back/src/types';
 import { AuthService } from './auth.service';
 import { Public } from './decorators/public.decorator';
 import { User } from './decorators/user.decorator';
 import { RegisterDto } from './dto/register.dto';
 import { RtGuard } from './guards/rt.guard';
-import { accessToken, refreshToken, registerToken } from 'src/utils/token.name';
+import {
+  accessToken,
+  refreshToken,
+  registerToken,
+} from 'apps/hello-gsm-back/src/utils/token.name';
 
 @ApiTags('Auth')
 @Controller('auth')

@@ -2,9 +2,9 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'apps/hello-gsm-back/src/prisma/prisma.service';
 import { Request } from 'express';
-import { ENV } from 'src/lib/env';
+import { ENV } from 'apps/hello-gsm-back/src/lib/env';
 
 type JwtPayload = {
   user_idx: number;

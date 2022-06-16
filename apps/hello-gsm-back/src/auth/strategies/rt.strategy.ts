@@ -3,9 +3,9 @@ import { Strategy, ExtractJwt } from 'passport-jwt';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { ENV } from 'src/lib/env';
-import { refreshToken } from 'src/utils/token.name';
+import { PrismaService } from 'apps/hello-gsm-back/src/prisma/prisma.service';
+import { ENV } from 'apps/hello-gsm-back/src/lib/env';
+import { refreshToken } from 'apps/hello-gsm-back/src/utils/token.name';
 import * as bcrypt from 'bcrypt';
 
 type JwtPayload = {

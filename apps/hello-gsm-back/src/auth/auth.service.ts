@@ -1,10 +1,10 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'apps/hello-gsm-back/src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
-import { ENV } from 'src/lib/env';
-import { AtUser } from 'src/types';
+import { ENV } from 'apps/hello-gsm-back/src/lib/env';
+import { AtUser } from 'apps/hello-gsm-back/src/types';
 import KakaoUserType from './types/kakao.user.type';
 import { RegisterDto } from './dto/register.dto';
 

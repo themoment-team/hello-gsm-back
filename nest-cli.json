@@ -1,5 +1,31 @@
 {
   "$schema": "https://json.schemastore.org/nest-cli",
   "collection": "@nestjs/schematics",
-  "sourceRoot": "src"
+  "sourceRoot": "apps/hello-gsm-back/src",
+  "monorepo": true,
+  "root": "apps/hello-gsm-back",
+  "compilerOptions": {
+    "webpack": true,
+    "tsConfigPath": "apps/hello-gsm-back/tsconfig.app.json"
+  },
+  "projects": {
+    "hello-gsm-back": {
+      "type": "application",
+      "root": "apps/hello-gsm-back",
+      "entryFile": "main",
+      "sourceRoot": "apps/hello-gsm-back/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/hello-gsm-back/tsconfig.app.json"
+      }
+    },
+    "admin": {
+      "type": "application",
+      "root": "apps/admin",
+      "entryFile": "main",
+      "sourceRoot": "apps/admin/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/admin/tsconfig.app.json"
+      }
+    }
+  }
 }

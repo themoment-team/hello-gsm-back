@@ -1,5 +1,5 @@
 import { IsEnum, IsPhoneNumber, IsString, MaxLength } from 'class-validator';
-import { Screening } from 'src/types';
+import { Screening } from 'apps/hello-gsm-back/src/types';
 
 export class ApplicationSuperDto {
   @IsPhoneNumber('KR')
