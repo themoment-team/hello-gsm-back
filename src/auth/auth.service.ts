@@ -44,7 +44,7 @@ export class AuthService {
   }
 
   async register(user_idx: number, data: RegisterDto) {
-    if (data.cellphoneNumber.includes('+82'))
+    if (!/^0\d{2}\d{3,4}\d{4}/g.test(data.cellphoneNumber))
       throw new BadRequestException('잘못된 전화번호 입력 방식입니다');
     if (new Date(data.birth).toString() === 'Invalid Date')
       throw new BadRequestException('잘못된 날짜 형식입니다');

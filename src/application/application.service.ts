@@ -12,9 +12,14 @@ import {
   ApplicationDto,
   FirstSubmissionDto,
   SecondsSubmissionDto,
+  QualificationFirstDto,
+  ApplicationGraduationDto,
+  ApplicationDetailGraduationDto,
+  ApplicationDetailQualificationDto,
 } from './dto';
 import { v1 } from 'uuid';
 import * as AWS from 'aws-sdk';
+import { EducationStatus } from 'src/types';
 
 @Injectable()
 export class ApplicationService {
@@ -28,6 +33,10 @@ export class ApplicationService {
     secretAccessKey: this.configService.get<string>(ENV.AWS_SECRET_ACCESS_KEY),
   });
 
+  /**
+   * 유저 원서 정보 모두 가져오기
+   * @param {number} user_idx
+   */
   async getAllUserInfo(user_idx: number) {
     const user = await this.prisma.user.findFirst({
       where: { user_idx: user_idx },
@@ -38,14 +47,26 @@ export class ApplicationService {
       },
     });
 
-    return JSON.stringify(user);
+    return JSON.parse(
+      JSON.stringify(user, (_, value) =>
+        typeof value === 'bigint' ? Number(value) : value,
+      ),
+    );
   }
 
+  /**
+   * 1차 서류 제출
+   * @param {number} user_idx
+   * @param {FirstSubmissionDto} data
+   * @param {Express.Multer.File} photo
+   * @returns {Promise<string>} 1차 서류 저장에 성공했습니다
+   * @throws {BadRequestException} BadRequestException
+   */
   async firstSubmission(
     user_idx: number,
     data: FirstSubmissionDto,
     photo: Express.Multer.File,
-  ) {
+  ): Promise<string> {
     const user = await this.prisma.user.findFirst({
       where: { user_idx },
       include: { application: true },
@@ -54,17 +75,20 @@ export class ApplicationService {
     if (user.application)
       throw new BadRequestException('이미 작성된 원서가 있습니다.');
 
-    this.checkMajor(data);
+    this.checkMajor(data.applicationDetail);
 
     const idPhotoUrl = await this.s3Upload(photo);
 
     await this.prisma.application.create({
       data: {
-        ...this.checkApplication(data),
+        ...this.checkApplication(
+          data.application,
+          data.applicationDetail.educationStatus,
+        ),
         user: { connect: { user_idx } },
         application_details: {
           create: {
-            ...this.checkApplicationDetail(data, idPhotoUrl),
+            ...this.checkApplicationDetail(data.applicationDetail, idPhotoUrl),
           },
         },
       },
@@ -73,6 +97,12 @@ export class ApplicationService {
     return '1차 서류 저장에 성공했습니다';
   }
 
+  /**
+   * 이미지 업로드
+   * @param {Express.Multer.File} photo
+   * @returns {Promise<string>} 이미지 url
+   * @throws {BadRequestException} BadRequestException
+   */
   async s3Upload(photo: Express.Multer.File): Promise<string> {
     if (!photo || !photo.mimetype.includes('image'))
       throw new BadRequestException('Not Found photo');
@@ -100,7 +130,12 @@ export class ApplicationService {
     }
   }
 
-  async deleteApplication(user_idx: number) {
+  /**
+   * 원서 삭제
+   * @param {number} user_idx
+   * @returns {Promise<string>} 원서 제거에 성공했습니다
+   */
+  async deleteApplication(user_idx: number): Promise<string> {
     const user = await this.prisma.user.findFirst({
       where: { user_idx },
       include: { application: { include: { application_details: true } } },
@@ -122,6 +157,13 @@ export class ApplicationService {
     return '원서 제거에 성공했습니다';
   }
 
+  /**
+   * 2차 서류 제출
+   * @param {SecondsSubmissionDto} data
+   * @param {number} user_idx
+   * @returns {Promise<string>} 2차 서류 작성에 성공했습니다
+   * @throws {BadRequestException} BadRequestException
+   */
   async secondsSubmission(
     data: SecondsSubmissionDto,
     user_idx: number,
@@ -130,6 +172,8 @@ export class ApplicationService {
 
     if (user.application.application_score)
       throw new BadRequestException('이미 작성된 원서가 있습니다');
+
+    this.calcScore(data);
 
     await this.prisma.application_score.create({
       data: {
@@ -145,11 +189,19 @@ export class ApplicationService {
     return '2차 서류 작성에 성공했습니다';
   }
 
+  /**
+   * 1차 서류 제출 수정
+   * @param {number} user_idx
+   * @param {FirstSubmissionDto} data
+   * @param {Express.Multer.File} photo
+   * @returns {Promise<string>} 수정에 성공했습니다
+   * @throws {BadRequestException} BadRequestException
+   */
   async firstSubmissionPatch(
     user_idx: number,
     data: FirstSubmissionDto,
     photo: Express.Multer.File,
-  ) {
+  ): Promise<string> {
     const application = await this.prisma.application.findFirst({
       where: { user_idx },
       include: { application_details: true },
@@ -160,7 +212,7 @@ export class ApplicationService {
     if (application.isFinalSubmission)
       throw new BadRequestException('최종 제출된 원서는 수정할 수 없습니다');
 
-    this.checkMajor(data);
+    this.checkMajor(data.applicationDetail);
 
     this.deleteImg(application.application_details.idPhotoUrl);
 
@@ -171,10 +223,16 @@ export class ApplicationService {
       data: {
         application: {
           update: {
-            ...this.checkApplication(data),
+            ...this.checkApplication(
+              data.application,
+              data.applicationDetail.educationStatus,
+            ),
             application_details: {
               update: {
-                ...this.checkApplicationDetail(data, idPhotoUrl),
+                ...this.checkApplicationDetail(
+                  data.applicationDetail,
+                  idPhotoUrl,
+                ),
               },
             },
           },
@@ -185,6 +243,13 @@ export class ApplicationService {
     return '수정에 성공했습니다';
   }
 
+  /**
+   * 2차 서류 제출 수정
+   * @param {SecondsSubmissionDto} data
+   * @param {number} user_idx
+   * @returns {Promise<sting>} 저장에 성공했습니다
+   * @throws {BadRequestException} BadRequestException
+   */
   async secondsSubmissionPatch(
     data: SecondsSubmissionDto,
     user_idx: number,
@@ -193,6 +258,10 @@ export class ApplicationService {
 
     if (!user.application.application_score)
       throw new BadRequestException('작성된 원서가 없습니다');
+    if (user.application.isFinalSubmission)
+      throw new BadRequestException('최종 제출된 원서는 수정할 수 없습니다');
+
+    this.calcScore(data);
 
     await this.prisma.application_score.update({
       where: { applicationIdx: user.application.applicationIdx },
@@ -206,22 +275,48 @@ export class ApplicationService {
     return '저장에 성공했습니다';
   }
 
-  async finalSubmission(user_idx: number) {
-    const { isFinalSubmission } = await this.prisma.application.findFirst({
+  /**
+   * 서류 최종 제출
+   * @param {number} user_idx
+   * @returns {Promise<string>} 최종 제출에 성공했습니다
+   * @throws {BadRequestException} BadRequestException
+   */
+  async finalSubmission(user_idx: number): Promise<number> {
+    const user = await this.prisma.user.findFirst({
       where: { user_idx },
+      include: {
+        application: {
+          include: { application_score: true, application_details: true },
+        },
+      },
     });
 
-    if (isFinalSubmission)
+    if (
+      !user.application ||
+      !user.application.application_details ||
+      !user.application.application_score
+    )
+      throw new BadRequestException('서류가 완전히 작성되지 않았습니다');
+    if (user.application.isFinalSubmission)
       throw new BadRequestException('이미 최종 제출이 되어있습니다');
 
-    await this.prisma.application.update({
-      where: { user_idx },
-      data: { isFinalSubmission: true },
-    });
+    await this.prisma.$transaction([
+      this.prisma
+        .$executeRaw`CALL usp_set_registration_number(${user.application.applicationIdx})`,
+      this.prisma.application.update({
+        where: { user_idx },
+        data: { isFinalSubmission: true },
+      }),
+    ]);
 
-    return '최종 제출에 성공했습니다';
+    return user.application.applicationIdx;
   }
 
+  /**
+   * 증명사진 삭제
+   * @param {string} imgUrl
+   * @throws {ServiceUnavailableException} ServiceUnavailableException
+   */
   private async deleteImg(imgUrl: string) {
     try {
       await this.s3
@@ -235,7 +330,12 @@ export class ApplicationService {
     }
   }
 
-  private checkMajor(data: FirstSubmissionDto) {
+  /**
+   * 전공 겹침 체크
+   * @param {ApplicationDetailDto} data
+   * @throws {BadRequestException} BadRequestException
+   */
+  private checkMajor(data: ApplicationDetailDto) {
     if (
       data.firstWantedMajor === data.secondWantedMajor ||
       data.firstWantedMajor === data.thirdWantedMajor ||
@@ -246,22 +346,30 @@ export class ApplicationService {
       );
   }
 
-  private checkApplication(data: FirstSubmissionDto): ApplicationDto {
-    if (data.educationStatus === '검정고시') {
-      return {
-        screening: data.screening,
-        teacherCellphoneNumber: 'null',
-        schoolName: 'null',
+  /**
+   * 원서 검사 및 필터링
+   * @param {ApplicationDto} data
+   * @param {EducationStatus}educationStatus
+   * @returns {ApplicationGraduationDto | QualificationFirstDto}
+   * @throws {BadRequestException} BadRequestException
+   */
+  private checkApplication(
+    data: ApplicationDto,
+    educationStatus: EducationStatus,
+  ): ApplicationGraduationDto | QualificationFirstDto {
+    if (educationStatus === EducationStatus.검정고시) {
+      const application: QualificationFirstDto = {
+        ...data,
         guardianCellphoneNumber: this.checkPhoneNumber(
           data.guardianCellphoneNumber,
         ),
+        schoolName: 'null',
+        teacherCellphoneNumber: 'null',
       };
+      return application;
     }
 
-    if (!data.teacherCellphoneNumber || !data.schoolName)
-      throw new BadRequestException('학교 정보를 입력해 주세요');
-
-    return {
+    const application: ApplicationGraduationDto = {
       screening: data.screening,
       schoolName: data.schoolName,
       teacherCellphoneNumber: this.checkPhoneNumber(
@@ -271,64 +379,82 @@ export class ApplicationService {
         data.guardianCellphoneNumber,
       ),
     };
+
+    return application;
   }
 
+  /**
+   * applicationDetail 테이블에 들어갈 데이터 필터링 및 검사
+   * @param {ApplicationDetailDto} data
+   * @param {string} idPhotoUrl
+   * @returns {ApplicationDetailGraduationDto | ApplicationDetailQualificationDto}
+   */
   private checkApplicationDetail(
-    data: FirstSubmissionDto,
+    data: ApplicationDetailDto,
     idPhotoUrl: string,
-  ): ApplicationDetailDto {
-    if (data.educationStatus === '검정고시')
-      return {
+  ): ApplicationDetailGraduationDto | ApplicationDetailQualificationDto {
+    if (data.educationStatus === EducationStatus.검정고시) {
+      const application: ApplicationDetailQualificationDto = {
+        ...data,
         idPhotoUrl,
-        address: data.address,
-        guardianName: data.guardianName,
-        guardianRelation: data.guardianRelation,
         teacherName: 'null',
-        educationStatus: data.educationStatus,
-        graduationYear: data.graduationYear,
-        graduationMonth: data.graduationMonth,
-        firstWantedMajor: data.firstWantedMajor,
-        secondWantedMajor: data.secondWantedMajor,
-        thirdWantedMajor: data.thirdWantedMajor,
-        telephoneNumber: this.checkPhoneNumber(data.telephoneNumber) || 'null',
-        addressDetails: data.addressDetails || 'null',
-        schoolTelephoneNumber: 'null',
         schoolLocation: 'null',
+        schoolTelephoneNumber: 'null',
+        educationStatus: EducationStatus.검정고시,
       };
+      return application;
+    }
 
-    if (
-      !data.teacherName ||
-      !data.schoolTelephoneNumber ||
-      !data.schoolLocation
-    )
-      throw new BadRequestException('학교 정보를 입력해 주세요');
-
-    return {
+    const application: ApplicationDetailGraduationDto = {
+      ...data,
       idPhotoUrl,
-      address: data.address,
-      guardianName: data.guardianName,
-      guardianRelation: data.guardianRelation,
-      teacherName: 'null',
-      educationStatus: data.educationStatus,
-      graduationYear: data.graduationYear,
-      graduationMonth: data.graduationMonth,
-      firstWantedMajor: data.firstWantedMajor,
-      secondWantedMajor: data.secondWantedMajor,
-      thirdWantedMajor: data.thirdWantedMajor,
-      telephoneNumber: this.checkPhoneNumber(data.telephoneNumber) || 'null',
-      addressDetails: data.addressDetails || 'null',
-      schoolTelephoneNumber:
-        this.checkPhoneNumber(data.schoolTelephoneNumber) || 'null',
-      schoolLocation: data.schoolLocation,
+      telephoneNumber: this.checkPhoneNumber(data.telephoneNumber),
+      schoolTelephoneNumber: this.checkPhoneNumber(data.schoolTelephoneNumber),
+      educationStatus:
+        data.educationStatus === EducationStatus.졸업
+          ? EducationStatus.졸업
+          : EducationStatus.졸업예정,
     };
+
+    return application;
   }
 
-  private checkPhoneNumber(cellphoneNumber: string) {
-    if (cellphoneNumber.includes('+82'))
+  /**
+   * 성적 계산 체크
+   * @param { SecondsSubmissionDto } data
+   * @throws { BadRequestException } BadRequestException
+   */
+  private calcScore(data: SecondsSubmissionDto) {
+    const total = data.score2_2 + data.score2_1 + data.score3_1;
+    if (
+      total !== data.generalCurriculumScoreSubtotal ||
+      data.artSportsScore + data.generalCurriculumScoreSubtotal !==
+        data.curriculumScoreSubtotal ||
+      data.nonCurriculumScoreSubtotal !==
+        data.attendanceScore + data.volunteerScore ||
+      data.curriculumScoreSubtotal + data.nonCurriculumScoreSubtotal !==
+        data.scoreTotal
+    )
+      throw new BadRequestException('계산 결과가 올바르지 않습니다');
+  }
+
+  /**
+   * 전화번호 검사
+   * @param {string} cellphoneNumber
+   * @returns {string} 01012341234
+   * @throws {BadRequestException} BadRequestException
+   */
+  private checkPhoneNumber(cellphoneNumber: string): string {
+    if (!/^0\d{2}\d{3,4}\d{4}/g.test(cellphoneNumber))
       throw new BadRequestException('잘못된 전화번호 입력 방식입니다');
-    return cellphoneNumber.replace(/[- /]/g, '');
+    return cellphoneNumber;
   }
 
+  /**
+   * Application 조회
+   * @param {number} user_idx
+   * @throws {BadRequestException} BadRequestException
+   */
   private async getUserApplication(user_idx: number) {
     const user = await this.prisma.user.findFirst({
       where: { user_idx },

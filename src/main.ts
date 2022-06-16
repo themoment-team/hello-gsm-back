@@ -11,7 +11,13 @@ async function bootstrap() {
   });
   app.useGlobalGuards(new AtGuard(new Reflector()));
   app.use(cookieParser());
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidUnknownValues: true,
+      forbidNonWhitelisted: true,
+    }),
+  );
 
   const config = new DocumentBuilder()
     .setTitle('Hello, GSM')

@@ -1,18 +1,6 @@
 import { IsNumber, IsOptional, Max, Min } from 'class-validator';
 
 export class SecondsSubmissionDto {
-  @Min(0)
-  @Max(108)
-  @IsNumber()
-  @IsOptional()
-  score1_1?: number;
-
-  @Min(0)
-  @Max(108)
-  @IsNumber()
-  @IsOptional()
-  score1_2?: number;
-
   @Min(10.8)
   @Max(54)
   @IsNumber()
