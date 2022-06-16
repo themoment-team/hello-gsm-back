@@ -47,7 +47,11 @@ export class ApplicationService {
       },
     });
 
-    return JSON.stringify(user);
+    return JSON.parse(
+      JSON.stringify(user, (_, value) =>
+        typeof value === 'bigint' ? Number(value) : value,
+      ),
+    );
   }
 
   /**
@@ -298,7 +302,7 @@ export class ApplicationService {
 
     await this.prisma.$transaction([
       this.prisma
-        .$executeRaw`CALL usp_set_registration_number([${user.application.applicationIdx}])`,
+        .$executeRaw`CALL usp_set_registration_number(${user.application.applicationIdx})`,
       this.prisma.application.update({
         where: { user_idx },
         data: { isFinalSubmission: true },
