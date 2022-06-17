@@ -25,8 +25,8 @@ model access_token_blacklist {
 model application {
   applicationIdx          Int                  @id @default(autoincrement()) @map("application_idx")
   registrationNumber      Int?                 @unique(map: "application_registration_number_uindex") @map("registration_number") @db.SmallInt
-  isFinalSubmission       Boolean?             @map("is_final_submission")
-  isDocumentReception     Boolean?             @map("is_document_reception")
+  isFinalSubmission       Boolean?             @default(false) @map("is_final_submission")
+  isDocumentReception     Boolean?             @default(false) @map("is_document_reception")
   firstResultScreening    String?              @map("first_result_screening") @db.VarChar(20)
   finalResultScreening    String?              @map("final_result_screening") @db.VarChar(20)
   guardianCellphoneNumber String               @map("guardian_cellphone_number") @db.VarChar(20)
@@ -40,24 +40,23 @@ model application {
 }
 
 model application_details {
-  applicationIdx        Int         @id @map("application_idx")
-  idPhotoUrl            String      @map("ID_photo_url") @db.VarChar(500)
-  address               String      @db.VarChar(50)
-  addressDetails        String      @map("address_details") @db.VarChar(50)
-  telephoneNumber       String      @map("telephone_number") @db.VarChar(20)
-  guardianName          String      @map("guardian_name") @db.VarChar(20)
-  guardianRelation      String      @map("guardian_relation") @db.VarChar(20)
-  teacherName           String      @map("teacher_name") @db.VarChar(20)
-  schoolLocation        String      @map("school_location") @db.VarChar(50)
-  educationStatus       String      @map("education_status") @db.VarChar(20)
-  graduationYear        String      @map("graduation_year") @db.VarChar(20)
-  graduationMonth       String      @map("graduation_month") @db.VarChar(20)
-  schoolTelephoneNumber String      @map("school_telephone_number") @db.VarChar(20)
-  firstWantedMajor      String      @map("first_wanted_major") @db.VarChar(20)
-  secondWantedMajor     String      @map("second_wanted_major") @db.VarChar(20)
-  thirdWantedMajor      String      @map("third_wanted_major") @db.VarChar(20)
-  majorResult           String?     @map("major_result") @db.VarChar(20)
-  application           application @relation(fields: [applicationIdx], references: [applicationIdx], onDelete: Cascade, onUpdate: Restrict, map: "application_details_application_application_idx_fk")
+  applicationIdx    Int         @id @map("application_idx")
+  idPhotoUrl        String      @map("ID_photo_url") @db.VarChar(500)
+  address           String      @db.VarChar(50)
+  addressDetails    String      @map("address_details") @db.VarChar(50)
+  telephoneNumber   String      @map("telephone_number") @db.VarChar(20)
+  guardianName      String      @map("guardian_name") @db.VarChar(20)
+  guardianRelation  String      @map("guardian_relation") @db.VarChar(20)
+  teacherName       String      @map("teacher_name") @db.VarChar(20)
+  schoolLocation    String      @map("school_location") @db.VarChar(50)
+  educationStatus   String      @map("education_status") @db.VarChar(20)
+  graduationYear    String      @map("graduation_year") @db.VarChar(20)
+  graduationMonth   String      @map("graduation_month") @db.VarChar(20)
+  firstWantedMajor  String      @map("first_wanted_major") @db.VarChar(20)
+  secondWantedMajor String      @map("second_wanted_major") @db.VarChar(20)
+  thirdWantedMajor  String      @map("third_wanted_major") @db.VarChar(20)
+  majorResult       String?     @map("major_result") @db.VarChar(20)
+  application       application @relation(fields: [applicationIdx], references: [applicationIdx], onDelete: Cascade, onUpdate: Restrict, map: "application_details_application_application_idx_fk")
 }
 
 model refresh_token {
@@ -87,47 +86,4 @@ model application_score {
   scoreTotal                     Int         @map("score_total") @db.SmallInt
   personalityEvaluationScore     Int?        @map("personality_evaluation_score") @db.SmallInt
   application                    application @relation(fields: [applicationIdx], references: [applicationIdx], onDelete: Cascade, onUpdate: Restrict, map: "application_score_application_application_idx_fk")
-}
-
-/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
-model deleted_application {
-  user_idx                      BigInt?   @unique(map: "user_idx")
-  application_idx               Int?      @unique(map: "application_idx")
-  registration_number           Int?      @unique(map: "registration_number") @db.SmallInt
-  name                          String?   @db.VarChar(20)
-  gender                        String?   @db.VarChar(20)
-  birth                         DateTime? @db.Date
-  ID_photo_url                  String?   @db.VarChar(500)
-  address                       String?   @db.VarChar(50)
-  address_details               String?   @db.VarChar(50)
-  telephone_number              String?   @db.VarChar(20)
-  cellphone_number              String?   @db.VarChar(20)
-  guardian_name                 String?   @db.VarChar(20)
-  guardian_relation             String?   @db.VarChar(20)
-  guardian_cellphone_number     String?   @db.VarChar(20)
-  teacher_name                  String?   @db.VarChar(20)
-  teacher_cellphone_number      String?   @db.VarChar(20)
-  school_name                   String?   @db.VarChar(50)
-  school_location               String?   @db.VarChar(50)
-  graduation_year               String?   @db.VarChar(20)
-  graduation_month              String?   @db.VarChar(20)
-  education_status              String?   @db.VarChar(20)
-  screening                     String?   @db.VarChar(20)
-  score_1_1                     Int?      @db.SmallInt
-  score_1_2                     Int?      @db.SmallInt
-  score_2_1                     Int?      @db.SmallInt
-  score_2_2                     Int?      @db.SmallInt
-  score_3_1                     Int?      @db.SmallInt
-  art_sports_score              Int?      @db.SmallInt
-  curriculum_score_subtotal     Int?      @db.SmallInt
-  attendance_score              Int?      @db.SmallInt
-  volunteer_score               Int?      @db.SmallInt
-  non_curriculum_score_subtotal Int?      @db.SmallInt
-  score_total                   Int?      @db.SmallInt
-  first_wanted_major            Int?      @db.SmallInt
-  second_wanted_major           Int?      @db.SmallInt
-  third_wanted_major            Int?      @db.SmallInt
-  del_datetime                  DateTime? @default(now()) @db.DateTime(0)
-
-  @@ignore
 }

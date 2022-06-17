@@ -14,7 +14,4 @@ export class ApplicationDetailQualificationDto extends ApplicationDetailSuperDto
 
   @IsEnum([EducationStatus.검정고시])
   educationStatus: EducationStatus.검정고시;
-
-  @IsEnum(['null'])
-  schoolTelephoneNumber: 'null';
 }
