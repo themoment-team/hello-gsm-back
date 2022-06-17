@@ -1,5 +1,5 @@
 import { IsEnum, IsPhoneNumber, IsString, MaxLength } from 'class-validator';
-import { Screening } from 'src/types';
+import { Screening } from 'apps/client/src/types';
 
 export class ApplicationSuperDto {
   @IsPhoneNumber('KR')
