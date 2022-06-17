@@ -1,4 +1,4 @@
-FROM node:16.14.2-alpine
+FROM node:16.15.1-alpine
 
 WORKDIR /app
 
@@ -8,11 +8,9 @@ RUN yarn
 
 RUN yarn global add prisma
 
-COPY ./src ./src
+COPY ./apps/client ./apps/client
 
-COPY ./test ./test
-
-COPY .env tsconfig.build.json tsconfig.json nest-cli.json ./
+COPY .env tsconfig.build.json tsconfig.json nest-cli.json task-definition.json ./
 
 COPY ./prisma ./prisma
 
