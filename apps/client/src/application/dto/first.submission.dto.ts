@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
 import { ValidateNested, IsObject, IsNotEmptyObject } from 'class-validator';
-import { ApplicationDetailDto } from './application.dtail.dto';
+import { ApplicationDetailDto } from './application.detail.dto';
 import { ApplicationDto } from './application.dto';
 
 export class FirstSubmissionDto {

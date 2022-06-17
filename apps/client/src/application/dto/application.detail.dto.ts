@@ -17,10 +17,4 @@ export class ApplicationDetailDto extends ApplicationDetailSuperDto {
   @IsString()
   @IsEnum(EducationStatus)
   educationStatus: EducationStatus;
-
-  @IsString()
-  @IsPhoneNumber('KR')
-  @MaxLength(20)
-  @Optional()
-  schoolTelephoneNumber: string;
 }

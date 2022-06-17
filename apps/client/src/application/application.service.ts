@@ -399,7 +399,6 @@ export class ApplicationService {
         idPhotoUrl,
         teacherName: 'null',
         schoolLocation: 'null',
-        schoolTelephoneNumber: 'null',
         educationStatus: EducationStatus.검정고시,
       };
       return application;
@@ -409,7 +408,6 @@ export class ApplicationService {
       ...data,
       idPhotoUrl,
       telephoneNumber: this.checkPhoneNumber(data.telephoneNumber),
-      schoolTelephoneNumber: this.checkPhoneNumber(data.schoolTelephoneNumber),
       educationStatus:
         data.educationStatus === EducationStatus.졸업
           ? EducationStatus.졸업
