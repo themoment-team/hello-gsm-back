@@ -103,7 +103,7 @@ export class ApplicationService {
    * @returns {Promise<string>} 이미지 url
    * @throws {BadRequestException} BadRequestException
    */
-  async s3Upload(photo: Express.Multer.File): Promise<string> {
+  async s3Upload(photo: Express.Multer.File): Promise<string | undefined> {
     if (!photo || !photo.mimetype.includes('image'))
       throw new BadRequestException('Not Found photo');
 
@@ -214,9 +214,11 @@ export class ApplicationService {
 
     this.checkMajor(data.applicationDetail);
 
-    this.deleteImg(application.application_details.idPhotoUrl);
-
-    const idPhotoUrl = await this.s3Upload(photo);
+    let idPhotoUrl: string;
+    if (photo) {
+      this.deleteImg(application.application_details.idPhotoUrl);
+      idPhotoUrl = await this.s3Upload(photo);
+    }
 
     await this.prisma.user.update({
       where: { user_idx },
