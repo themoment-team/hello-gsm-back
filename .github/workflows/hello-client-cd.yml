@@ -1,10 +1,9 @@
 on:
   push:
     branches: [ master ]
-    paths: ./apps/client/**
+    paths: /hello-gsm-back/apps/client/**
 
-name: Deploy to Amazon ECS
-
+name: Hello_CLIENT_CD
 jobs:
   deploy:
     name: Deploy
