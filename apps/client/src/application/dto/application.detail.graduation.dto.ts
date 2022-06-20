@@ -4,9 +4,6 @@ import { ApplicationDetailSuperDto } from './application.detail.super';
 
 export class ApplicationDetailGraduationDto extends ApplicationDetailSuperDto {
   @IsString()
-  idPhotoUrl: string;
-
-  @IsString()
   @MaxLength(20)
   teacherName: string;
 

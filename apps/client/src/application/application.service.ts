@@ -58,14 +58,12 @@ export class ApplicationService {
    * 1차 서류 제출
    * @param {number} user_idx
    * @param {FirstSubmissionDto} data
-   * @param {Express.Multer.File} photo
    * @returns {Promise<string>} 1차 서류 저장에 성공했습니다
    * @throws {BadRequestException} BadRequestException
    */
   async firstSubmission(
     user_idx: number,
     data: FirstSubmissionDto,
-    photo: Express.Multer.File,
   ): Promise<string> {
     const user = await this.prisma.user.findFirst({
       where: { user_idx },
@@ -77,8 +75,6 @@ export class ApplicationService {
 
     this.checkMajor(data.applicationDetail);
 
-    const idPhotoUrl = await this.s3Upload(photo);
-
     await this.prisma.application.create({
       data: {
         ...this.checkApplication(
@@ -88,7 +84,7 @@ export class ApplicationService {
         user: { connect: { user_idx } },
         application_details: {
           create: {
-            ...this.checkApplicationDetail(data.applicationDetail, idPhotoUrl),
+            ...this.checkApplicationDetail(data.applicationDetail),
           },
         },
       },
@@ -103,9 +99,20 @@ export class ApplicationService {
    * @returns {Promise<string>} 이미지 url
    * @throws {BadRequestException} BadRequestException
    */
-  async s3Upload(photo: Express.Multer.File): Promise<string | undefined> {
+  async s3Upload(
+    photo: Express.Multer.File,
+    user_idx: number,
+  ): Promise<string> {
     if (!photo || !photo.mimetype.includes('image'))
       throw new BadRequestException('Not Found photo');
+
+    const user = await this.prisma.user.findFirst({
+      where: { user_idx },
+      include: { application_image: true },
+    });
+
+    if (user.application_image)
+      await this.deleteImg(user.application_image.IdPhotoUrl);
 
     const params = {
       Bucket: this.configService.get(ENV.AWS_S3_BUCKET_NAME),
@@ -121,9 +128,21 @@ export class ApplicationService {
 
     try {
       const result = await this.s3.upload(params).promise();
-      Logger.log(`${result.Key} success upload`);
 
-      return result.Location;
+      if (!user.application_image)
+        await this.prisma.application_image.create({
+          data: {
+            user: { connect: { user_idx } },
+            IdPhotoUrl: result.Location,
+          },
+        });
+      else
+        await this.prisma.application_image.update({
+          where: { user_idx },
+          data: { IdPhotoUrl: result.Location },
+        });
+
+      return '이미지 업로드에 성공했습니다';
     } catch (e) {
       Logger.error(`${photo.originalname} failed upload`, e);
       throw new BadRequestException('업로드에 실패했습니다.');
@@ -178,8 +197,6 @@ export class ApplicationService {
     await this.prisma.application_score.create({
       data: {
         ...data,
-        score1_1: 0,
-        score1_2: 0,
         application: {
           connect: { applicationIdx: user.application.applicationIdx },
         },
@@ -193,14 +210,12 @@ export class ApplicationService {
    * 1차 서류 제출 수정
    * @param {number} user_idx
    * @param {FirstSubmissionDto} data
-   * @param {Express.Multer.File} photo
    * @returns {Promise<string>} 수정에 성공했습니다
    * @throws {BadRequestException} BadRequestException
    */
   async firstSubmissionPatch(
     user_idx: number,
     data: FirstSubmissionDto,
-    photo: Express.Multer.File,
   ): Promise<string> {
     const application = await this.prisma.application.findFirst({
       where: { user_idx },
@@ -214,12 +229,6 @@ export class ApplicationService {
 
     this.checkMajor(data.applicationDetail);
 
-    let idPhotoUrl: string;
-    if (photo) {
-      this.deleteImg(application.application_details.idPhotoUrl);
-      idPhotoUrl = await this.s3Upload(photo);
-    }
-
     await this.prisma.user.update({
       where: { user_idx },
       data: {
@@ -231,10 +240,7 @@ export class ApplicationService {
             ),
             application_details: {
               update: {
-                ...this.checkApplicationDetail(
-                  data.applicationDetail,
-                  idPhotoUrl,
-                ),
+                ...this.checkApplicationDetail(data.applicationDetail),
               },
             },
           },
@@ -269,8 +275,6 @@ export class ApplicationService {
       where: { applicationIdx: user.application.applicationIdx },
       data: {
         ...data,
-        score1_1: 0,
-        score1_2: 0,
       },
     });
 
@@ -388,17 +392,14 @@ export class ApplicationService {
   /**
    * applicationDetail 테이블에 들어갈 데이터 필터링 및 검사
    * @param {ApplicationDetailDto} data
-   * @param {string} idPhotoUrl
    * @returns {ApplicationDetailGraduationDto | ApplicationDetailQualificationDto}
    */
   private checkApplicationDetail(
     data: ApplicationDetailDto,
-    idPhotoUrl: string,
   ): ApplicationDetailGraduationDto | ApplicationDetailQualificationDto {
     if (data.educationStatus === EducationStatus.검정고시) {
       const application: ApplicationDetailQualificationDto = {
         ...data,
-        idPhotoUrl,
         teacherName: 'null',
         schoolLocation: 'null',
         educationStatus: EducationStatus.검정고시,
@@ -408,7 +409,6 @@ export class ApplicationService {
 
     const application: ApplicationDetailGraduationDto = {
       ...data,
-      idPhotoUrl,
       telephoneNumber: this.checkPhoneNumber(data.telephoneNumber),
       educationStatus:
         data.educationStatus === EducationStatus.졸업
