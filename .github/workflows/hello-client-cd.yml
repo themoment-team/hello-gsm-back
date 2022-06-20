@@ -1,7 +1,7 @@
 on:
   push:
     branches: [ master ]
-    paths: /hello-gsm-back/apps/client/**
+    paths: 'apps/client/**'
 
 name: Hello_CLIENT_CD
 jobs:
