@@ -1,5 +1,10 @@
-import { Optional } from '@nestjs/common';
-import { IsEnum, IsPhoneNumber, IsString, MaxLength } from 'class-validator';
+import {
+  IsEnum,
+  IsPhoneNumber,
+  IsString,
+  MaxLength,
+  IsOptional,
+} from 'class-validator';
 import { Major } from 'apps/client/src/types';
 
 export class ApplicationDetailSuperDto {
@@ -8,13 +13,13 @@ export class ApplicationDetailSuperDto {
   address: string;
 
   @MaxLength(50)
-  @Optional()
+  @IsOptional()
   @IsString()
   addressDetails: string;
 
   @IsPhoneNumber('KR')
   @IsString()
-  @Optional()
+  @IsOptional()
   @MaxLength(20)
   telephoneNumber: string;
 
