@@ -3,9 +3,6 @@ import { EducationStatus } from 'apps/client/src/types';
 import { ApplicationDetailSuperDto } from './application.detail.super';
 
 export class ApplicationDetailQualificationDto extends ApplicationDetailSuperDto {
-  @IsString()
-  idPhotoUrl: string;
-
   @IsEnum(['null'])
   teacherName: 'null';
 

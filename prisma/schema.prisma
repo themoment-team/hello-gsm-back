@@ -8,13 +8,14 @@ datasource db {
 }
 
 model user {
-  user_idx        BigInt       @id
-  userImg         String?      @map("user_img") @db.VarChar(500)
-  name            String?      @db.VarChar(20)
-  birth           DateTime?    @db.Date
-  gender          String?      @db.VarChar(20)
-  cellphoneNumber String?      @map("cellphone_number") @db.VarChar(20)
-  application     application?
+  user_idx          BigInt             @id
+  userImg           String?            @map("user_img") @db.VarChar(500)
+  name              String?            @db.VarChar(20)
+  birth             DateTime?          @db.Date
+  gender            String?            @db.VarChar(20)
+  cellphoneNumber   String?            @map("cellphone_number") @db.VarChar(20)
+  application       application?
+  application_image application_image?
 }
 
 model access_token_blacklist {
@@ -41,7 +42,6 @@ model application {
 
 model application_details {
   applicationIdx    Int         @id @map("application_idx")
-  idPhotoUrl        String      @map("ID_photo_url") @db.VarChar(500)
   address           String      @db.VarChar(50)
   addressDetails    String      @map("address_details") @db.VarChar(50)
   telephoneNumber   String      @map("telephone_number") @db.VarChar(20)
@@ -72,8 +72,6 @@ model admin {
 
 model application_score {
   applicationIdx                 Int         @id @map("application_idx")
-  score1_1                       Int         @map("score_1_1") @db.SmallInt
-  score1_2                       Int         @map("score_1_2") @db.SmallInt
   score2_1                       Int         @map("score_2_1") @db.SmallInt
   score2_2                       Int         @map("score_2_2") @db.SmallInt
   score3_1                       Int         @map("score_3_1") @db.SmallInt
@@ -86,4 +84,10 @@ model application_score {
   scoreTotal                     Int         @map("score_total") @db.SmallInt
   personalityEvaluationScore     Int?        @map("personality_evaluation_score") @db.SmallInt
   application                    application @relation(fields: [applicationIdx], references: [applicationIdx], onDelete: Cascade, onUpdate: Restrict, map: "application_score_application_application_idx_fk")
+}
+
+model application_image {
+  user_idx   BigInt @id
+  IdPhotoUrl String @unique(map: "application_image_ID_photo_url_uindex") @map("ID_photo_url") @db.VarChar(500)
+  user       user   @relation(fields: [user_idx], references: [user_idx], onDelete: Cascade, onUpdate: Restrict, map: "application_image_user_user_idx_fk")
 }

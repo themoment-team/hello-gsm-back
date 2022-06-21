@@ -28,13 +28,20 @@ export class ApplicationController {
   }
 
   @Post('/firstSubmission')
-  @UseInterceptors(FileInterceptor('photo'))
   async firstSubmission(
-    @UploadedFile() photo: Express.Multer.File,
     @User('user_idx') user_idx: number,
     @Body() data: FirstSubmissionDto,
   ) {
-    return this.applicationService.firstSubmission(user_idx, data, photo);
+    return this.applicationService.firstSubmission(user_idx, data);
+  }
+
+  @Post('/image')
+  @UseInterceptors(FileInterceptor('photo'))
+  async image(
+    @UploadedFile() photo: Express.Multer.File,
+    @User('user_idx') user_idx: number,
+  ) {
+    return this.applicationService.s3Upload(photo, user_idx);
   }
 
   @Post('/secondsSubmission')
@@ -48,11 +55,10 @@ export class ApplicationController {
   @Patch('/firstSubmission')
   @UseInterceptors(FileInterceptor('photo'))
   async firstSubmissionPatch(
-    @UploadedFile() photo: Express.Multer.File,
     @User('user_idx') user_idx: number,
     @Body() data: FirstSubmissionDto,
   ) {
-    return this.applicationService.firstSubmissionPatch(user_idx, data, photo);
+    return this.applicationService.firstSubmissionPatch(user_idx, data);
   }
 
   @Patch('/secondsSubmission')
