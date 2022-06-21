@@ -1,7 +1,6 @@
 on:
   push:
     branches: [ master ]
-    paths: ./apps/client/**
 
 name: Hello_CLIENT_CD
 jobs:
