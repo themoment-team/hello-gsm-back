@@ -38,7 +38,14 @@ jobs:
         IMAGE_TAG: latest
       run: |
         docker build -f ClientDockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+      
+    - name : push test
+      env:
+        ECR_REGISTRY: ${{secrets.AWS_ECR_REGISTRY}}
+        ECR_REPOSITORY: hello-server
+        IMAGE_TAG: latest
+      run: | 
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
         
     - name: Fill in the new image ID in the Amazon ECS task definition
