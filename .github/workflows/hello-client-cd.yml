@@ -37,14 +37,6 @@ jobs:
         IMAGE_TAG: latest
       run: |
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f ClientDockerfile .
-      
-    - name : push test
-      id : push-ecr
-      env:
-        ECR_REGISTRY: ${{secrets.AWS_ECR_REGISTRY}}
-        ECR_REPOSITORY: hello-server
-        IMAGE_TAG: latest
-      run: | 
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
         
