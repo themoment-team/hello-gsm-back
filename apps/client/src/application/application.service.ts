@@ -41,6 +41,8 @@ export class ApplicationService {
     const user = await this.prisma.user.findFirst({
       where: { user_idx: user_idx },
       include: {
+        application_image: { select: { IdPhotoUrl: true } },
+
         application: {
           include: { application_score: true, application_details: true },
         },
