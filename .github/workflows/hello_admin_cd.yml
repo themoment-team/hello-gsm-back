@@ -1,7 +1,7 @@
 on:
   push:
     branches: [ master ]
-    paths: ./apps/admin/**
+    paths: 'apps/admin/**'
 
 jobs:
   deploy:
