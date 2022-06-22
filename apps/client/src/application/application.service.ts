@@ -402,6 +402,8 @@ export class ApplicationService {
     if (data.educationStatus === EducationStatus.검정고시) {
       const application: ApplicationDetailQualificationDto = {
         ...data,
+        addressDetails: data.addressDetails || 'null',
+        telephoneNumber: this.checkPhoneNumber(data.telephoneNumber),
         teacherName: 'null',
         schoolLocation: 'null',
         educationStatus: EducationStatus.검정고시,
@@ -411,6 +413,7 @@ export class ApplicationService {
 
     const application: ApplicationDetailGraduationDto = {
       ...data,
+      addressDetails: data.addressDetails || 'null',
       telephoneNumber: this.checkPhoneNumber(data.telephoneNumber),
       educationStatus:
         data.educationStatus === EducationStatus.졸업
@@ -447,6 +450,7 @@ export class ApplicationService {
    * @throws {BadRequestException} BadRequestException
    */
   private checkPhoneNumber(cellphoneNumber: string): string {
+    if (!cellphoneNumber) return 'null';
     if (!/^0\d{2}\d{3,4}\d{4}/g.test(cellphoneNumber))
       throw new BadRequestException('잘못된 전화번호 입력 방식입니다');
     return cellphoneNumber;

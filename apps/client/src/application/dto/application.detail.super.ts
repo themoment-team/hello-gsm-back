@@ -4,6 +4,7 @@ import {
   IsString,
   MaxLength,
   IsOptional,
+  IsNotEmpty,
 } from 'class-validator';
 import { Major } from 'apps/client/src/types';
 
@@ -14,14 +15,16 @@ export class ApplicationDetailSuperDto {
 
   @MaxLength(50)
   @IsOptional()
+  @IsNotEmpty()
   @IsString()
-  addressDetails: string;
+  addressDetails: string | 'null';
 
   @IsPhoneNumber('KR')
   @IsString()
   @IsOptional()
+  @IsNotEmpty()
   @MaxLength(20)
-  telephoneNumber: string;
+  telephoneNumber: string | 'null';
 
   @IsString()
   @MaxLength(20)

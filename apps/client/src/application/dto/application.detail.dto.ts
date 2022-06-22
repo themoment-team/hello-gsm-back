@@ -1,5 +1,5 @@
 import { Optional } from '@nestjs/common';
-import { IsEnum, IsPhoneNumber, IsString, MaxLength } from 'class-validator';
+import { IsEnum, IsString, MaxLength } from 'class-validator';
 import { EducationStatus } from 'apps/client/src/types';
 import { ApplicationDetailSuperDto } from './application.detail.super';
 
