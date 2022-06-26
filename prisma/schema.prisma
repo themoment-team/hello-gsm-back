@@ -88,6 +88,6 @@ model application_score {
 
 model application_image {
   user_idx   BigInt @id
-  IdPhotoUrl String @unique(map: "application_image_ID_photo_url_uindex") @map("ID_photo_url") @db.VarChar(500)
+  idPhotoUrl String @unique(map: "application_image_ID_photo_url_uindex") @map("ID_photo_url") @db.VarChar(500)
   user       user   @relation(fields: [user_idx], references: [user_idx], onDelete: Cascade, onUpdate: Restrict, map: "application_image_user_user_idx_fk")
 }
