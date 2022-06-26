@@ -41,7 +41,7 @@ export class ApplicationService {
     const user = await this.prisma.user.findFirst({
       where: { user_idx: user_idx },
       include: {
-        application_image: { select: { IdPhotoUrl: true } },
+        application_image: { select: { idPhotoUrl: true } },
 
         application: {
           include: { application_score: true, application_details: true },
@@ -114,7 +114,7 @@ export class ApplicationService {
     });
 
     if (user.application_image)
-      await this.deleteImg(user.application_image.IdPhotoUrl);
+      await this.deleteImg(user.application_image.idPhotoUrl);
 
     const params = {
       Bucket: this.configService.get(ENV.AWS_S3_BUCKET_NAME),
@@ -135,13 +135,13 @@ export class ApplicationService {
         await this.prisma.application_image.create({
           data: {
             user: { connect: { user_idx } },
-            IdPhotoUrl: result.Location,
+            idPhotoUrl: result.Location,
           },
         });
       else
         await this.prisma.application_image.update({
           where: { user_idx },
-          data: { IdPhotoUrl: result.Location },
+          data: { idPhotoUrl: result.Location },
         });
 
       return '이미지 업로드에 성공했습니다';
