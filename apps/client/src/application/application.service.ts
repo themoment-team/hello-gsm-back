@@ -296,13 +296,15 @@ export class ApplicationService {
         application: {
           include: { application_score: true, application_details: true },
         },
+        application_image: true,
       },
     });
 
     if (
       !user.application ||
       !user.application.application_details ||
-      !user.application.application_score
+      !user.application.application_score ||
+      !user.application_image
     )
       throw new BadRequestException('서류가 완전히 작성되지 않았습니다');
     if (user.application.isFinalSubmission)
