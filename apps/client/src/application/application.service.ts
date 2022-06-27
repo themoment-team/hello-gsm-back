@@ -50,9 +50,11 @@ export class ApplicationService {
     });
 
     return JSON.parse(
-      JSON.stringify(user, (_, value) =>
-        typeof value === 'bigint' ? Number(value) : value,
-      ),
+      JSON.stringify(user, (_, value) => {
+        if (typeof value === 'bigint') return Number(value);
+        else if (value === 'null') return null;
+        return value;
+      }),
     );
   }
 
