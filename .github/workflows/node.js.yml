@@ -29,3 +29,19 @@ jobs:
       - run: yarn install --frozen-lockfile
 
       - run: yarn build
+
+      - name: Hello, GSM Client Server CI Success!
+        uses: sarisia/actions-status-discord@v1
+        if: ${{ success() }}
+        with:
+          webhook: ${{ secrets.CI_DISCORD_WEBHOOK }}
+          title: Hello-GSM Server CI Success
+          color: 04CF5C
+
+      - name: Hello, GSM Client Server CI Failed
+        uses: sarisia/actions-status-discord@v1
+        if: ${{ failure() }}
+        with:
+          webhook: ${{ secrets.CI_DISCORD_WEBHOOK }}
+          title: Hello-GSM Server CI Failed
+          color: DC3545
