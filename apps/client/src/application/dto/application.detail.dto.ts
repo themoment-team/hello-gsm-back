@@ -1,17 +1,16 @@
-import { Optional } from '@nestjs/common';
-import { IsEnum, IsString, MaxLength } from 'class-validator';
+import { IsEnum, IsOptional, IsString, MaxLength } from 'class-validator';
 import { EducationStatus } from 'apps/client/src/types';
 import { ApplicationDetailSuperDto } from './application.detail.super';
 
 export class ApplicationDetailDto extends ApplicationDetailSuperDto {
   @IsString()
   @MaxLength(20)
-  @Optional()
+  @IsOptional()
   teacherName: string;
 
   @IsString()
   @MaxLength(50)
-  @Optional()
+  @IsOptional()
   schoolLocation: string;
 
   @IsString()
