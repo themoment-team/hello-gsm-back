@@ -106,6 +106,8 @@ export class ApplicationService {
   async image(photo: Express.Multer.File, user_idx: number): Promise<string> {
     if (!photo || !photo.mimetype.includes('image'))
       throw new BadRequestException('Not Found photo');
+    if (photo.size > 500000)
+      throw new BadRequestException('파일 크기는 최대 500KB입니다');
 
     const user = await this.prisma.user.findFirst({
       where: { user_idx },
