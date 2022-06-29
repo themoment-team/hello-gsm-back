@@ -41,7 +41,7 @@ export class ApplicationController {
     @UploadedFile() photo: Express.Multer.File,
     @User('user_idx') user_idx: number,
   ) {
-    return this.applicationService.s3Upload(photo, user_idx);
+    return this.applicationService.image(photo, user_idx);
   }
 
   @Post('/secondsSubmission')
