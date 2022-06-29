@@ -103,12 +103,11 @@ export class ApplicationService {
    * @returns {Promise<string>} 이미지 url
    * @throws {BadRequestException} BadRequestException
    */
-  async s3Upload(
-    photo: Express.Multer.File,
-    user_idx: number,
-  ): Promise<string> {
+  async image(photo: Express.Multer.File, user_idx: number): Promise<string> {
     if (!photo || !photo.mimetype.includes('image'))
       throw new BadRequestException('Not Found photo');
+    if (photo.size > 500000)
+      throw new BadRequestException('파일 크기는 최대 500KB입니다');
 
     const user = await this.prisma.user.findFirst({
       where: { user_idx },
@@ -130,6 +129,18 @@ export class ApplicationService {
       },
     };
 
+    let cnt = 0;
+    this.s3Upload(params, user_idx, user, cnt);
+
+    return '이미지 업로드에 성공했습니다';
+  }
+
+  async s3Upload(
+    params: AWS.S3.PutObjectRequest,
+    user_idx: number,
+    user: any,
+    cnt: number,
+  ) {
     try {
       const result = await this.s3.upload(params).promise();
 
@@ -145,11 +156,10 @@ export class ApplicationService {
           where: { user_idx },
           data: { idPhotoUrl: result.Location },
         });
-
-      return '이미지 업로드에 성공했습니다';
     } catch (e) {
-      Logger.error(`${photo.originalname} failed upload`, e);
-      throw new BadRequestException('업로드에 실패했습니다.');
+      if (cnt > 2) return;
+      cnt++;
+      this.s3Upload(params, user_idx, user, cnt);
     }
   }
 
