@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   Injectable,
-  Logger,
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -115,7 +114,7 @@ export class ApplicationService {
     });
 
     if (user.application_image)
-      await this.deleteImg(user.application_image.idPhotoUrl);
+      this.deleteImg(user.application_image.idPhotoUrl, 0);
 
     const params = {
       Bucket: this.configService.get(ENV.AWS_S3_BUCKET_NAME),
@@ -129,8 +128,7 @@ export class ApplicationService {
       },
     };
 
-    let cnt = 0;
-    this.s3Upload(params, user_idx, user, cnt);
+    this.s3Upload(params, user_idx, user, 0);
 
     return '이미지 업로드에 성공했습니다';
   }
@@ -158,8 +156,7 @@ export class ApplicationService {
         });
     } catch (e) {
       if (cnt > 2) return;
-      cnt++;
-      this.s3Upload(params, user_idx, user, cnt);
+      this.s3Upload(params, user_idx, user, cnt++);
     }
   }
 
@@ -171,13 +168,19 @@ export class ApplicationService {
   async deleteApplication(user_idx: number): Promise<string> {
     const user = await this.prisma.user.findFirst({
       where: { user_idx },
-      include: { application: { include: { application_details: true } } },
+      include: {
+        application: { include: { application_details: true } },
+        application_image: true,
+      },
     });
 
     if (!user.application)
       throw new BadRequestException('저장된 원서가 없습니다');
     if (user.application.isFinalSubmission)
       throw new BadRequestException('최종 제출된 서류는 삭제할 수 없습니다');
+
+    if (user.application_image)
+      this.deleteImg(user.application_image.idPhotoUrl, 0);
 
     await this.prisma.application.delete({
       where: { applicationIdx: user.application.applicationIdx },
@@ -339,7 +342,7 @@ export class ApplicationService {
    * @param {string} imgUrl
    * @throws {ServiceUnavailableException} ServiceUnavailableException
    */
-  private async deleteImg(imgUrl: string) {
+  private async deleteImg(imgUrl: string, cnt: number) {
     try {
       await this.s3
         .deleteObject({
@@ -348,7 +351,8 @@ export class ApplicationService {
         })
         .promise();
     } catch (e) {
-      throw new ServiceUnavailableException('원서 수정을 할 수 없습니다.');
+      if (cnt > 2) return;
+      this.deleteImg(imgUrl, cnt++);
     }
   }
 
