@@ -19,8 +19,8 @@ model user {
 }
 
 model access_token_blacklist {
-  access_token String   @id @db.VarChar(500)
-  expired_date DateTime @default(dbgenerated("(current_timestamp() + interval 5 minute)")) @db.Timestamp(0)
+  access_token String    @id @db.VarChar(500)
+  expired_date DateTime? @db.Timestamp(0)
 }
 
 model application {
@@ -72,17 +72,17 @@ model admin {
 
 model application_score {
   applicationIdx                 Int         @id @map("application_idx")
-  score2_1                       Int         @map("score_2_1") @db.SmallInt
-  score2_2                       Int         @map("score_2_2") @db.SmallInt
-  score3_1                       Int         @map("score_3_1") @db.SmallInt
-  generalCurriculumScoreSubtotal Int         @map("general_curriculum_score_subtotal") @db.SmallInt
-  artSportsScore                 Int         @map("art_sports_score") @db.SmallInt
-  curriculumScoreSubtotal        Int         @map("curriculum_score_subtotal") @db.SmallInt
-  attendanceScore                Int         @map("attendance_score") @db.SmallInt
-  volunteerScore                 Int         @map("volunteer_score") @db.SmallInt
-  nonCurriculumScoreSubtotal     Int         @map("non_curriculum_score_subtotal") @db.SmallInt
-  scoreTotal                     Int         @map("score_total") @db.SmallInt
-  personalityEvaluationScore     Int?        @map("personality_evaluation_score") @db.SmallInt
+  score2_1                       Decimal     @map("score_2_1") @db.Decimal(6, 3)
+  score2_2                       Decimal     @map("score_2_2") @db.Decimal(6, 3)
+  score3_1                       Decimal     @map("score_3_1") @db.Decimal(6, 3)
+  generalCurriculumScoreSubtotal Decimal     @map("general_curriculum_score_subtotal") @db.Decimal(6, 3)
+  artSportsScore                 Decimal     @map("art_sports_score") @db.Decimal(6, 3)
+  curriculumScoreSubtotal        Decimal     @map("curriculum_score_subtotal") @db.Decimal(6, 3)
+  attendanceScore                Decimal     @map("attendance_score") @db.Decimal(3, 0)
+  volunteerScore                 Decimal     @map("volunteer_score") @db.Decimal(3, 0)
+  nonCurriculumScoreSubtotal     Decimal     @map("non_curriculum_score_subtotal") @db.Decimal(3, 0)
+  scoreTotal                     Decimal     @map("score_total") @db.Decimal(6, 3)
+  personalityEvaluationScore     Decimal?    @map("personality_evaluation_score") @db.Decimal(6, 3)
   application                    application @relation(fields: [applicationIdx], references: [applicationIdx], onDelete: Cascade, onUpdate: Restrict, map: "application_score_application_application_idx_fk")
 }
 
