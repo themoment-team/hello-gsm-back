@@ -35,9 +35,6 @@ jobs:
         ECR_REPOSITORY: hello-admin
         IMAGE_TAG: latest
       run: |
-        # Build a docker container and
-        # push it to ECR so that it can
-        # be deployed to ECS.
         docker build -t $ECR_REGISTRY:$IMAGE_TAG -f AdminDockerfile .
         docker push $ECR_REGISTRY:$IMAGE_TAG
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
@@ -46,14 +43,14 @@ jobs:
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
         task-definition: task-definition.json
-        container-name: hello-gsm-server-container
+        container-name: hello-gsm-admin-container	
         image: ${{ steps.build-image.outputs.image }}
 
     - name: Deploy Amazon ECS task definition
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
         task-definition: task-definition.json
-        service: hello-gsm-ecs-service
+        service: hello-gsm-admin-service
         cluster: hello-gsm
         wait-for-service-stability: true
         
