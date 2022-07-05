@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  ServiceUnavailableException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ENV } from 'apps/client/src/lib/env';
 import { PrismaService } from 'apps/client/src/prisma/prisma.service';
@@ -10,7 +6,7 @@ import {
   ApplicationDetailDto,
   ApplicationDto,
   FirstSubmissionDto,
-  SecondsSubmissionDto,
+  SecondSubmissionDto,
   QualificationFirstDto,
   ApplicationGraduationDto,
   ApplicationDetailGraduationDto,
@@ -195,13 +191,13 @@ export class ApplicationService {
 
   /**
    * 2차 서류 제출
-   * @param {SecondsSubmissionDto} data
+   * @param {SecondSubmissionDto} data
    * @param {number} user_idx
    * @returns {Promise<string>} 2차 서류 작성에 성공했습니다
    * @throws {BadRequestException} BadRequestException
    */
-  async secondsSubmission(
-    data: SecondsSubmissionDto,
+  async secondSubmission(
+    data: SecondSubmissionDto,
     user_idx: number,
   ): Promise<string> {
     const user = await this.getUserApplication(user_idx);
@@ -270,13 +266,13 @@ export class ApplicationService {
 
   /**
    * 2차 서류 제출 수정
-   * @param {SecondsSubmissionDto} data
+   * @param {SecondSubmissionDto} data
    * @param {number} user_idx
    * @returns {Promise<sting>} 저장에 성공했습니다
    * @throws {BadRequestException} BadRequestException
    */
-  async secondsSubmissionPatch(
-    data: SecondsSubmissionDto,
+  async secondSubmissionPatch(
+    data: SecondSubmissionDto,
     user_idx: number,
   ): Promise<string> {
     const user = await this.getUserApplication(user_idx);
@@ -444,10 +440,10 @@ export class ApplicationService {
 
   /**
    * 성적 계산 체크
-   * @param { SecondsSubmissionDto } data
+   * @param { SecondSubmissionDto } data
    * @throws { BadRequestException } BadRequestException
    */
-  private calcScore(data: SecondsSubmissionDto) {
+  private calcScore(data: SecondSubmissionDto) {
     const total = data.score2_2 + data.score2_1 + data.score3_1;
     if (
       total !== data.generalCurriculumScoreSubtotal ||
