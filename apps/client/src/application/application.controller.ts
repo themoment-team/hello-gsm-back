@@ -10,7 +10,10 @@ import {
 } from '@nestjs/common';
 import { ApplicationService } from './application.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { FirstSubmissionDto, SecondsSubmissionDto } from './dto';
+import {
+  FirstSubmissionDto,
+  SecondSubmissionDto as SecondSubmissionDto,
+} from './dto';
 import { User } from 'apps/client/src/auth/decorators/user.decorator';
 
 @Controller('application')
@@ -44,12 +47,12 @@ export class ApplicationController {
     return this.applicationService.image(photo, user_idx);
   }
 
-  @Post('/secondsSubmission')
-  async secondsSubmission(
-    @Body() data: SecondsSubmissionDto,
+  @Post('/secondSubmission')
+  async secondSubmission(
+    @Body() data: SecondSubmissionDto,
     @User('user_idx') user_idx: number,
   ) {
-    return this.applicationService.secondsSubmission(data, user_idx);
+    return this.applicationService.secondSubmission(data, user_idx);
   }
 
   @Patch('/firstSubmission')
@@ -63,10 +66,10 @@ export class ApplicationController {
 
   @Patch('/secondsSubmission')
   async secondsSubmissionPatch(
-    @Body() data: SecondsSubmissionDto,
+    @Body() data: SecondSubmissionDto,
     @User('user_idx') user_idx: number,
   ) {
-    return this.applicationService.secondsSubmissionPatch(data, user_idx);
+    return this.applicationService.secondSubmissionPatch(data, user_idx);
   }
 
   @Patch('/finalSubmission')
