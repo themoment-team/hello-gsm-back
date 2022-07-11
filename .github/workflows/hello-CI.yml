@@ -16,20 +16,26 @@ jobs:
     strategy:
       matrix:
         node-version: [16.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-      - uses: actions/checkout@v3
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+      - name: Checkout source code
+        uses: actions/checkout@v3  
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3 // 7
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
 
-      - run: yarn install --frozen-lockfile
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
 
-      - run: yarn build
+      - name: Test unit
+        run: yarn test 
 
+      - name: build
+        run: yarn build 
+        
+        
       - name: Hello, GSM Client Server CI Success!
         uses: sarisia/actions-status-discord@v1
         if: ${{ success() }}
