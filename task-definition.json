@@ -64,7 +64,7 @@
     "EC2",
     "FARGATE"
   ],
-  "taskDefinitionArn": "arn:aws:ecs:ap-northeast-2:030783040786:task-definition/hellogsm-task:2",
+  "taskDefinitionArn": "arn:aws:ecs:ap-northeast-2:030783040786:task-definition/hellogsm-task:20",
   "family": "hellogsm-task",
   "requiresAttributes": [
     {
@@ -120,7 +120,7 @@
     "cpuArchitecture": null
   },
   "cpu": "512",
-  "revision": 2,
+  "revision": 20,
   "status": "ACTIVE",
   "inferenceAccelerators": null,
   "proxyConfiguration": null,
