@@ -49,7 +49,7 @@ jobs:
     - name: Deploy Amazon ECS task definition
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
-        task-definition: task-definition.json
+        task-definition: admin-task-definition.json
         service: hello-gsm-admin-service
         cluster: hello-gsm
         wait-for-service-stability: true
