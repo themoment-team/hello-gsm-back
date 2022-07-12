@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'apps/admin/src/prisma/prisma.service';
-import { GetAllApplicationQuery } from './dto';
+import { GetAllApplicationQuery, ScoreDto } from './dto';
 
 @Injectable()
 export class ApplicationService {
@@ -39,5 +39,33 @@ export class ApplicationService {
         },
       },
     });
+  }
+
+  /*
+   * 2차 시험을 치른 후 점수를 입력하는 기능
+   * @param {ScoreDto} data
+   * @return {Promise<string>}
+   */
+  async score(data: ScoreDto): Promise<string> {
+    const application = await this.prisma.application.findFirst({
+      where: { registrationNumber: data.registrationNumber },
+    });
+
+    if (!application) throw new BadRequestException('유저를 찾을 수 없습니다');
+    if (new Date() >= new Date('20221109'))
+      throw new BadRequestException('수정할 수 있는 기간이 지났습니다');
+
+    await this.prisma.application.update({
+      where: { registrationNumber: data.registrationNumber },
+      data: {
+        application_score: {
+          update: {
+            personalityEvaluationScore: data.personalityEvaluationScore,
+          },
+        },
+      },
+    });
+
+    return '수정에 성공했습니다';
   }
 }
