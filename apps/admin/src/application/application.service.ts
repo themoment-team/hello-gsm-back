@@ -57,6 +57,8 @@ export class ApplicationService {
     });
 
     if (!application) throw new BadRequestException('유저를 찾을 수 없습니다');
+    if (!application.firstResultScreening)
+      throw new BadRequestException('1차에 합격하지 않았습니다');
     if (new Date() >= new Date('20221109'))
       throw new BadRequestException('수정할 수 있는 기간이 지났습니다');
 
