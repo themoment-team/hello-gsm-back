@@ -62,6 +62,11 @@ export class ApplicationService {
     if (new Date() >= new Date('20221021'))
       throw new BadRequestException('기능을 사용할 수 있는 기간이 지났습니다');
 
+    await this.prisma.application.update({
+      where: { registrationNumber },
+      data: { isDocumentReception: !application.isDocumentReception },
+    });
+
     return '수정에 성공했습니다';
   }
 }
