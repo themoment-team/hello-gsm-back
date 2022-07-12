@@ -1,6 +1,6 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Query } from '@nestjs/common';
 import { ApplicationService } from './application.service';
-import { GetAllApplicationQuery } from './dto';
+import { DocumentDto, GetAllApplicationQuery } from './dto';
 
 @Controller('application')
 export class ApplicationController {
@@ -9,5 +9,10 @@ export class ApplicationController {
   @Get('/')
   async GetAllApplication(@Query() query: GetAllApplicationQuery) {
     return this.applicationService.GetAllApplication(query);
+  }
+
+  @Patch('/document')
+  async document(@Body() data: DocumentDto) {
+    return this.applicationService.document(data);
   }
 }
