@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'apps/admin/src/prisma/prisma.service';
-import { GetAllApplicationQuery } from './dto';
+import { DocumentDto, GetAllApplicationQuery } from './dto';
 
 @Injectable()
 export class ApplicationService {
@@ -39,5 +39,18 @@ export class ApplicationService {
         },
       },
     });
+  }
+
+  async document({ registrationNumber }: DocumentDto) {
+    const application = await this.prisma.application.findFirst({
+      where: { registrationNumber },
+    });
+
+    if (!application) throw new BadRequestException('유저를 찾을 수 없습니다');
+    // TODO 1차 시험 보기 전까지만 기능을 사용할 수 있도록 해야함
+    if (new Date() >= new Date('20221021'))
+      throw new BadRequestException('기능을 사용할 수 있는 기간이 지났습니다');
+
+    return '수정에 성공했습니다';
   }
 }
