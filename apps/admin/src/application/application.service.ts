@@ -6,6 +6,10 @@ import { DocumentDto, GetAllApplicationQuery } from './dto';
 export class ApplicationService {
   constructor(private prisma: PrismaService) {}
 
+  /*
+   * 최종 제출을 한 지원자들만 검색합니다
+   * @param {GetAllApplicationQuery} query
+   */
   async GetAllApplication(query: GetAllApplicationQuery) {
     if (!parseInt(query.page))
       throw new BadRequestException('잘못된 입력입니다');
@@ -36,12 +40,19 @@ export class ApplicationService {
             { NOT: undefined },
             { user: { name: { contains: query.name } } },
           ],
+          isFinalSubmission: { equals: true },
         },
       },
     });
   }
 
-  async document({ registrationNumber }: DocumentDto) {
+  /*
+   * 지원자가 서류 제출을 완료하면 체크를 해줍니다
+   * @param {DocumentDto} data
+   * @throw {BadRequestException}
+   * @return {Promise<string>}
+   */
+  async document({ registrationNumber }: DocumentDto): Promise<string> {
     const application = await this.prisma.application.findFirst({
       where: { registrationNumber },
     });
