@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Patch, Query } from '@nestjs/common';
 import { ApplicationService } from './application.service';
-import { DocumentDto, GetAllApplicationQuery } from './dto';
+import { GetAllApplicationQuery, ScoreDto, DocumentDto } from './dto';
 
 @Controller('application')
 export class ApplicationController {
@@ -9,6 +9,11 @@ export class ApplicationController {
   @Get('/')
   async GetAllApplication(@Query() query: GetAllApplicationQuery) {
     return this.applicationService.GetAllApplication(query);
+  }
+
+  @Patch('/score')
+  async score(@Body() data: ScoreDto) {
+    return this.applicationService.score(data);
   }
 
   @Get('/ticket')
