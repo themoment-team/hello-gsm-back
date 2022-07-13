@@ -64,6 +64,8 @@ export class ApplicationService {
     user_idx: number,
     data: FirstSubmissionDto,
   ): Promise<string> {
+    this.checkApplicationDate();
+
     const user = await this.prisma.user.findFirst({
       where: { user_idx },
       include: { application: true },
@@ -99,6 +101,8 @@ export class ApplicationService {
    * @throws {BadRequestException} BadRequestException
    */
   async image(photo: Express.Multer.File, user_idx: number): Promise<string> {
+    this.checkApplicationDate();
+
     if (!photo || !photo.mimetype.includes('image'))
       throw new BadRequestException('Not Found photo');
     if (photo.size > 500000)
@@ -106,8 +110,11 @@ export class ApplicationService {
 
     const user = await this.prisma.user.findFirst({
       where: { user_idx },
-      include: { application_image: true },
+      include: { application_image: true, application: true },
     });
+
+    if (user.application.isFinalSubmission)
+      throw new BadRequestException('최종 제출된 서류는 수정할 수 없습니다');
 
     if (user.application_image)
       this.deleteImg(user.application_image.idPhotoUrl, 0);
@@ -162,6 +169,8 @@ export class ApplicationService {
    * @returns {Promise<string>} 원서 제거에 성공했습니다
    */
   async deleteApplication(user_idx: number): Promise<string> {
+    this.checkApplicationDate();
+
     const user = await this.prisma.user.findFirst({
       where: { user_idx },
       include: {
@@ -200,6 +209,8 @@ export class ApplicationService {
     data: SecondSubmissionDto,
     user_idx: number,
   ): Promise<string> {
+    this.checkApplicationDate();
+
     const user = await this.getUserApplication(user_idx);
 
     if (user.application.application_score)
@@ -230,6 +241,8 @@ export class ApplicationService {
     user_idx: number,
     data: FirstSubmissionDto,
   ): Promise<string> {
+    this.checkApplicationDate();
+
     const application = await this.prisma.application.findFirst({
       where: { user_idx },
       include: { application_details: true },
@@ -275,6 +288,8 @@ export class ApplicationService {
     data: SecondSubmissionDto,
     user_idx: number,
   ): Promise<string> {
+    this.checkApplicationDate();
+
     const user = await this.getUserApplication(user_idx);
 
     if (!user.application.application_score)
@@ -301,6 +316,8 @@ export class ApplicationService {
    * @throws {BadRequestException} BadRequestException
    */
   async finalSubmission(user_idx: number): Promise<number> {
+    this.checkApplicationDate();
+
     const user = await this.prisma.user.findFirst({
       where: { user_idx },
       include: {
@@ -495,5 +512,10 @@ export class ApplicationService {
       throw new BadRequestException('최종 제출된 서류는 수정할 수 없습니다');
 
     return user;
+  }
+
+  private checkApplicationDate() {
+    if (new Date() >= new Date('2022-10-21'))
+      throw new BadRequestException('서류를 작성할 수 있는 기간이 지났습니다');
   }
 }

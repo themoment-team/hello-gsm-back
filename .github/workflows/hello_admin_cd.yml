@@ -1,7 +1,9 @@
 on:
   push:
     branches: [ master ]
-    paths: 'apps/admin/**'
+    paths: 
+      - 'apps/admin/**'
+      - '.github/**'
 
 jobs:
   deploy:
@@ -28,6 +30,11 @@ jobs:
           touch .env
           echo "${{ secrets.DATA_FOR_ENV }}" >> .env
           cat .env
+    - name : task-definition setting
+      run: |
+          touch task-definition.json
+          echo "${{ secrets.ADMIN_TASK_DEFINITION}}" >> task-definition.json
+
     - name: Build, tag, and push image to Amazon ECR
       id: build-image
       env:
@@ -38,6 +45,8 @@ jobs:
         docker build -t $ECR_REGISTRY:$IMAGE_TAG -f AdminDockerfile .
         docker push $ECR_REGISTRY:$IMAGE_TAG
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+        
+          
     - name: Fill in the new image ID in the Amazon ECS task definition
       id: task-def
       uses: aws-actions/amazon-ecs-render-task-definition@v1

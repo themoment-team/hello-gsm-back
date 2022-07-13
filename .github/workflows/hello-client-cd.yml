@@ -1,7 +1,9 @@
 on:
   push:
     branches: [ master ]
-    paths: 'apps/client/**'
+    paths: 
+        - 'apps/client/**'
+
 
 name: Hello_CLIENT_CD
 jobs:
@@ -29,7 +31,7 @@ jobs:
           touch .env
           echo "${{ secrets.DATA_FOR_ENV }}" >> .env
           cat .env
-
+        
     - name: Build, tag, and push image to Amazon ECR
       id: build-image
       env:
@@ -57,14 +59,13 @@ jobs:
         cluster: hello-gsm
         wait-for-service-stability: true
         
-        
     - name: Hello, GSM Client Server CD Success!
       uses: sarisia/actions-status-discord@v1
       if: ${{ success() }}
       with:
         webhook: ${{ secrets.DISCORD_WEBHOOK }}
         title: Hello-GSM Server CD Success
-        color: 04CF5C
+        color: 49FF45
 
     - name: Hello, GSM Client Server CD Failed
       uses: sarisia/actions-status-discord@v1

@@ -16,6 +16,11 @@ export class ApplicationController {
     return this.applicationService.score(data);
   }
 
+  @Get('/ticket')
+  async ticket() {
+    return this.applicationService.ticket();
+  }
+
   @Patch('/document')
   async document(@Body() data: DocumentDto) {
     return this.applicationService.document(data);

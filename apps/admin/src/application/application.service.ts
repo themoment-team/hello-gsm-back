@@ -79,6 +79,31 @@ export class ApplicationService {
   }
 
   /*
+   * 수험표를 만들기 위해 들어갈 값들을 return 합니다
+   */
+  async ticket() {
+    return this.prisma.user.findMany({
+      select: {
+        name: true,
+        birth: true,
+        application: {
+          select: {
+            schoolName: true,
+            screening: true,
+            registrationNumber: true,
+          },
+        },
+        application_image: { select: { idPhotoUrl: true } },
+      },
+      where: {
+        application: {
+          firstResultScreening: { not: null },
+        },
+      },
+    });
+  }
+
+  /*
    * 지원자가 서류 제출을 완료하면 체크를 해줍니다
    * @param {DocumentDto} data
    * @throw {BadRequestException}
@@ -91,7 +116,7 @@ export class ApplicationService {
 
     if (!application) throw new BadRequestException('유저를 찾을 수 없습니다');
     // TODO 1차 시험 보기 전까지만 기능을 사용할 수 있도록 해야함
-    if (new Date() >= new Date('20221021'))
+    if (new Date() >= new Date('2022-10-21'))
       throw new BadRequestException('기능을 사용할 수 있는 기간이 지났습니다');
 
     await this.prisma.application.update({
