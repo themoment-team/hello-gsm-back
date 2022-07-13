@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsNumber, Max, Min } from 'class-validator';
 
 export class ScoreDto {
   @IsNumber()
@@ -7,5 +7,7 @@ export class ScoreDto {
 
   @IsNumber()
   @IsNotEmpty()
+  @Max(140)
+  @Min(0)
   personalityEvaluationScore: number;
 }
