@@ -28,6 +28,7 @@ jobs:
           touch .env
           echo "${{ secrets.DATA_FOR_ENV }}" >> .env
           cat .env
+
     - name: Build, tag, and push image to Amazon ECR
       id: build-image
       env:
@@ -39,6 +40,14 @@ jobs:
         docker push $ECR_REGISTRY:$IMAGE_TAG
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
         
+    - name: Download Task Definition Template
+      run: |
+        aws ecs describe-task-definition \
+          --cluster hello-gsm \
+          --tasks arn:aws:ecs:ap-northeast-2:030783040786:task-definition/hellogsm-admin-task:2 \
+          --query taskDefinition \
+          > task-definition.json
+          
     - name: Fill in the new image ID in the Amazon ECS task definition
       id: task-def
       uses: aws-actions/amazon-ecs-render-task-definition@v1
