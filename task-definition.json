@@ -9,7 +9,7 @@
         "logDriver": "awslogs",
         "secretOptions": null,
         "options": {
-          "awslogs-group": "/ecs/hellogsm-task",
+          "awslogs-group": "/ecs/hellogsm-admin-task",
           "awslogs-region": "ap-northeast-2",
           "awslogs-stream-prefix": "ecs"
         }
@@ -37,7 +37,7 @@
       "memoryReservation": null,
       "volumesFrom": [],
       "stopTimeout": null,
-      "image": "030783040786.dkr.ecr.ap-northeast-2.amazonaws.com/hello-server:latest",
+      "image": "030783040786.dkr.ecr.ap-northeast-2.amazonaws.com/hello-admin:latest",
       "startTimeout": null,
       "firelensConfiguration": null,
       "dependsOn": null,
@@ -54,18 +54,18 @@
       "dockerLabels": null,
       "systemControls": null,
       "privileged": null,
-      "name": "hello-gsm-server-container"
+      "name": "hello-gsm-admin-container"
     }
   ],
   "placementConstraints": [],
-  "memory": "1024",
-  "taskRoleArn": null,
+  "memory": "512",
+  "taskRoleArn": "arn:aws:iam::030783040786:role/ecsTaskExecutionRole",
   "compatibilities": [
     "EC2",
     "FARGATE"
   ],
-  "taskDefinitionArn": "arn:aws:ecs:ap-northeast-2:030783040786:task-definition/hellogsm-task:20",
-  "family": "hellogsm-task",
+  "taskDefinitionArn": "arn:aws:ecs:ap-northeast-2:030783040786:task-definition/hellogsm-admin-task:2",
+  "family": "hellogsm-admin-task",
   "requiresAttributes": [
     {
       "targetId": null,
@@ -95,6 +95,12 @@
       "targetId": null,
       "targetType": null,
       "value": null,
+      "name": "com.amazonaws.ecs.capability.task-iam-role"
+    },
+    {
+      "targetId": null,
+      "targetType": null,
+      "value": null,
       "name": "ecs.capability.execution-role-ecr-pull"
     },
     {
@@ -119,8 +125,8 @@
     "operatingSystemFamily": "LINUX",
     "cpuArchitecture": null
   },
-  "cpu": "512",
-  "revision": 20,
+  "cpu": "256",
+  "revision": 2,
   "status": "ACTIVE",
   "inferenceAccelerators": null,
   "proxyConfiguration": null,
