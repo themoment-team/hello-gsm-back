@@ -29,6 +29,12 @@ jobs:
           touch .env
           echo "${{ secrets.DATA_FOR_ENV }}" >> .env
           cat .env
+          
+    - name : task definition setting
+      run: |
+          touch task-definition.json
+          echo "${{ secrets.CLIENT_TASK_DEFINITION }}" >> task-definition.json
+          cat task-definition.json
 
     - name: Build, tag, and push image to Amazon ECR
       id: build-image
@@ -64,7 +70,7 @@ jobs:
       with:
         webhook: ${{ secrets.DISCORD_WEBHOOK }}
         title: Hello-GSM Server CD Success
-        color: 04CF5C
+        color: 49FF45
 
     - name: Hello, GSM Client Server CD Failed
       uses: sarisia/actions-status-discord@v1
