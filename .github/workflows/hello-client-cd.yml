@@ -37,6 +37,7 @@ jobs:
       run: |
           touch task-definition.json
           echo "${{ secrets.CLIENT_TASK_DEFINITION}}" >> task-definition.json
+          cat task-definition.json
 
     - name: Build, tag, and push image to Amazon ECR
       id: build-image
