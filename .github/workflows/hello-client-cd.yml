@@ -1,7 +1,10 @@
 on:
   push:
     branches: [ master ]
-    paths: 'apps/client/**'
+    paths: 
+	- 'apps/client/**'
+	- '.github/**'
+
 
 name: Hello_CLIENT_CD
 jobs:
