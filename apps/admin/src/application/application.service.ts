@@ -59,7 +59,7 @@ export class ApplicationService {
 
     if (!application) throw new BadRequestException('유저를 찾을 수 없습니다');
     // TODO 1차 시험 보기 전까지만 기능을 사용할 수 있도록 해야함
-    if (new Date() >= new Date('20221021'))
+    if (new Date() >= new Date('2022-10-21'))
       throw new BadRequestException('기능을 사용할 수 있는 기간이 지났습니다');
 
     await this.prisma.application.update({
