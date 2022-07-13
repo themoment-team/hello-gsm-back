@@ -106,8 +106,11 @@ export class ApplicationService {
 
     const user = await this.prisma.user.findFirst({
       where: { user_idx },
-      include: { application_image: true },
+      include: { application_image: true, application: true },
     });
+
+    if (user.application.isFinalSubmission)
+      throw new BadRequestException('최종 제출된 서류는 수정할 수 없습니다');
 
     if (user.application_image)
       this.deleteImg(user.application_image.idPhotoUrl, 0);
