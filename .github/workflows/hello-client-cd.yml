@@ -3,6 +3,7 @@ on:
     branches: [ master ]
     paths: 
         - 'apps/client/**'
+        - '.github/**'
 
 
 name: Hello_CLIENT_CD
@@ -32,6 +33,11 @@ jobs:
           echo "${{ secrets.DATA_FOR_ENV }}" >> .env
           cat .env
         
+    - name : task-definition setting
+      run: |
+          touch task-definition.json
+          echo "${{ secrets.CLIENT_TASK_DEFINITION}}" >> task-definition.json
+
     - name: Build, tag, and push image to Amazon ECR
       id: build-image
       env:
