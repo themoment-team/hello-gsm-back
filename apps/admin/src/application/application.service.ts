@@ -46,6 +46,28 @@ export class ApplicationService {
     });
   }
 
+  async ticket() {
+    return this.prisma.user.findMany({
+      select: {
+        name: true,
+        birth: true,
+        application: {
+          select: {
+            schoolName: true,
+            screening: true,
+            registrationNumber: true,
+          },
+        },
+        application_image: { select: { idPhotoUrl: true } },
+      },
+      where: {
+        application: {
+          firstResultScreening: { not: null },
+        },
+      },
+    });
+  }
+
   /*
    * 지원자가 서류 제출을 완료하면 체크를 해줍니다
    * @param {DocumentDto} data
