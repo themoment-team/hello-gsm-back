@@ -46,6 +46,9 @@ export class ApplicationService {
     });
   }
 
+  /*
+   * 수험표를 만들기 위해 들어갈 값들을 return 합니다
+   */
   async ticket() {
     return this.prisma.user.findMany({
       select: {
