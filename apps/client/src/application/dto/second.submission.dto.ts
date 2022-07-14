@@ -1,6 +1,6 @@
 import { IsNumber, Max, Min } from 'class-validator';
 
-export class SecondsSubmissionDto {
+export class SecondSubmissionDto {
   @Min(10.8)
   @Max(54)
   @IsNumber()

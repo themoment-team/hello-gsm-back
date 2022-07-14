@@ -1,9 +1,12 @@
 on:
   push:
     branches: [ master ]
+    paths: 
+        - 'apps/client/**'
+        - '.github/**'
 
-name: Deploy to Amazon ECS
 
+name: Hello_CLIENT_CD
 jobs:
   deploy:
     name: Deploy
@@ -29,6 +32,13 @@ jobs:
           touch .env
           echo "${{ secrets.DATA_FOR_ENV }}" >> .env
           cat .env
+       
+    - name: create-task-definition.json
+      id: create-json-1
+      uses: jsdaniell/create-json@1.1.2
+      with:
+        name: "task-definition.json"
+        json: ${{ secrets.CLIENT_TASK_DEFINITION }}
 
     - name: Build, tag, and push image to Amazon ECR
       id: build-image
@@ -37,12 +47,18 @@ jobs:
         ECR_REPOSITORY: hello-server
         IMAGE_TAG: latest
       run: |
-        # Build a docker container and
-        # push it to ECR so that it can
-        # be deployed to ECS.
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        docker build -t $ECR_REGISTRY:$IMAGE_TAG -f ClientDockerfile .
+        docker push $ECR_REGISTRY:$IMAGE_TAG
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+        
+    - name: create-task-definition.json
+      id: create-json-2
+      uses: jsdaniell/create-json@1.1.2
+      with:
+        name: "task-definition.json"
+        json: ${{ secrets.CLIENT_TASK_DEFINITION }}
+
+        
     - name: Fill in the new image ID in the Amazon ECS task definition
       id: task-def
       uses: aws-actions/amazon-ecs-render-task-definition@v1
@@ -58,3 +74,19 @@ jobs:
         service: hello-gsm-ecs-service
         cluster: hello-gsm
         wait-for-service-stability: true
+        
+    - name: Hello, GSM Client Server CD Success!
+      uses: sarisia/actions-status-discord@v1
+      if: ${{ success() }}
+      with:
+        webhook: ${{ secrets.DISCORD_WEBHOOK }}
+        title: Hello-GSM Server CD Success
+        color: 49FF45
+
+    - name: Hello, GSM Client Server CD Failed
+      uses: sarisia/actions-status-discord@v1
+      if: ${{ failure() }}
+      with:
+        webhook: ${{ secrets.DISCORD_WEBHOOK }}
+        title: Hello-GSM Server CD Failed
+        color: DC3545

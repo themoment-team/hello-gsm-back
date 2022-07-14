@@ -10,7 +10,10 @@ import {
 } from '@nestjs/common';
 import { ApplicationService } from './application.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { FirstSubmissionDto, SecondsSubmissionDto } from './dto';
+import {
+  FirstSubmissionDto,
+  SecondSubmissionDto as SecondSubmissionDto,
+} from './dto';
 import { User } from 'apps/client/src/auth/decorators/user.decorator';
 
 @Controller('application')
@@ -28,39 +31,45 @@ export class ApplicationController {
   }
 
   @Post('/firstSubmission')
-  @UseInterceptors(FileInterceptor('photo'))
   async firstSubmission(
-    @UploadedFile() photo: Express.Multer.File,
     @User('user_idx') user_idx: number,
     @Body() data: FirstSubmissionDto,
   ) {
-    return this.applicationService.firstSubmission(user_idx, data, photo);
+    return this.applicationService.firstSubmission(user_idx, data);
   }
 
-  @Post('/secondsSubmission')
-  async secondsSubmission(
-    @Body() data: SecondsSubmissionDto,
+  @Post('/image')
+  @UseInterceptors(FileInterceptor('photo'))
+  async image(
+    @UploadedFile() photo: Express.Multer.File,
     @User('user_idx') user_idx: number,
   ) {
-    return this.applicationService.secondsSubmission(data, user_idx);
+    return this.applicationService.image(photo, user_idx);
+  }
+
+  @Post('/secondSubmission')
+  async secondSubmission(
+    @Body() data: SecondSubmissionDto,
+    @User('user_idx') user_idx: number,
+  ) {
+    return this.applicationService.secondSubmission(data, user_idx);
   }
 
   @Patch('/firstSubmission')
   @UseInterceptors(FileInterceptor('photo'))
   async firstSubmissionPatch(
-    @UploadedFile() photo: Express.Multer.File,
     @User('user_idx') user_idx: number,
     @Body() data: FirstSubmissionDto,
   ) {
-    return this.applicationService.firstSubmissionPatch(user_idx, data, photo);
+    return this.applicationService.firstSubmissionPatch(user_idx, data);
   }
 
   @Patch('/secondsSubmission')
   async secondsSubmissionPatch(
-    @Body() data: SecondsSubmissionDto,
+    @Body() data: SecondSubmissionDto,
     @User('user_idx') user_idx: number,
   ) {
-    return this.applicationService.secondsSubmissionPatch(data, user_idx);
+    return this.applicationService.secondSubmissionPatch(data, user_idx);
   }
 
   @Patch('/finalSubmission')

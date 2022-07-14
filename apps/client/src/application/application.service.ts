@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  Logger,
-  ServiceUnavailableException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ENV } from 'apps/client/src/lib/env';
 import { PrismaService } from 'apps/client/src/prisma/prisma.service';
@@ -11,7 +6,7 @@ import {
   ApplicationDetailDto,
   ApplicationDto,
   FirstSubmissionDto,
-  SecondsSubmissionDto,
+  SecondSubmissionDto,
   QualificationFirstDto,
   ApplicationGraduationDto,
   ApplicationDetailGraduationDto,
@@ -41,6 +36,8 @@ export class ApplicationService {
     const user = await this.prisma.user.findFirst({
       where: { user_idx: user_idx },
       include: {
+        application_image: { select: { idPhotoUrl: true } },
+
         application: {
           include: { application_score: true, application_details: true },
         },
@@ -48,9 +45,11 @@ export class ApplicationService {
     });
 
     return JSON.parse(
-      JSON.stringify(user, (_, value) =>
-        typeof value === 'bigint' ? Number(value) : value,
-      ),
+      JSON.stringify(user, (_, value) => {
+        if (typeof value === 'bigint') return Number(value);
+        else if (value === 'null') return null;
+        return value;
+      }),
     );
   }
 
@@ -58,15 +57,15 @@ export class ApplicationService {
    * 1차 서류 제출
    * @param {number} user_idx
    * @param {FirstSubmissionDto} data
-   * @param {Express.Multer.File} photo
    * @returns {Promise<string>} 1차 서류 저장에 성공했습니다
    * @throws {BadRequestException} BadRequestException
    */
   async firstSubmission(
     user_idx: number,
     data: FirstSubmissionDto,
-    photo: Express.Multer.File,
   ): Promise<string> {
+    this.checkApplicationDate();
+
     const user = await this.prisma.user.findFirst({
       where: { user_idx },
       include: { application: true },
@@ -77,8 +76,6 @@ export class ApplicationService {
 
     this.checkMajor(data.applicationDetail);
 
-    const idPhotoUrl = await this.s3Upload(photo);
-
     await this.prisma.application.create({
       data: {
         ...this.checkApplication(
@@ -88,7 +85,7 @@ export class ApplicationService {
         user: { connect: { user_idx } },
         application_details: {
           create: {
-            ...this.checkApplicationDetail(data.applicationDetail, idPhotoUrl),
+            ...this.checkApplicationDetail(data.applicationDetail),
           },
         },
       },
@@ -103,9 +100,24 @@ export class ApplicationService {
    * @returns {Promise<string>} 이미지 url
    * @throws {BadRequestException} BadRequestException
    */
-  async s3Upload(photo: Express.Multer.File): Promise<string> {
+  async image(photo: Express.Multer.File, user_idx: number): Promise<string> {
+    this.checkApplicationDate();
+
     if (!photo || !photo.mimetype.includes('image'))
       throw new BadRequestException('Not Found photo');
+    if (photo.size > 500000)
+      throw new BadRequestException('파일 크기는 최대 500KB입니다');
+
+    const user = await this.prisma.user.findFirst({
+      where: { user_idx },
+      include: { application_image: true, application: true },
+    });
+
+    if (user.application.isFinalSubmission)
+      throw new BadRequestException('최종 제출된 서류는 수정할 수 없습니다');
+
+    if (user.application_image)
+      this.deleteImg(user.application_image.idPhotoUrl, 0);
 
     const params = {
       Bucket: this.configService.get(ENV.AWS_S3_BUCKET_NAME),
@@ -119,14 +131,35 @@ export class ApplicationService {
       },
     };
 
+    this.s3Upload(params, user_idx, user, 0);
+
+    return '이미지 업로드에 성공했습니다';
+  }
+
+  async s3Upload(
+    params: AWS.S3.PutObjectRequest,
+    user_idx: number,
+    user: any,
+    cnt: number,
+  ) {
     try {
       const result = await this.s3.upload(params).promise();
-      Logger.log(`${result.Key} success upload`);
 
-      return result.Location;
+      if (!user.application_image)
+        await this.prisma.application_image.create({
+          data: {
+            user: { connect: { user_idx } },
+            idPhotoUrl: result.Location,
+          },
+        });
+      else
+        await this.prisma.application_image.update({
+          where: { user_idx },
+          data: { idPhotoUrl: result.Location },
+        });
     } catch (e) {
-      Logger.error(`${photo.originalname} failed upload`, e);
-      throw new BadRequestException('업로드에 실패했습니다.');
+      if (cnt > 2) return;
+      this.s3Upload(params, user_idx, user, cnt++);
     }
   }
 
@@ -136,15 +169,23 @@ export class ApplicationService {
    * @returns {Promise<string>} 원서 제거에 성공했습니다
    */
   async deleteApplication(user_idx: number): Promise<string> {
+    this.checkApplicationDate();
+
     const user = await this.prisma.user.findFirst({
       where: { user_idx },
-      include: { application: { include: { application_details: true } } },
+      include: {
+        application: { include: { application_details: true } },
+        application_image: true,
+      },
     });
 
     if (!user.application)
       throw new BadRequestException('저장된 원서가 없습니다');
     if (user.application.isFinalSubmission)
       throw new BadRequestException('최종 제출된 서류는 삭제할 수 없습니다');
+
+    if (user.application_image)
+      this.deleteImg(user.application_image.idPhotoUrl, 0);
 
     await this.prisma.application.delete({
       where: { applicationIdx: user.application.applicationIdx },
@@ -159,15 +200,17 @@ export class ApplicationService {
 
   /**
    * 2차 서류 제출
-   * @param {SecondsSubmissionDto} data
+   * @param {SecondSubmissionDto} data
    * @param {number} user_idx
    * @returns {Promise<string>} 2차 서류 작성에 성공했습니다
    * @throws {BadRequestException} BadRequestException
    */
-  async secondsSubmission(
-    data: SecondsSubmissionDto,
+  async secondSubmission(
+    data: SecondSubmissionDto,
     user_idx: number,
   ): Promise<string> {
+    this.checkApplicationDate();
+
     const user = await this.getUserApplication(user_idx);
 
     if (user.application.application_score)
@@ -178,8 +221,6 @@ export class ApplicationService {
     await this.prisma.application_score.create({
       data: {
         ...data,
-        score1_1: 0,
-        score1_2: 0,
         application: {
           connect: { applicationIdx: user.application.applicationIdx },
         },
@@ -193,15 +234,15 @@ export class ApplicationService {
    * 1차 서류 제출 수정
    * @param {number} user_idx
    * @param {FirstSubmissionDto} data
-   * @param {Express.Multer.File} photo
    * @returns {Promise<string>} 수정에 성공했습니다
    * @throws {BadRequestException} BadRequestException
    */
   async firstSubmissionPatch(
     user_idx: number,
     data: FirstSubmissionDto,
-    photo: Express.Multer.File,
   ): Promise<string> {
+    this.checkApplicationDate();
+
     const application = await this.prisma.application.findFirst({
       where: { user_idx },
       include: { application_details: true },
@@ -214,10 +255,6 @@ export class ApplicationService {
 
     this.checkMajor(data.applicationDetail);
 
-    this.deleteImg(application.application_details.idPhotoUrl);
-
-    const idPhotoUrl = await this.s3Upload(photo);
-
     await this.prisma.user.update({
       where: { user_idx },
       data: {
@@ -229,10 +266,7 @@ export class ApplicationService {
             ),
             application_details: {
               update: {
-                ...this.checkApplicationDetail(
-                  data.applicationDetail,
-                  idPhotoUrl,
-                ),
+                ...this.checkApplicationDetail(data.applicationDetail),
               },
             },
           },
@@ -245,15 +279,17 @@ export class ApplicationService {
 
   /**
    * 2차 서류 제출 수정
-   * @param {SecondsSubmissionDto} data
+   * @param {SecondSubmissionDto} data
    * @param {number} user_idx
    * @returns {Promise<sting>} 저장에 성공했습니다
    * @throws {BadRequestException} BadRequestException
    */
-  async secondsSubmissionPatch(
-    data: SecondsSubmissionDto,
+  async secondSubmissionPatch(
+    data: SecondSubmissionDto,
     user_idx: number,
   ): Promise<string> {
+    this.checkApplicationDate();
+
     const user = await this.getUserApplication(user_idx);
 
     if (!user.application.application_score)
@@ -267,8 +303,6 @@ export class ApplicationService {
       where: { applicationIdx: user.application.applicationIdx },
       data: {
         ...data,
-        score1_1: 0,
-        score1_2: 0,
       },
     });
 
@@ -282,19 +316,23 @@ export class ApplicationService {
    * @throws {BadRequestException} BadRequestException
    */
   async finalSubmission(user_idx: number): Promise<number> {
+    this.checkApplicationDate();
+
     const user = await this.prisma.user.findFirst({
       where: { user_idx },
       include: {
         application: {
           include: { application_score: true, application_details: true },
         },
+        application_image: true,
       },
     });
 
     if (
       !user.application ||
       !user.application.application_details ||
-      !user.application.application_score
+      !user.application.application_score ||
+      !user.application_image
     )
       throw new BadRequestException('서류가 완전히 작성되지 않았습니다');
     if (user.application.isFinalSubmission)
@@ -317,7 +355,7 @@ export class ApplicationService {
    * @param {string} imgUrl
    * @throws {ServiceUnavailableException} ServiceUnavailableException
    */
-  private async deleteImg(imgUrl: string) {
+  private async deleteImg(imgUrl: string, cnt: number) {
     try {
       await this.s3
         .deleteObject({
@@ -326,7 +364,8 @@ export class ApplicationService {
         })
         .promise();
     } catch (e) {
-      throw new ServiceUnavailableException('원서 수정을 할 수 없습니다.');
+      if (cnt > 2) return;
+      this.deleteImg(imgUrl, cnt++);
     }
   }
 
@@ -386,17 +425,16 @@ export class ApplicationService {
   /**
    * applicationDetail 테이블에 들어갈 데이터 필터링 및 검사
    * @param {ApplicationDetailDto} data
-   * @param {string} idPhotoUrl
    * @returns {ApplicationDetailGraduationDto | ApplicationDetailQualificationDto}
    */
   private checkApplicationDetail(
     data: ApplicationDetailDto,
-    idPhotoUrl: string,
   ): ApplicationDetailGraduationDto | ApplicationDetailQualificationDto {
     if (data.educationStatus === EducationStatus.검정고시) {
       const application: ApplicationDetailQualificationDto = {
         ...data,
-        idPhotoUrl,
+        addressDetails: data.addressDetails || 'null',
+        telephoneNumber: this.checkPhoneNumber(data.telephoneNumber),
         teacherName: 'null',
         schoolLocation: 'null',
         educationStatus: EducationStatus.검정고시,
@@ -406,7 +444,7 @@ export class ApplicationService {
 
     const application: ApplicationDetailGraduationDto = {
       ...data,
-      idPhotoUrl,
+      addressDetails: data.addressDetails || 'null',
       telephoneNumber: this.checkPhoneNumber(data.telephoneNumber),
       educationStatus:
         data.educationStatus === EducationStatus.졸업
@@ -419,10 +457,10 @@ export class ApplicationService {
 
   /**
    * 성적 계산 체크
-   * @param { SecondsSubmissionDto } data
+   * @param { SecondSubmissionDto } data
    * @throws { BadRequestException } BadRequestException
    */
-  private calcScore(data: SecondsSubmissionDto) {
+  private calcScore(data: SecondSubmissionDto) {
     const total = data.score2_2 + data.score2_1 + data.score3_1;
     if (
       total !== data.generalCurriculumScoreSubtotal ||
@@ -443,6 +481,7 @@ export class ApplicationService {
    * @throws {BadRequestException} BadRequestException
    */
   private checkPhoneNumber(cellphoneNumber: string): string {
+    if (!cellphoneNumber) return 'null';
     if (!/^0\d{2}\d{3,4}\d{4}/g.test(cellphoneNumber))
       throw new BadRequestException('잘못된 전화번호 입력 방식입니다');
     return cellphoneNumber;
@@ -473,5 +512,10 @@ export class ApplicationService {
       throw new BadRequestException('최종 제출된 서류는 수정할 수 없습니다');
 
     return user;
+  }
+
+  private checkApplicationDate() {
+    if (new Date() >= new Date('2022-10-21'))
+      throw new BadRequestException('서류를 작성할 수 있는 기간이 지났습니다');
   }
 }

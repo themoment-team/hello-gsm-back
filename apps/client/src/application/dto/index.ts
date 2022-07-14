@@ -1,5 +1,5 @@
 export * from './first.submission.dto';
-export * from './seconds.submission.dto';
+export * from './second.submission.dto';
 export * from './application.dto';
 export * from './application.detail.dto';
 export * from './qualification.first.dto';
