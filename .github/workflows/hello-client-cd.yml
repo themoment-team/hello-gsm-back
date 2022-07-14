@@ -39,7 +39,7 @@ jobs:
       with:
         name: "task-definition.json"
         json: ${{ secrets.CLIENT_TASK_DEFINITION }}
-        dir: 'hello-gsm-back/'
+        dir: "../../../hello-gsm-back/"
 
     - name: Build, tag, and push image to Amazon ECR
       id: build-image
