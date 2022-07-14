@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { PrismaService } from 'apps/admin/src/prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto } from './dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
@@ -22,7 +22,7 @@ export class AuthService {
     if (!bcrypt.compareSync(password, user.password))
       throw new BadRequestException('비밀번호가 올바르지 않습니다');
 
-    const tokens = this.getTokens(user.id);
+    const tokens = await this.getTokens(user.id);
 
     await this.saveRefresh(tokens, user.admin_idx);
 
