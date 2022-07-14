@@ -32,14 +32,7 @@ jobs:
           touch .env
           echo "${{ secrets.DATA_FOR_ENV }}" >> .env
           cat .env
-        
-    - name: create-task-definition.json
-      id: create-json
-      uses: jsdaniell/create-json@1.1.2
-      with:
-        name: "task-definition.json"
-        json: ${{ secrets.CLIENT_TASK_DEFINITION }}
-        dir: "../../../hello-gsm-back/"
+       
 
     - name: Build, tag, and push image to Amazon ECR
       id: build-image
@@ -51,6 +44,14 @@ jobs:
         docker build -t $ECR_REGISTRY:$IMAGE_TAG -f ClientDockerfile .
         docker push $ECR_REGISTRY:$IMAGE_TAG
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+        
+    - name: create-task-definition.json
+      id: create-json
+      uses: jsdaniell/create-json@1.1.2
+      with:
+        name: "task-definition.json"
+        json: ${{ secrets.CLIENT_TASK_DEFINITION }}
+
         
     - name: Fill in the new image ID in the Amazon ECS task definition
       id: task-def
