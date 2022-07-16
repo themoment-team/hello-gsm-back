@@ -44,7 +44,7 @@ jobs:
       id: build-image
       env:
         ECR_REGISTRY: ${{secrets.AWS_ECR_REGISTRY}}
-        ECR_REPOSITORY: hello-server
+        ECR_REPOSITORY: hello-client-ecr
         IMAGE_TAG: latest
       run: |
         docker build -t $ECR_REGISTRY:$IMAGE_TAG -f ClientDockerfile .
@@ -64,15 +64,15 @@ jobs:
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
         task-definition: task-definition.json
-        container-name: hello-gsm-server-container
+        container-name: hello-client-container
         image: ${{ steps.build-image.outputs.image }}
 
     - name: Deploy Amazon ECS task definition
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
         task-definition: task-definition.json
-        service: hello-gsm-ecs-service
-        cluster: hello-gsm
+        service: hello-client-service
+        cluster: hellogsm
         wait-for-service-stability: true
         
     - name: Hello, GSM Client Server CD Success!
