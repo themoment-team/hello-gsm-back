@@ -30,11 +30,6 @@ jobs:
           touch .env
           echo "${{ secrets.DATA_FOR_ENV }}" >> .env
           cat .env
-          
-    - name: Download task definition
-      run: |
-        aws ecs describe-task-definition --task-definition newrelic-infra --output text --query taskDefinition.executionRoleArn
-
 
     - name: Build, tag, and push image to Amazon ECR
       id: build-image
