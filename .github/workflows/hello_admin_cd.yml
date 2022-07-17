@@ -34,7 +34,7 @@ jobs:
     - name: Build, tag, and push image to Amazon ECR
       id: build-image
       env:
-        ECR_REGISTRY: ${{secrets.AWS_ECR_REGISTRY_ADMIN}}
+        ECR_REGISTRY: ${{ secrets.AWS_ECR_REGISTRY_ADMIN }}
         ECR_REPOSITORY: hello-admin-ecr
         IMAGE_TAG: latest
       run: |
