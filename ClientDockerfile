@@ -8,7 +8,7 @@ RUN yarn
 
 RUN yarn global add prisma
 
-COPY ./apps/client ./apps/client
+COPY ./apps/admin ./apps/admin
 
 COPY .env tsconfig.build.json tsconfig.json nest-cli.json ./
 
@@ -16,6 +16,6 @@ COPY ./prisma ./prisma
 
 RUN prisma generate
 
-RUN yarn build
+RUN yarn build:a
 
-CMD ["yarn", "start:prod"]
+CMD ["yarn", "start:a:prod"]
