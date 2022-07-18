@@ -32,13 +32,6 @@ jobs:
           touch .env
           echo "${{ secrets.DATA_FOR_ENV }}" >> .env
           cat .env
-       
-    - name: create-task-definition.json
-      id: create-json-1
-      uses: jsdaniell/create-json@1.1.2
-      with:
-        name: "task-definition.json"
-        json: ${{ secrets.CLIENT_TASK_DEFINITION }}
 
     - name: Build, tag, and push image to Amazon ECR
       id: build-image
