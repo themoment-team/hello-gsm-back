@@ -192,6 +192,7 @@ export class ApplicationService {
       include: {
         application_score: true,
         application_details: true,
+        user: { include: { application_image: true } },
       },
     });
 
