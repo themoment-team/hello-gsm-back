@@ -117,7 +117,7 @@ export class ApplicationService {
       throw new BadRequestException('최종 제출된 서류는 수정할 수 없습니다');
 
     if (user.application_image)
-      this.deleteImg(user.application_image.idPhotoUrl, 0);
+      this.deleteImg(user.application_image.idPhotoUrl);
 
     const params = {
       Bucket: this.configService.get(ENV.AWS_S3_BUCKET_NAME),
@@ -185,15 +185,18 @@ export class ApplicationService {
       throw new BadRequestException('최종 제출된 서류는 삭제할 수 없습니다');
 
     if (user.application_image)
-      this.deleteImg(user.application_image.idPhotoUrl, 0);
+      this.deleteImg(user.application_image.idPhotoUrl);
 
     await this.prisma.application.delete({
       where: { applicationIdx: user.application.applicationIdx },
       include: {
         application_score: true,
         application_details: true,
-        user: { include: { application_image: true } },
       },
+    });
+
+    await this.prisma.application_image.delete({
+      where: { user_idx },
     });
 
     return '원서 제거에 성공했습니다';
@@ -356,17 +359,18 @@ export class ApplicationService {
    * @param {string} imgUrl
    * @throws {ServiceUnavailableException} ServiceUnavailableException
    */
-  private async deleteImg(imgUrl: string, cnt: number) {
-    try {
-      await this.s3
-        .deleteObject({
-          Bucket: this.configService.get(ENV.AWS_S3_BUCKET_NAME),
-          Key: imgUrl.replace(this.configService.get(ENV.AWS_S3_URL), ''),
-        })
-        .promise();
-    } catch (e) {
-      if (cnt > 2) return;
-      this.deleteImg(imgUrl, cnt++);
+  private async deleteImg(imgUrl: string) {
+    for (let i = 0; i < 3; i++) {
+      try {
+        await this.s3
+          .deleteObject({
+            Bucket: this.configService.get(ENV.AWS_S3_BUCKET_NAME),
+            Key: imgUrl.replace(this.configService.get(ENV.AWS_S3_URL), ''),
+          })
+          .promise();
+
+        return;
+      } catch (e) {}
     }
   }
 

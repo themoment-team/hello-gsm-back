@@ -19,7 +19,7 @@
     "start:a:debug": "nest start admin --debug --watch",
     "start:a:prod": "node dist/apps/admin/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "test": "jest",
+    "test": "jest client",
     "test:a:watch": "jest admin --watch",
     "test:watch": "jest client --watch",
     "test:cov": "jest --coverage",
