@@ -5,7 +5,6 @@ on:
         - 'apps/client/**'
         - '.github/**'
 
-
 name: Hello_CLIENT_CD
 jobs:
   deploy:
@@ -28,7 +27,7 @@ jobs:
       uses: aws-actions/amazon-ecr-login@v1
 
     - name : .env setting
-      run: |
+      run: | 
           touch .env
           echo "${{ secrets.DATA_FOR_ENV }}" >> .env
           cat .env
