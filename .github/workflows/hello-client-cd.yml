@@ -52,9 +52,12 @@ jobs:
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
         
 
-    - name: Download task definition
-      run: |
-        aws ecs describe-task-definition --task-definition newrelic-infra --output text --query taskDefinition.executionRoleArn
+    - name: create-task-definition.json
+      id: create-json-2
+      uses: jsdaniell/create-json@1.1.2
+      with:
+        name: "task-definition.json"
+        json: ${{ secrets.CLIENT_TASK_DEFINITION }}
     
     - name: Fill in the new image ID in the Amazon ECS task definition
       id: task-def
