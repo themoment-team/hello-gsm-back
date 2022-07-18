@@ -8,11 +8,13 @@ RUN yarn
 
 RUN yarn global add prisma
 
-COPY ./apps/admin ./apps/admin
+COPY ./apps/client ./apps/client
 
 COPY .env tsconfig.build.json tsconfig.json nest-cli.json task-definition.json ./
 
 COPY ./prisma ./prisma
+
+RUN prisma db pull
 
 RUN prisma generate
 
