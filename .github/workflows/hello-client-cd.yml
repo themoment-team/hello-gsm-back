@@ -44,7 +44,7 @@ jobs:
     - name: Build, tag, and push image to Amazon ECR     # Docker build 를 하고 ECR 에 푸쉬하는 과정이에요.
       id: build-image
       env:
-       ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+       ECR_REGISTRY: ${{ secrets.AWS_ECR_REGISTRY }}
        IMAGE_TAG: latest
       run: |
         docker build -t $ECR_REGISTRY:$IMAGE_TAG -f ClientDockerfile .
