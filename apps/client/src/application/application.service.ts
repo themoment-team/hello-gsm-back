@@ -11,6 +11,7 @@ import {
   ApplicationGraduationDto,
   ApplicationDetailGraduationDto,
   ApplicationDetailQualificationDto,
+  GedSubmissionDto,
 } from './dto';
 import { v1 } from 'uuid';
 import * as AWS from 'aws-sdk';
@@ -228,6 +229,48 @@ export class ApplicationService {
     });
 
     return '2차 서류 작성에 성공했습니다';
+  }
+
+  /*
+   * 검정고시 전용 성적 재출
+   * @param {GedSubmissionDto} data
+   * @param {user_idx} user_idx
+   */
+  async GedSubmisstion(data: GedSubmissionDto, user_idx: number) {
+    const user = await this.prisma.user.findFirst({
+      where: { user_idx },
+      include: { application: true },
+    });
+
+    if (user.application.screening !== EducationStatus.검정고시)
+      throw new BadRequestException('잘못된 요청입니다');
+
+    this.GedScoreCalc(data);
+
+    await this.prisma.user.update({
+      where: { user_idx },
+      data: {
+        application: {
+          update: {
+            application_score: {
+              update: {
+                ...data,
+                score2_1: -1,
+                score2_2: -1,
+                score3_1: -1,
+                artSportsScore: -1,
+                volunteerScore: -1,
+                attendanceScore: -1,
+                personalityEvaluationScore: -1,
+                generalCurriculumScoreSubtotal: -1,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return '저장에 성공했습니다';
   }
 
   /**
@@ -472,6 +515,25 @@ export class ApplicationService {
         data.scoreTotal
     )
       throw new BadRequestException('계산 결과가 올바르지 않습니다');
+  }
+
+  /*
+   * 검정고시 성적 계산
+   * @param {GedSubmissionDto} data
+   * @return {number} result
+   */
+  private GedScoreCalc(data: GedSubmissionDto) {
+    const result = Number(
+      (
+        (1 - data.curriculumScoreSubtotal / data.nonCurriculumScoreSubtotal) *
+        100
+      ).toFixed(4),
+    );
+
+    if (result !== data.scoreTotal)
+      throw new BadRequestException('계산 결과가 올바르지 않습니다');
+
+    return result;
   }
 
   /**
