@@ -10,7 +10,7 @@ env:
   ECR_REPOSITORY: hello-client-ecr      # ECR repository 의 이름이에요.
   ECS_SERVICE: hello-client-service     # ECS service의 이름이에요.
   ECS_CLUSTER: hellogsm                 # ECS cluster의 이름이에요.
-  ECS_TASK_DEFINITION: .aws/client/task-definition.json       # task-definition.json 의 경로에요. 
+  ECS_TASK_DEFINITION: ./task-definition.json       # task-definition.json 의 경로에요. 
   CONTAINER_NAME:  hello-client-container                     # ecs container 의 이름이에요.
 
 
@@ -55,7 +55,7 @@ jobs:
       id: task-def
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
-        task-definition: ${{ env.ECS_TASK_DEFINITION }}           
+        task-definition: ./task-definition.json    
         container-name: ${{ env.CONTAINER_NAME }}
         image: ${{ steps.build-image.outputs.image }}
 
