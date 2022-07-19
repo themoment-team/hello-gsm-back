@@ -19,6 +19,7 @@ export class UserService {
             firstResultScreening: true,
             finalResultScreening: true,
             registrationNumber: true,
+            screening: true,
             application_details: {
               select: {
                 firstWantedMajor: true,
