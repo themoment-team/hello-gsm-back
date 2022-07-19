@@ -3,7 +3,7 @@ on:
     branches: [ master ]
     paths: 
         - 'apps/client/**'
-
+        - '.github/**'
 
 name: Hello_CLIENT_CD
 jobs:
@@ -43,7 +43,7 @@ jobs:
       id: build-image
       env:
         ECR_REGISTRY: ${{secrets.AWS_ECR_REGISTRY}}
-        ECR_REPOSITORY: hello-client-ecr
+        ECR_REPOSITORY: hello-server
         IMAGE_TAG: latest
       run: |
         docker build -t $ECR_REGISTRY:$IMAGE_TAG -f ClientDockerfile .
@@ -63,29 +63,13 @@ jobs:
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
         task-definition: task-definition.json
-        container-name: hello-client-container
+        container-name: hello-gsm-server-container
         image: ${{ steps.build-image.outputs.image }}
 
     - name: Deploy Amazon ECS task definition
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
         task-definition: task-definition.json
-        service: hello-client-service
-        cluster: hellogsm
+        service: hello-gsm-ecs-service
+        cluster: hello-gsm
         wait-for-service-stability: true
-        
-    - name: Hello, GSM Client Server CD Success!
-      uses: sarisia/actions-status-discord@v1
-      if: ${{ success() }}
-      with:
-        webhook: ${{ secrets.DISCORD_WEBHOOK }}
-        title: Hello-GSM Server CD Success
-        color: 49FF45
-
-    - name: Hello, GSM Client Server CD Failed
-      uses: sarisia/actions-status-discord@v1
-      if: ${{ failure() }}
-      with:
-        webhook: ${{ secrets.DISCORD_WEBHOOK }}
-        title: Hello-GSM Server CD Failed
-        color: DC3545

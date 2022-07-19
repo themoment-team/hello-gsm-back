@@ -30,11 +30,12 @@ jobs:
           touch .env
           echo "${{ secrets.DATA_FOR_ENV }}" >> .env
           cat .env
-
+        
+        
     - name: Build, tag, and push image to Amazon ECR
       id: build-image
       env:
-        ECR_REGISTRY: ${{secrets.AWS_ECR_REGISTRY_ADMIN}}
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY: hello-admin-ecr
         IMAGE_TAG: latest
       run: |
@@ -44,7 +45,7 @@ jobs:
  
     - name: Download task definition
       run: |
-        aws ecs describe-task-definition --task-definition newrelic-infra --output text --query taskDefinition.executionRoleArn
+        aws ecs describe-task-definition --task-definition hello-admin-task:1 --query taskDefinition > task-definition.json
    
     - name: Fill in the new image ID in the Amazon ECS task definition
       id: task-def
@@ -57,23 +58,9 @@ jobs:
     - name: Deploy Amazon ECS task definition
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
-        task-definition: task-definition.json
+        task-definition: ${{ steps.task-def.outputs.task-definition }}
         service: hello-admin-service
         cluster: hellogsm
         wait-for-service-stability: true
         
-    - name: Hello, GSM Admin Server CD Success!
-      uses: sarisia/actions-status-discord@v1
-      if: ${{ success() }}
-      with:
-        webhook: ${{ secrets.DISCORD_WEBHOOK }}
-        title: Hello-GSM Server CD Success
-        color: 04CF5C
-
-    - name: Hello, GSM Admin Server CD Failed
-      uses: sarisia/actions-status-discord@v1
-      if: ${{ failure() }}
-      with:
-        webhook: ${{ secrets.DISCORD_WEBHOOK }}
-        title: Hello-GSM Server CD Failed
-        color: DC3545
+        

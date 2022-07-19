@@ -82,7 +82,7 @@ model application_score {
   volunteerScore                 Decimal     @map("volunteer_score") @db.Decimal(3, 0)
   nonCurriculumScoreSubtotal     Decimal     @map("non_curriculum_score_subtotal") @db.Decimal(3, 0)
   scoreTotal                     Decimal     @map("score_total") @db.Decimal(6, 3)
-  personalityEvaluationScore     Decimal?    @map("personality_evaluation_score") @db.Decimal(6, 3)
+  personalityEvaluationScore     Decimal?    @map("personality_evaluation_score") @db.Decimal(4, 1)
   application                    application @relation(fields: [applicationIdx], references: [applicationIdx], onDelete: Cascade, onUpdate: Restrict, map: "application_score_application_application_idx_fk")
 }
 
