@@ -10,7 +10,7 @@ RUN yarn global add prisma
 
 COPY ./apps/client ./apps/client
 
-COPY .env tsconfig.build.json tsconfig.json nest-cli.json ./.aws/client/task-definiton.json ./
+COPY .env tsconfig.build.json tsconfig.json nest-cli.json ./
 
 COPY ./prisma ./prisma
 
