@@ -4,58 +4,68 @@ on:
     paths: 
         - 'apps/client/**'
         - '.github/**'
+        
+env:
+  AWS_REGION: ap-northeast-2            # AWS 리전이에요.
+  ECR_REPOSITORY: hello-client-ecr      # ECR repository 의 이름이에요.
+  ECS_SERVICE: hello-client-service     # ECS service의 이름이에요.
+  ECS_CLUSTER: hellogsm                 # ECS cluster의 이름이에요.
+  ECS_TASK_DEFINITION: .aws/client/task-definition.json       # task-definition.json 의 경로에요. 
+  CONTAINER_NAME:  hello-client-container                     # ecs container 의 이름이에요.
+
 
 name: Hello_CLIENT_CD
 jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
+    environment: production
+
 
     steps:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Configure AWS credentials
+    - name: Configure AWS credentials                 # AWS 엑세스 과정이에요
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ap-northeast-2
+        aws-region: $ {{ env.AWS_REGION }}
 
-    - name: Login to Amazon ECR
+    - name: Login to Amazon ECR                       # ECR 로그인 과정이에요
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
 
-    - name : .env setting
+    - name : .env setting                             # Docker build 를 위한 .env setting 이에요.
       run: | 
           touch .env
           echo "${{ secrets.DATA_FOR_ENV }}" >> .env
           cat .env
-
-    - name: Build, tag, and push image to Amazon ECR
+  
+    - name: Build, tag, and push image to Amazon ECR     # Docker build 를 하고 ECR 에 푸쉬하는 과정이에요.
       id: build-image
       env:
-        ECR_REGISTRY: ${{ secrets.AWS_ECR_REGISTRY }}
-        ECR_REPOSITORY: hello-client-ecr
-        IMAGE_TAG: latest
+       ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+       IMAGE_TAG: ${{ github.sha }}
       run: |
         docker build -t $ECR_REGISTRY:$IMAGE_TAG -f ClientDockerfile .
         docker push $ECR_REGISTRY:$IMAGE_TAG
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
     
-    - name: Fill in the new image ID in the Amazon ECS task definition
+    - name: Fill in the new image ID in the Amazon ECS task definition      # ECS 작업정의에 새 개정을 추가해요.
       id: task-def
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
-        task-definition: task-definition.json
-        container-name: hello-client-container
+        task-definition: ${{ env.ECS_TASK_DEFINITION }}
+        container-name: ${{ env.CONTAINER_NAME }}
         image: ${{ steps.build-image.outputs.image }}
 
-    - name: Deploy Amazon ECS task definition
+    - name: Deploy Amazon ECS task definition                               # 작업정의를 배포하는 과정이에요.
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
-        task-definition: task-definition.json
-        service: hello-client-service
-        cluster: hellogsm
-        wait-for-service-stability: true
+         task-definition: ${{ steps.task-def.outputs.task-definition }}
+         service: ${{ env.ECS_SERVICE }}
+         cluster: ${{ env.ECS_CLUSTER }}
+         wait-for-service-stability: true
         
