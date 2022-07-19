@@ -5,7 +5,6 @@ on:
         - 'apps/client/**'
         - '.github/**'
 
-
 name: Hello_CLIENT_CD
 jobs:
   deploy:
