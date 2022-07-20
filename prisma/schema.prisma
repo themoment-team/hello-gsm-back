@@ -72,9 +72,12 @@ model admin {
 
 model application_score {
   applicationIdx                 Int         @id @map("application_idx")
+  score_1_1                      Decimal     @db.Decimal(6, 3)
+  score_1_2                      Decimal     @db.Decimal(6, 3)
   score2_1                       Decimal     @map("score_2_1") @db.Decimal(6, 3)
   score2_2                       Decimal     @map("score_2_2") @db.Decimal(6, 3)
   score3_1                       Decimal     @map("score_3_1") @db.Decimal(6, 3)
+  score_3_2                      Decimal     @db.Decimal(6, 3)
   generalCurriculumScoreSubtotal Decimal     @map("general_curriculum_score_subtotal") @db.Decimal(6, 3)
   artSportsScore                 Decimal     @map("art_sports_score") @db.Decimal(6, 3)
   curriculumScoreSubtotal        Decimal     @map("curriculum_score_subtotal") @db.Decimal(6, 3)
@@ -83,6 +86,7 @@ model application_score {
   nonCurriculumScoreSubtotal     Decimal     @map("non_curriculum_score_subtotal") @db.Decimal(3, 0)
   scoreTotal                     Decimal     @map("score_total") @db.Decimal(6, 3)
   personalityEvaluationScore     Decimal?    @map("personality_evaluation_score") @db.Decimal(4, 1)
+  rank_percentage                Decimal?    @db.Decimal(6, 3)
   application                    application @relation(fields: [applicationIdx], references: [applicationIdx], onDelete: Cascade, onUpdate: Restrict, map: "application_score_application_application_idx_fk")
 }
 
