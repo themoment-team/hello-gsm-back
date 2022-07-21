@@ -117,7 +117,7 @@ export class ApplicationService {
       throw new BadRequestException('최종 제출된 서류는 수정할 수 없습니다');
 
     if (user.application_image)
-      this.deleteImg(user.application_image.idPhotoUrl, 0);
+      this.deleteImg(user.application_image.idPhotoUrl);
 
     const params = {
       Bucket: this.configService.get(ENV.AWS_S3_BUCKET_NAME),
@@ -185,7 +185,7 @@ export class ApplicationService {
       throw new BadRequestException('최종 제출된 서류는 삭제할 수 없습니다');
 
     if (user.application_image)
-      this.deleteImg(user.application_image.idPhotoUrl, 0);
+      this.deleteImg(user.application_image.idPhotoUrl);
 
     await this.prisma.application.delete({
       where: { applicationIdx: user.application.applicationIdx },
@@ -193,6 +193,10 @@ export class ApplicationService {
         application_score: true,
         application_details: true,
       },
+    });
+
+    await this.prisma.application_image.delete({
+      where: { user_idx },
     });
 
     return '원서 제거에 성공했습니다';
@@ -221,6 +225,11 @@ export class ApplicationService {
     await this.prisma.application_score.create({
       data: {
         ...data,
+        score1_2: -1,
+        score1_1: -1,
+        score3_2: -1,
+        rankPercentage: this.calcRankPercentage(data.scoreTotal),
+
         application: {
           connect: { applicationIdx: user.application.applicationIdx },
         },
@@ -355,17 +364,18 @@ export class ApplicationService {
    * @param {string} imgUrl
    * @throws {ServiceUnavailableException} ServiceUnavailableException
    */
-  private async deleteImg(imgUrl: string, cnt: number) {
-    try {
-      await this.s3
-        .deleteObject({
-          Bucket: this.configService.get(ENV.AWS_S3_BUCKET_NAME),
-          Key: imgUrl.replace(this.configService.get(ENV.AWS_S3_URL), ''),
-        })
-        .promise();
-    } catch (e) {
-      if (cnt > 2) return;
-      this.deleteImg(imgUrl, cnt++);
+  private async deleteImg(imgUrl: string) {
+    for (let i = 0; i < 3; i++) {
+      try {
+        await this.s3
+          .deleteObject({
+            Bucket: this.configService.get(ENV.AWS_S3_BUCKET_NAME),
+            Key: imgUrl.replace(this.configService.get(ENV.AWS_S3_URL), ''),
+          })
+          .promise();
+
+        return;
+      } catch (e) {}
     }
   }
 
@@ -517,5 +527,9 @@ export class ApplicationService {
   private checkApplicationDate() {
     if (new Date() >= new Date('2022-10-21'))
       throw new BadRequestException('서류를 작성할 수 있는 기간이 지났습니다');
+  }
+
+  private calcRankPercentage(scoreTotal: number) {
+    return Number(((1 - scoreTotal / 300) * 100).toFixed(4));
   }
 }
