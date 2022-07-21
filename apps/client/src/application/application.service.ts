@@ -226,6 +226,11 @@ export class ApplicationService {
     await this.prisma.application_score.create({
       data: {
         ...data,
+        score1_2: -1,
+        score1_1: -1,
+        score3_2: -1,
+        rankPercentage: this.calcRankPercentage(data.scoreTotal),
+
         application: {
           connect: { applicationIdx: user.application.applicationIdx },
         },
@@ -584,5 +589,9 @@ export class ApplicationService {
   private checkApplicationDate() {
     if (new Date() >= new Date('2022-10-21'))
       throw new BadRequestException('서류를 작성할 수 있는 기간이 지났습니다');
+  }
+
+  private calcRankPercentage(scoreTotal: number) {
+    return Number(((1 - scoreTotal / 300) * 100).toFixed(4));
   }
 }
