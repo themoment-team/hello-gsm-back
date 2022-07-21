@@ -246,36 +246,34 @@ export class ApplicationService {
    * @param {user_idx} user_idx
    */
   async GedSubmisstion(data: GedSubmissionDto, user_idx: number) {
-    const user = await this.prisma.user.findFirst({
-      where: { user_idx },
-      include: { application: true },
-    });
+    this.checkApplicationDate();
 
-    if (user.application.screening !== EducationStatus.검정고시)
+    const user = await this.getUserApplication(user_idx);
+
+    if (
+      user.application.application_details.educationStatus !==
+      EducationStatus.검정고시
+    )
       throw new BadRequestException('잘못된 요청입니다');
+    if (user.application.application_score)
+      throw new BadRequestException('이미 작성된 원서가 있습니다');
 
     this.GedScoreCalc(data);
 
-    await this.prisma.user.update({
-      where: { user_idx },
+    await this.prisma.application_score.create({
       data: {
-        application: {
-          update: {
-            application_score: {
-              update: {
-                ...data,
-                score2_1: -1,
-                score2_2: -1,
-                score3_1: -1,
-                artSportsScore: -1,
-                volunteerScore: -1,
-                attendanceScore: -1,
-                personalityEvaluationScore: -1,
-                generalCurriculumScoreSubtotal: -1,
-              },
-            },
-          },
-        },
+        ...data,
+        score1_1: -1,
+        score1_2: -1,
+        score3_2: -1,
+        score2_1: -1,
+        score2_2: -1,
+        score3_1: -1,
+        artSportsScore: -1,
+        volunteerScore: -1,
+        attendanceScore: -1,
+        generalCurriculumScoreSubtotal: -1,
+        applicationIdx: user.application.applicationIdx,
       },
     });
 
@@ -567,13 +565,9 @@ export class ApplicationService {
   private async getUserApplication(user_idx: number) {
     const user = await this.prisma.user.findFirst({
       where: { user_idx },
-      select: {
+      include: {
         application: {
-          select: {
-            applicationIdx: true,
-            application_score: true,
-            isFinalSubmission: true,
-          },
+          include: { application_details: true, application_score: true },
         },
       },
     });
@@ -586,6 +580,10 @@ export class ApplicationService {
     return user;
   }
 
+  /*
+   * 서류를 작성할 수 있는 날짜 체크
+   * @throws {BadRequestException}
+   */
   private checkApplicationDate() {
     if (new Date() >= new Date('2022-10-21'))
       throw new BadRequestException('서류를 작성할 수 있는 기간이 지났습니다');
