@@ -12,6 +12,7 @@ import { ApplicationService } from './application.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
   FirstSubmissionDto,
+  GraduationSubmissionDto,
   SecondSubmissionDto as SecondSubmissionDto,
 } from './dto';
 import { User } from 'apps/client/src/auth/decorators/user.decorator';
@@ -53,6 +54,14 @@ export class ApplicationController {
     @User('user_idx') user_idx: number,
   ) {
     return this.applicationService.secondSubmission(data, user_idx);
+  }
+
+  @Post('/graduationSubmission')
+  async graduationSubmission(
+    @Body() data: GraduationSubmissionDto,
+    @User('user_idx') user_idx: number,
+  ) {
+    return this.applicationService.graduationSubmission(data, user_idx);
   }
 
   @Patch('/firstSubmission')

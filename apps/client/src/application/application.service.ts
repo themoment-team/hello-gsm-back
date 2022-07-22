@@ -11,6 +11,7 @@ import {
   ApplicationGraduationDto,
   ApplicationDetailGraduationDto,
   ApplicationDetailQualificationDto,
+  GraduationSubmissionDto,
 } from './dto';
 import { v1 } from 'uuid';
 import * as AWS from 'aws-sdk';
@@ -237,6 +238,37 @@ export class ApplicationService {
     });
 
     return '2차 서류 작성에 성공했습니다';
+  }
+
+  /*
+   * 졸업자 전용 성적 입력
+   * @param {GrduationSubmissionDto} data
+   * @param {number} user_idx
+   * @return {Promise<string>}
+   */
+  async graduationSubmission(data: GraduationSubmissionDto, user_idx: number) {
+    this.checkApplicationDate();
+
+    const user = await this.getUserApplication(user_idx);
+
+    if (
+      user.application.application_details.educationStatus !==
+      EducationStatus.졸업
+    )
+      throw new BadRequestException('잘못된 요청입니다');
+    if (user.application.application_score)
+      throw new BadRequestException('이미 작성된 원서가 있습니다');
+
+    this.graduationScoreCalc(data);
+
+    await this.prisma.application_score.create({
+      data: {
+        ...data,
+        applicationIdx: user.application.applicationIdx,
+      },
+    });
+
+    return '저장에 성공했습니다';
   }
 
   /**
@@ -505,13 +537,9 @@ export class ApplicationService {
   private async getUserApplication(user_idx: number) {
     const user = await this.prisma.user.findFirst({
       where: { user_idx },
-      select: {
+      include: {
         application: {
-          select: {
-            applicationIdx: true,
-            application_score: true,
-            isFinalSubmission: true,
-          },
+          include: { application_details: true, application_score: true },
         },
       },
     });
@@ -531,5 +559,26 @@ export class ApplicationService {
 
   private calcRankPercentage(scoreTotal: number) {
     return Number(((1 - scoreTotal / 300) * 100).toFixed(4));
+  }
+
+  private graduationScoreCalc(data: GraduationSubmissionDto) {
+    const total =
+      data.score1_1 +
+      data.score1_2 +
+      data.score2_2 +
+      data.score2_1 +
+      data.score3_1 +
+      data.score3_2;
+
+    if (
+      total !== data.generalCurriculumScoreSubtotal ||
+      data.artSportsScore + data.generalCurriculumScoreSubtotal !==
+        data.curriculumScoreSubtotal ||
+      data.nonCurriculumScoreSubtotal !==
+        data.attendanceScore + data.volunteerScore ||
+      data.curriculumScoreSubtotal + data.nonCurriculumScoreSubtotal !==
+        data.scoreTotal
+    )
+      throw new BadRequestException('계산 결과가 올바르지 않습니다');
   }
 }
