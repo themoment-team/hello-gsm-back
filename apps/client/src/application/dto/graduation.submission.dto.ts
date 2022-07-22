@@ -1,12 +1,19 @@
-import { IsNumber, Max, Min } from 'class-validator';
+import { IsNumber, IsOptional, Max, Min } from 'class-validator';
 
 export class GraduationSubmissionDto {
+  @IsOptional()
+  @Min(0)
+  @Max(12.6)
   @IsNumber()
   score1_1: number;
 
+  @IsOptional()
   @IsNumber()
+  @Min(0)
+  @Max(18.9)
   score1_2: number;
 
+  @IsOptional()
   @Min(10.8)
   @Max(54)
   @IsNumber()
@@ -23,6 +30,8 @@ export class GraduationSubmissionDto {
   score3_1: number;
 
   @IsNumber()
+  @Min(0)
+  @Max(31.5)
   score3_2: number;
 
   @Max(180)
@@ -59,4 +68,7 @@ export class GraduationSubmissionDto {
   @Min(78)
   @IsNumber()
   scoreTotal: number;
+
+  @IsNumber()
+  rankPercentag: number;
 }

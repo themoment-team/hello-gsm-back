@@ -260,6 +260,8 @@ export class ApplicationService {
       throw new BadRequestException('이미 작성된 원서가 있습니다');
 
     this.graduationScoreCalc(data);
+    if (data.rankPercentag !== this.calcRankPercentage(data.scoreTotal))
+      throw new BadRequestException('계산 결과가 올바르지 않습니다');
 
     await this.prisma.application_score.create({
       data: {
