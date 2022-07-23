@@ -245,7 +245,7 @@ export class ApplicationService {
    * @param {GedSubmissionDto} data
    * @param {user_idx} user_idx
    */
-  async GedSubmisstion(data: GedSubmissionDto, user_idx: number) {
+  async GedSubmission(data: GedSubmissionDto, user_idx: number) {
     this.checkApplicationDate();
 
     const user = await this.getUserApplication(user_idx);

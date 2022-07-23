@@ -44,7 +44,7 @@ export class ApplicationController {
     @Body() data: GedSubmissionDto,
     @User('user_idx') user_idx: number,
   ) {
-    return this.applicationService.GedSubmisstion(data, user_idx);
+    return this.applicationService.GedSubmission(data, user_idx);
   }
 
   @Post('/image')
