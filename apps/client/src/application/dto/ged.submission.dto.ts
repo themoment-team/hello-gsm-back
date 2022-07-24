@@ -8,5 +8,5 @@ export class GedSubmissionDto {
   nonCurriculumScoreSubtotal: number;
 
   @IsNumber()
-  scoreTotal: number;
+  rankPercentag: number;
 }

@@ -213,7 +213,7 @@ export class ApplicationService {
   }
 
   /**
-   * 2차 서류 제출
+   * 졸업예정 성적 입력
    * @param {SecondSubmissionDto} data
    * @param {number} user_idx
    * @returns {Promise<string>} 2차 서류 작성에 성공했습니다
@@ -318,6 +318,7 @@ export class ApplicationService {
         volunteerScore: -1,
         attendanceScore: -1,
         generalCurriculumScoreSubtotal: -1,
+        scoreTotal: -1,
         applicationIdx: user.application.applicationIdx,
       },
     });
@@ -583,7 +584,7 @@ export class ApplicationService {
       ).toFixed(4),
     );
 
-    if (result !== data.scoreTotal)
+    if (result !== data.rankPercentag)
       throw new BadRequestException('계산 결과가 올바르지 않습니다');
 
     return result;
