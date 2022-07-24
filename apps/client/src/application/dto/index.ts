@@ -7,3 +7,4 @@ export * from './application.graduation.dto';
 export * from './application.detail.graduation.dto';
 export * from './application.detail.qualification.dto';
 export * from './graduation.submission.dto';
+export * from './ged.submission.dto';
