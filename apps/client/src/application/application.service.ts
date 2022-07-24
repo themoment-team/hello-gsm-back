@@ -249,11 +249,15 @@ export class ApplicationService {
   }
 
   /*
-   * 검정고시 전용 성적 재출
+   * 검정고시 전용 성적 재출 및 수정
    * @param {GedSubmissionDto} data
    * @param {user_idx} user_idx
    */
-  async GedSubmission(data: GedSubmissionDto, user_idx: number) {
+  async GedSubmission(
+    data: GedSubmissionDto,
+    user_idx: number,
+    isPatch?: boolean,
+  ) {
     this.checkApplicationDate();
 
     const user = await this.getUserApplication(user_idx);
@@ -263,27 +267,37 @@ export class ApplicationService {
       EducationStatus.검정고시
     )
       throw new BadRequestException('잘못된 요청입니다');
-    if (user.application.application_score)
+    if (!isPatch && user.application.application_score)
       throw new BadRequestException('이미 작성된 원서가 있습니다');
+    if (isPatch && !user.application.application_score)
+      throw new BadRequestException('작성된 원서가 없습니다');
 
     this.GedScoreCalc(data);
 
-    await this.prisma.application_score.create({
-      data: {
-        ...data,
-        score1_1: -1,
-        score1_2: -1,
-        score3_2: -1,
-        score2_1: -1,
-        score2_2: -1,
-        score3_1: -1,
-        artSportsScore: -1,
-        volunteerScore: -1,
-        attendanceScore: -1,
-        generalCurriculumScoreSubtotal: -1,
-        applicationIdx: user.application.applicationIdx,
-      },
-    });
+    const scores = {
+      ...data,
+      score1_1: -1,
+      score1_2: -1,
+      score3_2: -1,
+      score2_1: -1,
+      score2_2: -1,
+      score3_1: -1,
+      artSportsScore: -1,
+      volunteerScore: -1,
+      attendanceScore: -1,
+      generalCurriculumScoreSubtotal: -1,
+      applicationIdx: user.application.applicationIdx,
+    };
+
+    if (isPatch)
+      await this.prisma.application_score.update({
+        where: { applicationIdx: user.application.applicationIdx },
+        data: scores,
+      });
+    else
+      await this.prisma.application_score.create({
+        data: scores,
+      });
 
     return '저장에 성공했습니다';
   }
