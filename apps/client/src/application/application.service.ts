@@ -11,6 +11,7 @@ import {
   ApplicationGraduationDto,
   ApplicationDetailGraduationDto,
   ApplicationDetailQualificationDto,
+  GedSubmissionDto,
 } from './dto';
 import { v1 } from 'uuid';
 import * as AWS from 'aws-sdk';
@@ -245,6 +246,46 @@ export class ApplicationService {
     });
 
     return '2차 서류 작성에 성공했습니다';
+  }
+
+  /*
+   * 검정고시 전용 성적 재출
+   * @param {GedSubmissionDto} data
+   * @param {user_idx} user_idx
+   */
+  async GedSubmission(data: GedSubmissionDto, user_idx: number) {
+    this.checkApplicationDate();
+
+    const user = await this.getUserApplication(user_idx);
+
+    if (
+      user.application.application_details.educationStatus !==
+      EducationStatus.검정고시
+    )
+      throw new BadRequestException('잘못된 요청입니다');
+    if (user.application.application_score)
+      throw new BadRequestException('이미 작성된 원서가 있습니다');
+
+    this.GedScoreCalc(data);
+
+    await this.prisma.application_score.create({
+      data: {
+        ...data,
+        score1_1: -1,
+        score1_2: -1,
+        score3_2: -1,
+        score2_1: -1,
+        score2_2: -1,
+        score3_1: -1,
+        artSportsScore: -1,
+        volunteerScore: -1,
+        attendanceScore: -1,
+        generalCurriculumScoreSubtotal: -1,
+        applicationIdx: user.application.applicationIdx,
+      },
+    });
+
+    return '저장에 성공했습니다';
   }
 
   /**
@@ -492,6 +533,25 @@ export class ApplicationService {
       throw new BadRequestException('계산 결과가 올바르지 않습니다');
   }
 
+  /*
+   * 검정고시 성적 계산
+   * @param {GedSubmissionDto} data
+   * @return {number} result
+   */
+  private GedScoreCalc(data: GedSubmissionDto) {
+    const result = Number(
+      (
+        (1 - data.curriculumScoreSubtotal / data.nonCurriculumScoreSubtotal) *
+        100
+      ).toFixed(4),
+    );
+
+    if (result !== data.scoreTotal)
+      throw new BadRequestException('계산 결과가 올바르지 않습니다');
+
+    return result;
+  }
+
   /**
    * 전화번호 검사
    * @param {string} cellphoneNumber
@@ -513,13 +573,9 @@ export class ApplicationService {
   private async getUserApplication(user_idx: number) {
     const user = await this.prisma.user.findFirst({
       where: { user_idx },
-      select: {
+      include: {
         application: {
-          select: {
-            applicationIdx: true,
-            application_score: true,
-            isFinalSubmission: true,
-          },
+          include: { application_details: true, application_score: true },
         },
       },
     });
@@ -532,6 +588,10 @@ export class ApplicationService {
     return user;
   }
 
+  /*
+   * 서류를 작성할 수 있는 날짜 체크
+   * @throws {BadRequestException}
+   */
   private checkApplicationDate() {
     if (new Date() >= new Date('2022-10-21'))
       throw new BadRequestException('서류를 작성할 수 있는 기간이 지났습니다');
