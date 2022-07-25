@@ -267,14 +267,19 @@ export class ApplicationService {
    * @param {number} user_idx
    */
   async GedSubmission(data: GedSubmissionDto, user_idx: number) {
+    // 성적 입력이 가능한 날짜 검증
     this.applicationDateValid();
 
+    // 유저 정보 가져오기
     const user = await this.getUserApplication(user_idx);
 
+    // 검증 로직
     this.userApplicationValidation(user);
 
+    // 성적 계산
     this.GedScoreValid(data);
 
+    // 저장
     await this.prisma.application_score.create({
       data: {
         ...this.scoreSetting,
@@ -292,14 +297,19 @@ export class ApplicationService {
    * @param {number} user_idx
    */
   async GedSubmissionPatch(data: GedSubmissionDto, user_idx: number) {
+    // 성적 입력이 가능한 날짜 검증
     this.applicationDateValid();
 
+    // 유저 정보 가져오기
     const user = await this.getUserApplication(user_idx);
 
+    // 검증 로직
     this.userApplicationValidation(user, true);
 
+    // 성적 계산
     this.GedScoreValid(data);
 
+    // 저장
     await this.prisma.application_score.update({
       where: { applicationIdx: user.application.applicationIdx },
       data: { ...this.scoreSetting, ...data },
