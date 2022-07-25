@@ -35,6 +35,10 @@ export class ApplicationService {
     volunteerScore: -1,
     attendanceScore: -1,
     generalCurriculumScoreSubtotal: -1,
+    nonCurriculumScoreSubtotal: -1,
+    curriculumScoreSubtotal: -1,
+    rankPercentage: -1,
+    scoreTotal: -1,
   };
 
   constructor(
