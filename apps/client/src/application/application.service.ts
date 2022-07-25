@@ -592,7 +592,7 @@ export class ApplicationService {
       ).toFixed(4),
     );
 
-    if (result !== data.scoreTotal)
+    if (result !== data.rankPercentage)
       throw new BadRequestException('계산 결과가 올바르지 않습니다');
 
     return result;
