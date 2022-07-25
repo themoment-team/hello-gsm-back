@@ -35,6 +35,10 @@ export class ApplicationService {
     volunteerScore: -1,
     attendanceScore: -1,
     generalCurriculumScoreSubtotal: -1,
+    nonCurriculumScoreSubtotal: -1,
+    curriculumScoreSubtotal: -1,
+    rankPercentage: -1,
+    scoreTotal: -1,
   };
 
   constructor(
@@ -588,7 +592,7 @@ export class ApplicationService {
       ).toFixed(4),
     );
 
-    if (result !== data.scoreTotal)
+    if (result !== data.rankPercentage)
       throw new BadRequestException('계산 결과가 올바르지 않습니다');
 
     return result;
