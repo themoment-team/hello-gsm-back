@@ -271,7 +271,7 @@ export class ApplicationService {
 
     const user = await this.getUserApplication(user_idx);
 
-    this.userApplicationIsExistValid(user);
+    this.userApplicationValidation(user);
 
     this.GedScoreValid(data);
 
@@ -296,7 +296,7 @@ export class ApplicationService {
 
     const user = await this.getUserApplication(user_idx);
 
-    this.userApplicationIsExistValid(user, true);
+    this.userApplicationValidation(user, true);
 
     this.GedScoreValid(data);
 
@@ -308,7 +308,7 @@ export class ApplicationService {
     return '저장에 성공했습니다';
   }
 
-  private userApplicationIsExistValid(user: any, isPatch?: boolean) {
+  private userApplicationValidation(user: any, isPatch?: boolean) {
     if (
       user.application.application_details.educationStatus !==
       EducationStatus.검정고시
