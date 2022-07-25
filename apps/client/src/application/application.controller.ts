@@ -48,6 +48,14 @@ export class ApplicationController {
     return this.applicationService.GedSubmission(data, user_idx);
   }
 
+  @Patch('/gedSubmission')
+  async GedSubmissionPatch(
+    @Body() data: GedSubmissionDto,
+    @User('user_idx') user_idx: number,
+  ) {
+    return this.applicationService.GedSubmissionPatch(data, user_idx);
+  }
+
   @Post('/image')
   @UseInterceptors(FileInterceptor('photo'))
   async image(
