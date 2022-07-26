@@ -279,19 +279,31 @@ export class ApplicationService {
     // 유저 정보 가져오기
     const user = await this.getUserApplication(user_idx);
 
+    // 검증 로직
     this.userApplicationValidation(user, EducationStatus.졸업);
 
+    // 성적 계산
     this.graduationScoreCalc(data);
 
     await this.prisma.application_score.create({
       data: {
         ...data,
-        score1_1: data.score1_1 < 0 ? -1 : data.score1_1,
-        score1_2: data.score1_2 < 0 ? -1 : data.score1_2,
-        score2_1: data.score2_1 < 0 ? -1 : data.score2_1,
+        ...this.transitionEmptyGraduationValue(data),
         applicationIdx: user.application.applicationIdx,
       },
     });
+  }
+
+  /*
+   * 졸업자 점수중 빈 값을 -1로 변환
+   * @param {GraduationSubmissionDto} data
+   */
+  transitionEmptyGraduationValue(data: GraduationSubmissionDto) {
+    return {
+      score1_1: data.score1_1 < 0 ? -1 : data.score1_1,
+      score1_2: data.score1_2 < 0 ? -1 : data.score1_2,
+      score2_1: data.score2_1 < 0 ? -1 : data.score2_1,
+    };
   }
 
   /*
