@@ -397,8 +397,6 @@ export class ApplicationService {
 
     if (!user.application.application_score)
       throw new BadRequestException('작성된 원서가 없습니다');
-    if (user.application.isFinalSubmission)
-      throw new BadRequestException('최종 제출된 원서는 수정할 수 없습니다');
 
     this.calcScore(data);
 
