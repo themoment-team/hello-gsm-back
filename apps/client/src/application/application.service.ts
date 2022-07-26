@@ -287,7 +287,6 @@ export class ApplicationService {
 
     await this.prisma.application_score.create({
       data: {
-        ...data,
         ...this.transitionEmptyGraduationValue(data),
         applicationIdx: user.application.applicationIdx,
       },
@@ -300,6 +299,7 @@ export class ApplicationService {
    */
   transitionEmptyGraduationValue(data: GraduationSubmissionDto) {
     return {
+      ...data,
       score1_1: data.score1_1 < 0 ? -1 : data.score1_1,
       score1_2: data.score1_2 < 0 ? -1 : data.score1_2,
       score2_1: data.score2_1 < 0 ? -1 : data.score2_1,
