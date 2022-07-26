@@ -279,17 +279,9 @@ export class ApplicationService {
     // 유저 정보 가져오기
     const user = await this.getUserApplication(user_idx);
 
-    if (
-      user.application.application_details.educationStatus !==
-      EducationStatus.졸업
-    )
-      throw new BadRequestException('잘못된 요청입니다');
-    if (user.application.application_score)
-      throw new BadRequestException('이미 작성된 원서가 있습니다');
+    this.userApplicationValidation(user, EducationStatus.졸업);
 
     this.graduationScoreCalc(data);
-    if (data.rankPercentag !== this.calcRankPercentage(data.scoreTotal))
-      throw new BadRequestException('계산 결과가 올바르지 않습니다');
 
     await this.prisma.application_score.create({
       data: {
@@ -315,7 +307,7 @@ export class ApplicationService {
     const user = await this.getUserApplication(user_idx);
 
     // 검증 로직
-    this.userApplicationValidation(user);
+    this.userApplicationValidation(user, EducationStatus.검정고시);
 
     // 성적 계산
     this.GedScoreValid(data);
@@ -345,7 +337,7 @@ export class ApplicationService {
     const user = await this.getUserApplication(user_idx);
 
     // 검증 로직
-    this.userApplicationValidation(user, true);
+    this.userApplicationValidation(user, EducationStatus.검정고시, true);
 
     // 성적 계산
     this.GedScoreValid(data);
@@ -359,11 +351,12 @@ export class ApplicationService {
     return '저장에 성공했습니다';
   }
 
-  private userApplicationValidation(user: any, isPatch?: boolean) {
-    if (
-      user.application.application_details.educationStatus !==
-      EducationStatus.검정고시
-    )
+  private userApplicationValidation(
+    user: any,
+    type: EducationStatus,
+    isPatch?: boolean,
+  ) {
+    if (user.application.application_details.educationStatus !== type)
       throw new BadRequestException('잘못된 요청입니다');
     if (!isPatch && user.application.application_score)
       throw new BadRequestException('이미 작성된 원서가 있습니다');
@@ -700,7 +693,8 @@ export class ApplicationService {
       data.nonCurriculumScoreSubtotal !==
         data.attendanceScore + data.volunteerScore ||
       data.curriculumScoreSubtotal + data.nonCurriculumScoreSubtotal !==
-        data.scoreTotal
+        data.scoreTotal ||
+      data.rankPercentag !== this.calcRankPercentage(data.scoreTotal)
     )
       throw new BadRequestException('계산 결과가 올바르지 않습니다');
   }
