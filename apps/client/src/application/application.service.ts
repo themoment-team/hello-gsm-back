@@ -36,6 +36,10 @@ export class ApplicationService {
     volunteerScore: -1,
     attendanceScore: -1,
     generalCurriculumScoreSubtotal: -1,
+    nonCurriculumScoreSubtotal: -1,
+    curriculumScoreSubtotal: -1,
+    rankPercentage: -1,
+    scoreTotal: -1,
   };
 
   constructor(
@@ -269,8 +273,10 @@ export class ApplicationService {
    * @return {Promise<string>}
    */
   async graduationSubmission(data: GraduationSubmissionDto, user_idx: number) {
+    // 성적 입력이 가능한 날짜 검증
     this.applicationDateValid();
 
+    // 유저 정보 가져오기
     const user = await this.getUserApplication(user_idx);
 
     if (
@@ -294,8 +300,6 @@ export class ApplicationService {
         applicationIdx: user.application.applicationIdx,
       },
     });
-
-    return '저장에 성공했습니다';
   }
 
   /*
@@ -625,7 +629,7 @@ export class ApplicationService {
       ).toFixed(4),
     );
 
-    if (result !== data.rankPercentag)
+    if (result !== data.rankPercentage)
       throw new BadRequestException('계산 결과가 올바르지 않습니다');
 
     return result;
