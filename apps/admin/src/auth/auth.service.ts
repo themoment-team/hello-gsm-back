@@ -22,24 +22,24 @@ export class AuthService {
     if (!bcrypt.compareSync(password, user.password))
       throw new BadRequestException('비밀번호가 올바르지 않습니다');
 
-    const tokens = await this.getTokens(user.id);
+    const tokens = await this.getTokens(user.admin_idx);
 
     await this.saveRefresh(tokens, user.admin_idx);
 
     return tokens;
   }
 
-  private async getTokens(id: string) {
+  private async getTokens(admin_idx: number) {
     const [at, rt, atExpired, rtExpired] = await Promise.all([
       this.jwtService.signAsync(
-        { id },
+        { user_idx: admin_idx },
         {
           secret: this.configService.get(ENV.JWT_ACCESS_SECRET),
           expiresIn: 60 * 5,
         },
       ),
       this.jwtService.signAsync(
-        { id },
+        { user_idx: admin_idx },
         {
           secret: this.configService.get(ENV.JWT_REFRESH_SECRET),
           expiresIn: '1d',

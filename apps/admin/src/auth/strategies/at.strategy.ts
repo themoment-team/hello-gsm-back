@@ -8,7 +8,7 @@ import { ENV } from 'apps/admin/src/lib/env';
 import { accessToken } from 'apps/admin/src/utils/token.name';
 
 type JwtPayload = {
-  user_idx: number;
+  admin_idx: number;
 };
 
 @Injectable()
@@ -28,12 +28,12 @@ export class AtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
   }
 
-  async validate(req: Request, { user_idx }: JwtPayload) {
-    if (!user_idx) return null;
+  async validate(req: Request, { admin_idx }: JwtPayload) {
+    if (!admin_idx) return null;
 
     const at = req.cookies[accessToken];
-    const user = await this.prisma.user.findFirst({
-      where: { user_idx },
+    const user = await this.prisma.admin.findFirst({
+      where: { admin_idx },
     });
 
     if (!user) return null;
@@ -45,6 +45,6 @@ export class AtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
 
     if (token) return null;
-    return { user_idx, accessToken: at };
+    return { admin_idx, accessToken: at };
   }
 }

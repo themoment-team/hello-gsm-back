@@ -9,7 +9,7 @@ import { refreshToken } from 'apps/admin/src/utils/token.name';
 import * as bcrypt from 'bcrypt';
 
 type JwtPayload = {
-  user_idx: number;
+  admin_idx: number;
 };
 
 @Injectable()
@@ -29,13 +29,13 @@ export class RtStrategy extends PassportStrategy(Strategy, 'jwt-rt') {
     });
   }
 
-  async validate(req: Request, { user_idx }: JwtPayload) {
-    if (!user_idx) return null;
+  async validate(req: Request, { admin_idx }: JwtPayload) {
+    if (!admin_idx) return null;
 
-    const user = await this.prisma.user.findFirst({ where: { user_idx } });
+    const user = await this.prisma.admin.findFirst({ where: { admin_idx } });
 
     const refresh = await this.prisma.refresh_token.findFirst({
-      where: { user_idx },
+      where: { user_idx: admin_idx },
     });
 
     if (
@@ -45,6 +45,6 @@ export class RtStrategy extends PassportStrategy(Strategy, 'jwt-rt') {
     )
       return null;
 
-    return { user_idx };
+    return { admin_idx };
   }
 }
