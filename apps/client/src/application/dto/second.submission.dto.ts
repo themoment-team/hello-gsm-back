@@ -50,4 +50,7 @@ export class SecondSubmissionDto {
   @Min(78)
   @IsNumber()
   scoreTotal: number;
+
+  @IsNumber()
+  rankPercentage: number;
 }
