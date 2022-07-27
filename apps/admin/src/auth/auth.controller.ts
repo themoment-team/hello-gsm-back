@@ -16,7 +16,7 @@ export class AuthController {
 
   private cookieOption = {
     httpOnly: true,
-    // domain: this.configService.get(ENV.ADMIN_DOMAIN),
+    domain: this.configService.get(ENV.ADMIN_DOMAIN),
     secure: process.env.NODE_ENV === 'prod',
   };
 
