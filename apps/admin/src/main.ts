@@ -1,6 +1,7 @@
 import { ValidationPipe } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { AdminModule } from './admin.module';
+import { AtGuard } from './auth/guards';
 
 async function bootstrap() {
   const app = await NestFactory.create(AdminModule, {
@@ -14,6 +15,9 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
+
+  app.useGlobalGuards(new AtGuard(new Reflector()));
+
   await app.listen(3000);
 }
 bootstrap();
