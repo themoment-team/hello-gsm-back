@@ -62,13 +62,7 @@ export class ApplicationService {
       },
     });
 
-    if (
-      !user ||
-      !user.application.application_score ||
-      !user.application_image ||
-      !user.application.application_details
-    )
-      throw new BadRequestException('유저가 존재하지 않습니다');
+    if (!user) throw new BadRequestException('유저가 존재하지 않습니다');
 
     return JSON.parse(
       JSON.stringify(user, (_, value) => {
