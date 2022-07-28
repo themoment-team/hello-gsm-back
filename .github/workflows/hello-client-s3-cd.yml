@@ -28,6 +28,12 @@ jobs:
       - name: build
         run: yarn build 
         
+      - name : .env setting
+        run: |
+          touch .env
+          echo "${{ secrets.DATA_FOR_ENV }}" >> .env
+          cat .env
+        
       - uses: actions/checkout@master
       - uses: jakejarvis/s3-sync-action@master
         with:
