@@ -63,13 +63,7 @@ export class ApplicationService {
       },
     });
 
-    if (
-      !user ||
-      !user.application.application_score ||
-      !user.application_image ||
-      !user.application.application_details
-    )
-      throw new BadRequestException('유저가 존재하지 않습니다');
+    if (!user) throw new BadRequestException('유저가 존재하지 않습니다');
 
     return JSON.parse(
       JSON.stringify(user, (_, value) => {
@@ -255,7 +249,6 @@ export class ApplicationService {
         score1_2: -1,
         score1_1: -1,
         score3_2: -1,
-        rankPercentage: this.calcRankPercentage(data.scoreTotal),
 
         application: {
           connect: { applicationIdx: user.application.applicationIdx },
@@ -440,8 +433,6 @@ export class ApplicationService {
 
     if (!user.application.application_score)
       throw new BadRequestException('작성된 원서가 없습니다');
-    if (user.application.isFinalSubmission)
-      throw new BadRequestException('최종 제출된 원서는 수정할 수 없습니다');
 
     this.calcScore(data);
 
@@ -616,7 +607,8 @@ export class ApplicationService {
       data.nonCurriculumScoreSubtotal !==
         data.attendanceScore + data.volunteerScore ||
       data.curriculumScoreSubtotal + data.nonCurriculumScoreSubtotal !==
-        data.scoreTotal
+        data.scoreTotal ||
+      this.calcRankPercentage(data.scoreTotal) !== data.rankPercentage
     )
       throw new BadRequestException('계산 결과가 올바르지 않습니다');
   }

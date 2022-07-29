@@ -90,7 +90,7 @@ export class ApplicationController {
     return this.applicationService.firstSubmissionPatch(user_idx, data);
   }
 
-  @Patch('/secondsSubmission')
+  @Patch('/secondSubmission')
   async secondsSubmissionPatch(
     @Body() data: SecondSubmissionDto,
     @User('user_idx') user_idx: number,
