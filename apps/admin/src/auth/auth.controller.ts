@@ -5,6 +5,7 @@ import { LoginDto } from './dto';
 import { accessToken, refreshToken } from 'apps/admin/src/utils/token.name';
 import { ConfigService } from '@nestjs/config';
 import { ENV } from 'apps/admin/src/lib/env';
+import { Public } from 'apps/admin/src/auth/decorators';
 
 @Controller('auth')
 export class AuthController {
@@ -15,10 +16,11 @@ export class AuthController {
 
   private cookieOption = {
     httpOnly: true,
-    domain: this.configService.get(ENV.DOMAIN),
+    domain: this.configService.get(ENV.ADMIN_DOMAIN),
     secure: process.env.NODE_ENV === 'prod',
   };
 
+  @Public()
   @Post('/login')
   async login(@Body() data: LoginDto, @Res() res: Response) {
     const tokens = await this.authService.login(data);
