@@ -70,5 +70,5 @@ export class GraduationSubmissionDto {
   scoreTotal: number;
 
   @IsNumber()
-  rankPercentag: number;
+  rankPercentage: number;
 }

@@ -698,7 +698,7 @@ export class ApplicationService {
         data.attendanceScore + data.volunteerScore ||
       data.curriculumScoreSubtotal + data.nonCurriculumScoreSubtotal !==
         data.scoreTotal ||
-      data.rankPercentag !== this.calcRankPercentage(data.scoreTotal)
+      data.rankPercentage !== this.calcRankPercentage(data.scoreTotal)
     )
       throw new BadRequestException('계산 결과가 올바르지 않습니다');
   }
