@@ -20,6 +20,7 @@
     "start:a:prod": "node dist/apps/admin/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest client",
+    "test:a": "jest admin",
     "test:a:watch": "jest admin --watch",
     "test:watch": "jest client --watch",
     "test:cov": "jest --coverage",
