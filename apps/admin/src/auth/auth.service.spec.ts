@@ -11,6 +11,7 @@ describe('AuthService', () => {
   let service: AuthService;
   let prisma: PrismaService;
   let jwtService: JwtService;
+  let configService: ConfigService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -21,6 +22,7 @@ describe('AuthService', () => {
     service = module.get<AuthService>(AuthService);
     prisma = module.get<PrismaService>(PrismaService);
     jwtService = module.get<JwtService>(JwtService);
+    configService = module.get<ConfigService>(ConfigService);
   });
 
   it('accessToken test', async () => {
@@ -41,6 +43,11 @@ describe('AuthService', () => {
       refresh_token: null,
     });
 
+    configService.get = jest
+      .fn()
+      .mockReturnValueOnce('JWT_ACCESS_SECRET')
+      .mockReturnValueOnce('JWT_REFRESH_SECRET');
+
     // when
     const tokens = await service.login({
       id: admin.id,
@@ -48,11 +55,12 @@ describe('AuthService', () => {
     });
 
     // then
-    const at = jwtService.decode(tokens.at);
-    const rt = jwtService.decode(tokens.rt);
-
-    if (typeof at === 'string') throw new Error('at does not matched');
-    if (typeof rt === 'string') throw new Error('rt does not matched');
+    const at = jwtService.verify(tokens.at, {
+      secret: 'JWT_ACCESS_SECRET',
+    });
+    const rt = jwtService.verify(tokens.rt, {
+      secret: 'JWT_REFRESH_SECRET',
+    });
 
     expect(at.id).toEqual('id');
     expect(rt.id).toEqual('id');
