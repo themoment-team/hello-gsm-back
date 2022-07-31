@@ -14,6 +14,7 @@ export const ENV = {
 
   // url
   DOMAIN: 'DOMAIN',
+  ADMIN_DOMAIN: 'ADMIN_DOMAIN',
   FRONT_URL: 'FRONT_URL',
 
   // s3
