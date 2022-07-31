@@ -5,6 +5,7 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { ENV } from 'apps/admin/src/lib/env';
+import { UserDecoratorType } from './type';
 
 @Injectable()
 export class AuthService {
@@ -27,6 +28,17 @@ export class AuthService {
     await this.saveRefresh(tokens, user.admin_idx);
 
     return tokens;
+  }
+
+  async logout(data: UserDecoratorType) {
+    await this.prisma.refresh_token.update({
+      where: { user_idx: data.admin_idx },
+      data: { refresh_token: null },
+    });
+
+    await this.prisma.access_token_blacklist.create({
+      data: { access_token: data.accessToken, expired_date: new Date() },
+    });
   }
 
   private async getTokens(admin_idx: number) {

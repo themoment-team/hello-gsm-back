@@ -6,6 +6,8 @@ import { accessToken, refreshToken } from 'apps/admin/src/utils/token.name';
 import { ConfigService } from '@nestjs/config';
 import { ENV } from 'apps/admin/src/lib/env';
 import { Public } from 'apps/admin/src/auth/decorators';
+import { User } from './decorators';
+import { UserDecoratorType } from './type';
 
 @Controller('auth')
 export class AuthController {
@@ -27,6 +29,19 @@ export class AuthController {
 
     this.ResCookie(res, tokens);
     res.send('로그인에 성공했습니다');
+  }
+
+  @Post('/logout')
+  async logout(@User() data: UserDecoratorType, @Res() res: Response) {
+    this.authService.logout(data);
+
+    res.clearCookie(accessToken, {
+      ...this.cookieOption,
+    });
+    res.clearCookie(refreshToken, {
+      ...this.cookieOption,
+    });
+    res.send('로그아웃에 성공하였습니다');
   }
 
   private ResCookie(res: Response, tokens: any) {
