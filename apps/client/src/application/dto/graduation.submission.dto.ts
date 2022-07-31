@@ -17,7 +17,7 @@ export class GraduationSubmissionDto {
   @Min(10.8)
   @Max(54)
   @IsNumber()
-  score2_1?: number;
+  score2_1: number;
 
   @Min(10.8)
   @Max(54)
