@@ -9,6 +9,7 @@ import { Public } from 'apps/admin/src/auth/decorators';
 import { User } from './decorators';
 import { UserDecoratorType } from './type';
 import { RtGuard } from './guards';
+import { TokensType } from './type/tokens.type';
 
 @Controller('auth')
 export class AuthController {
@@ -54,7 +55,7 @@ export class AuthController {
     res.send('토큰 재발급에 성공하였습니다.');
   }
 
-  private ResCookie(res: Response, tokens: any) {
+  private ResCookie(res: Response, tokens: TokensType) {
     res.cookie(accessToken, tokens.at, {
       expires: tokens.atExpired,
       ...this.cookieOption,

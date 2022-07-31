@@ -6,6 +6,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { ENV } from 'apps/admin/src/lib/env';
 import { UserDecoratorType } from './type';
+import { TokensType } from './type/tokens.type';
 
 @Injectable()
 export class AuthService {
@@ -41,13 +42,13 @@ export class AuthService {
     });
   }
 
-  async refresh(user_idx: number) {
+  async refresh(user_idx: number): Promise<TokensType> {
     const tokens = await this.getTokens(user_idx);
     await this.saveRefresh(tokens, user_idx);
     return tokens;
   }
 
-  private async getTokens(admin_idx: number) {
+  private async getTokens(admin_idx: number): Promise<TokensType> {
     const [at, rt, atExpired, rtExpired] = await Promise.all([
       this.jwtService.signAsync(
         { user_idx: admin_idx },
@@ -69,7 +70,7 @@ export class AuthService {
     return { at, rt, atExpired, rtExpired };
   }
 
-  private async saveRefresh(tokens: any, user_idx: number) {
+  private async saveRefresh(tokens: TokensType, user_idx: number) {
     const refresh_token = await bcrypt.hash(tokens.rt, 10);
 
     await this.prisma.refresh_token.update({
