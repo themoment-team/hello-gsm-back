@@ -41,6 +41,12 @@ export class AuthService {
     });
   }
 
+  async refresh(user_idx: number) {
+    const tokens = await this.getTokens(user_idx);
+    await this.saveRefresh(tokens, user_idx);
+    return tokens;
+  }
+
   private async getTokens(admin_idx: number) {
     const [at, rt, atExpired, rtExpired] = await Promise.all([
       this.jwtService.signAsync(
