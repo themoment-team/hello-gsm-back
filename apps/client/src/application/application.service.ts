@@ -11,6 +11,7 @@ import {
   ApplicationGraduationDto,
   ApplicationDetailGraduationDto,
   ApplicationDetailQualificationDto,
+  GraduationSubmissionDto,
   GedSubmissionDto,
 } from './dto';
 import { v1 } from 'uuid';
@@ -223,7 +224,7 @@ export class ApplicationService {
   }
 
   /**
-   * 2차 서류 제출
+   * 졸업예정 성적 입력
    * @param {SecondSubmissionDto} data
    * @param {number} user_idx
    * @returns {Promise<string>} 2차 서류 작성에 성공했습니다
@@ -259,6 +260,48 @@ export class ApplicationService {
   }
 
   /*
+   * 졸업자 전용 성적 입력
+   * @param {GrduationSubmissionDto} data
+   * @param {number} user_idx
+   * @return {Promise<string>}
+   */
+  async graduationSubmission(data: GraduationSubmissionDto, user_idx: number) {
+    // 성적 입력이 가능한 날짜 검증
+    this.applicationDateValid();
+
+    // 유저 정보 가져오기
+    const user = await this.getUserApplication(user_idx);
+
+    // 검증 로직
+    this.userApplicationValidation(user, EducationStatus.졸업);
+
+    // 성적 계산
+    this.graduationScoreCalc(data);
+
+    await this.prisma.application_score.create({
+      data: {
+        ...this.transitionEmptyGraduationValue(data),
+        applicationIdx: user.application.applicationIdx,
+      },
+    });
+  }
+
+  /*
+   * 졸업자 점수중 빈 값을 -1로 변환
+   * @param {GraduationSubmissionDto} data
+   */
+  transitionEmptyGraduationValue(data: GraduationSubmissionDto) {
+    const valid = (score: number) =>
+      score === null || score === undefined ? -1 : score;
+
+    return {
+      ...data,
+      score1_1: valid(data.score1_1),
+      score1_2: valid(data.score1_1),
+    };
+  }
+
+  /*
    * 검정고시 전용 성적 입력
    * @param {GedSubmissionDto} data
    * @param {number} user_idx
@@ -271,7 +314,7 @@ export class ApplicationService {
     const user = await this.getUserApplication(user_idx);
 
     // 검증 로직
-    this.userApplicationValidation(user);
+    this.userApplicationValidation(user, EducationStatus.검정고시);
 
     // 성적 계산
     this.GedScoreValid(data);
@@ -301,7 +344,7 @@ export class ApplicationService {
     const user = await this.getUserApplication(user_idx);
 
     // 검증 로직
-    this.userApplicationValidation(user, true);
+    this.userApplicationValidation(user, EducationStatus.검정고시, true);
 
     // 성적 계산
     this.GedScoreValid(data);
@@ -315,11 +358,12 @@ export class ApplicationService {
     return '저장에 성공했습니다';
   }
 
-  private userApplicationValidation(user: any, isPatch?: boolean) {
-    if (
-      user.application.application_details.educationStatus !==
-      EducationStatus.검정고시
-    )
+  private userApplicationValidation(
+    user: any,
+    type: EducationStatus,
+    isPatch?: boolean,
+  ) {
+    if (user.application.application_details.educationStatus !== type)
       throw new BadRequestException('잘못된 요청입니다');
     if (!isPatch && user.application.application_score)
       throw new BadRequestException('이미 작성된 원서가 있습니다');
@@ -637,5 +681,27 @@ export class ApplicationService {
 
   private calcRankPercentage(scoreTotal: number) {
     return Number(((1 - scoreTotal / 300) * 100).toFixed(4));
+  }
+
+  private graduationScoreCalc(data: GraduationSubmissionDto) {
+    const total =
+      (data.score1_1 || 0) +
+      (data.score1_2 || 0) +
+      (data.score2_1 || 0) +
+      data.score2_2 +
+      data.score3_1 +
+      data.score3_2;
+
+    if (
+      total !== data.generalCurriculumScoreSubtotal ||
+      data.artSportsScore + data.generalCurriculumScoreSubtotal !==
+        data.curriculumScoreSubtotal ||
+      data.nonCurriculumScoreSubtotal !==
+        data.attendanceScore + data.volunteerScore ||
+      data.curriculumScoreSubtotal + data.nonCurriculumScoreSubtotal !==
+        data.scoreTotal ||
+      data.rankPercentage !== this.calcRankPercentage(data.scoreTotal)
+    )
+      throw new BadRequestException('계산 결과가 올바르지 않습니다');
   }
 }
