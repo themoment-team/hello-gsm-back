@@ -291,10 +291,13 @@ export class ApplicationService {
    * @param {GraduationSubmissionDto} data
    */
   transitionEmptyGraduationValue(data: GraduationSubmissionDto) {
+    const valid = (score: number) =>
+      score === null || score === undefined ? -1 : score;
+
     return {
       ...data,
-      score1_1: data.score1_1 < 0 ? -1 : data.score1_1,
-      score1_2: data.score1_2 < 0 ? -1 : data.score1_2,
+      score1_1: valid(data.score1_1),
+      score1_2: valid(data.score1_1),
     };
   }
 
