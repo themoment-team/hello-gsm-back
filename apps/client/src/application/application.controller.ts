@@ -81,6 +81,14 @@ export class ApplicationController {
     return this.applicationService.graduationSubmission(data, user_idx);
   }
 
+  @Patch('/graduationSubmission')
+  async graduationSubmissionPatch(
+    @Body() data: GraduationSubmissionDto,
+    @User('user_idx') user_idx: number,
+  ) {
+    return this.applicationService.graduationSubmissionPatch(data, user_idx);
+  }
+
   @Patch('/firstSubmission')
   @UseInterceptors(FileInterceptor('photo'))
   async firstSubmissionPatch(

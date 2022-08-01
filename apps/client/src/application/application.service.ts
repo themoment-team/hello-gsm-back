@@ -287,6 +287,36 @@ export class ApplicationService {
   }
 
   /*
+   * 졸업자 전용 성적 입력 수정
+   * @param {GrduationSubmissionDto} data
+   * @param {number} user_idx
+   * @return {Promise<string>}
+   */
+  async graduationSubmissionPatch(
+    data: GraduationSubmissionDto,
+    user_idx: number,
+  ) {
+    // 성적 입력이 가능한 날짜 검증
+    this.applicationDateValid();
+
+    // 유저 정보 가져오기
+    const user = await this.getUserApplication(user_idx);
+
+    // 검증 로직
+    this.userApplicationValidation(user, EducationStatus.졸업, true);
+
+    // 성적 계산
+    this.graduationScoreCalc(data);
+
+    await this.prisma.application_score.update({
+      where: { applicationIdx: user.application.applicationIdx },
+      data: {
+        ...this.transitionEmptyGraduationValue(data),
+      },
+    });
+  }
+
+  /*
    * 졸업자 점수중 빈 값을 -1로 변환
    * @param {GraduationSubmissionDto} data
    */
