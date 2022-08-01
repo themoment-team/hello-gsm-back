@@ -17,12 +17,13 @@ export class GraduationSubmissionDto {
   @Min(10.8)
   @Max(54)
   @IsNumber()
-  score2_1: number;
+  score2_1?: number;
 
+  @IsOptional()
   @Min(10.8)
   @Max(54)
   @IsNumber()
-  score2_2: number;
+  score2_2?: number;
 
   @Min(14.4)
   @Max(72)

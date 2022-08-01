@@ -328,6 +328,8 @@ export class ApplicationService {
       ...data,
       score1_1: valid(data.score1_1),
       score1_2: valid(data.score1_1),
+      score2_1: valid(data.score2_1),
+      score2_2: valid(data.score2_2),
     };
   }
 
@@ -718,7 +720,7 @@ export class ApplicationService {
       (data.score1_1 || 0) +
       (data.score1_2 || 0) +
       (data.score2_1 || 0) +
-      data.score2_2 +
+      (data.score2_2 || 0) +
       data.score3_1 +
       data.score3_2;
 
