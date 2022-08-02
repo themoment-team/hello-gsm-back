@@ -60,22 +60,26 @@ export class AuthController {
   @Get('/kakao/callback')
   @HttpCode(200)
   async kakaoLogin(@Req() req: Request, @Res() res: Response) {
-    const user: any = req.user;
-    const tokens: any = await this.authService.kakaoLogin(user._json);
+    try {
+      const user: any = req.user;
+      const tokens: any = await this.authService.kakaoLogin(user._json);
 
-    if (tokens.registerToken) {
-      res.cookie(registerToken, tokens.registerToken, {
-        expires: tokens.expired,
-        path: '/auth/register',
-        ...this.cookieOption,
-      });
+      if (tokens.registerToken) {
+        res.cookie(registerToken, tokens.registerToken, {
+          expires: tokens.expired,
+          path: '/auth/register',
+          ...this.cookieOption,
+        });
 
-      res.redirect(`${this.configService.get(ENV.FRONT_URL)}/auth/signup`);
-      return;
+        res.redirect(`${this.configService.get(ENV.FRONT_URL)}/auth/signup`);
+        return;
+      }
+
+      this.ResCookie(res, tokens);
+      res.redirect(`${this.configService.get(ENV.FRONT_URL)}`);
+    } catch (e) {
+      res.redirect(`${this.configService.get(ENV.FRONT_URL)}/auth/signin`);
     }
-
-    this.ResCookie(res, tokens);
-    res.redirect(`${this.configService.get(ENV.FRONT_URL)}`);
   }
 
   @Public()
