@@ -1,2 +1,2 @@
 export * from './user.decorator.type';
-export * from './tokens.type.ts';
+export * from './tokens.type';
