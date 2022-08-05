@@ -6,7 +6,7 @@ import { AtGuard } from './auth/guards';
 
 async function bootstrap() {
   const app = await NestFactory.create(AdminModule, {
-    cors: { origin: process.env.FRONT_URL, credentials: true },
+    cors: { origin: process.env.ADMIN_URL, credentials: true },
   });
 
   app.use(cookieParser());
