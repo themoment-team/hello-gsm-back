@@ -525,6 +525,37 @@ export class ApplicationService {
     return user.application.applicationIdx;
   }
 
+ /**
+  * 최종 제출 취소 (테스트 서버 전용)
+  * @param {number} user_idx
+  */
+  async finalSubmissionPatch(user_idx: number) {
+    this.checkTestEnv();
+
+    const user = await this.prisma.user.findFirst({
+      where: { user_idx },
+      select: { application: true },
+    });
+
+    if (!user.application.isFinalSubmission)
+      throw new BadRequestException('최종 제출이 되어있지 않습니다');
+
+    await this.prisma.application.update({
+      where: { user_idx },
+      data: { isFinalSubmission: false },
+    });
+
+    return '수정에 성공했습니다';
+  }
+
+ /**
+  * 테스트 서버 확인
+  */
+  private checkTestEnv() {
+    if (this.configService.get(ENV.NODE_ENV) !== 'test')
+      throw new BadRequestException('기능을 이용할 수 없습니다');
+  }
+
   /**
    * 증명사진 삭제
    * @param {string} imgUrl

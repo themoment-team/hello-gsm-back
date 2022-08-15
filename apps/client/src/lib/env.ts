@@ -22,4 +22,7 @@ export const ENV = {
   AWS_SECRET_ACCESS_KEY: 'AWS_SECRET_ACCESS_KEY',
   AWS_REGION: 'AWS_REGION',
   AWS_S3_URL: 'AWS_S3_URL',
+
+  // environment
+  NODE_ENV: 'NODE_ENV',
 } as const;
