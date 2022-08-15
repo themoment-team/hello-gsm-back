@@ -110,4 +110,9 @@ export class ApplicationController {
   async finalSubmission(@User('user_idx') user_idx: number) {
     return this.applicationService.finalSubmission(user_idx);
   }
+
+  @Patch('/finalSubmission')
+  async finalSubmissionPatch(@User('user_idx') user_idx: number) {
+    return this.applicationService.finalSubmissionPatch(user_idx)
+  }
 }
