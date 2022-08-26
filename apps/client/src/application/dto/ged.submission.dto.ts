@@ -9,4 +9,7 @@ export class GedSubmissionDto {
 
   @IsNumber()
   rankPercentage: number;
+
+  @IsNumber()
+  scoreTotal: number;
 }
