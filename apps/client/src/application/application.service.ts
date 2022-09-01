@@ -525,10 +525,10 @@ export class ApplicationService {
     return user.application.applicationIdx;
   }
 
- /**
-  * 최종 제출 취소 (테스트 서버 전용)
-  * @param {number} user_idx
-  */
+  /**
+   * 최종 제출 취소 (테스트 서버 전용)
+   * @param {number} user_idx
+   */
   async finalSubmissionPatch(user_idx: number) {
     this.checkTestEnv();
 
@@ -548,9 +548,9 @@ export class ApplicationService {
     return '수정에 성공했습니다';
   }
 
- /**
-  * 테스트 서버 확인
-  */
+  /**
+   * 테스트 서버 확인
+   */
   private checkTestEnv() {
     if (this.configService.get(ENV.NODE_ENV) !== 'test')
       throw new BadRequestException('기능을 이용할 수 없습니다');
@@ -688,17 +688,22 @@ export class ApplicationService {
    * @return {number} result
    */
   private GedScoreValid(data: GedSubmissionDto) {
-    const result = Number(
+    const rankPercentage = Number(
       (
         (1 - data.curriculumScoreSubtotal / data.nonCurriculumScoreSubtotal) *
         100
-      ).toFixed(4),
+      ).toFixed(3),
     );
 
-    if (result !== data.rankPercentage)
-      throw new BadRequestException('계산 결과가 올바르지 않습니다');
+    const scoreTotal = Number(
+      ((300 - (300 * rankPercentage) / 100) * 0.87).toFixed(3),
+    );
 
-    return result;
+    if (
+      rankPercentage !== data.rankPercentage ||
+      scoreTotal !== data.scoreTotal
+    )
+      throw new BadRequestException('계산 결과가 올바르지 않습니다');
   }
 
   /**

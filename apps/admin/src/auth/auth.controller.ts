@@ -1,5 +1,5 @@
 import { Body, Controller, Post, Res, UseGuards } from '@nestjs/common';
-import { Response } from 'express';
+import { CookieOptions, Response } from 'express';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto';
 import { accessToken, refreshToken } from 'apps/admin/src/utils/token.name';
@@ -18,10 +18,11 @@ export class AuthController {
     private configService: ConfigService,
   ) {}
 
-  private cookieOption = {
+  private cookieOption: CookieOptions = {
     httpOnly: true,
     domain: this.configService.get(ENV.ADMIN_DOMAIN),
     secure: process.env.NODE_ENV === 'prod',
+    sameSite: 'lax',
   };
 
   @Public()
