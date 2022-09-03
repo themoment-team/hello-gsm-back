@@ -35,18 +35,15 @@ $ npm start:prod
   <img src="https://img.shields.io/badge/Prisma-2D3748?style=flat-square&logo=Prisma&logoColor=white" alt="Prisma" />
   <img src="https://img.shields.io/badge/Passport-34E27A?style=flat-square&logo=Passport&logoColor=white" alt="Passport" />
   <img src="https://img.shields.io/badge/JWT-000000?style=flat-square&logo=JsonWebTokens&logoColor=white" alt="JWT" />
-  <img src="https://img.shields.io/badge/Gmail-EA4335?style=flat-square&logo=Gmail&logoColor=white" alt="Gmail" />
-  <img src="https://img.shields.io/badge/Swagger-85EA2D?style=flat-square&logo=swagger&logoColor=black" alt="Swagger" />
-  <img src="https://img.shields.io/badge/OAuth2.0-000?style=flat-square&logo=OAuth2.0&logoColor=black" alt="Swagger" />
-  <img src="https://img.shields.io/badge/MariaDB-003545?style=flat-square&logo=MariaDB&logoColor=white" alt="Swagger" />
-  <img src="https://img.shields.io/badge/Nodemailer-22B573?style=flat-square&logo=Nodemailer&logoColor=white" alt="Swagger" />
+  <img src="https://img.shields.io/badge/OAuth2.0-000?style=flat-square&logo=OAuth2.0&logoColor=black" alt="OAuth2.0" />
+  <img src="https://img.shields.io/badge/MariaDB-003545?style=flat-square&logo=MariaDB&logoColor=white" alt="MariaDB" />
 </div>
 
 ## Dev Tools
 
 <div align="left">
   <img src="https://img.shields.io/badge/Neovim-57A143?style=flat-square&logo=Neovim&logoColor=white" alt="Neovim" />
-  <img src="https://img.shields.io/badge/Prettier-F7B93E?style=flat-square&logo=Prettier&logoColor=black" alt="Neovim" />
+  <img src="https://img.shields.io/badge/Prettier-F7B93E?style=flat-square&logo=Prettier&logoColor=black" alt="Prettier" />
   <img src="https://img.shields.io/badge/ESLint-4B32C3?style=flat-square&logo=ESLint&logoColor=white" alt="ESLint" />
 </div>
 
