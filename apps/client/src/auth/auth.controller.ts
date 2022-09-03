@@ -36,7 +36,7 @@ export class AuthController {
   private cookieOption = {
     httpOnly: true,
     domain: this.configService.get(ENV.DOMAIN),
-    secure: process.env.NODE_ENV === 'prod' || process.env.NODE_ENV === 'test',
+    secure: process.env.NODE_ENV === 'prod',
   };
 
   constructor(
@@ -53,7 +53,9 @@ export class AuthController {
   @Public()
   @Get('/kakao')
   @HttpCode(201)
-  async kakao() {}
+  async kakao() {
+    return;
+  }
 
   @Public()
   @UseGuards(AuthGuard('kakao'))
