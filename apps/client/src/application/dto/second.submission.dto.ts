@@ -2,16 +2,27 @@ import { IsNumber, IsOptional, Max, Min } from 'class-validator';
 
 export class SecondSubmissionDto {
   @IsOptional()
-  @Min(10.8)
-  @Max(54)
+  @Min(3.6)
+  @Max(18)
   @IsNumber()
-  score2_1?: number;
+  score1_1?: number;
+
+  @IsOptional()
+  @Min(3.6)
+  @Max(36)
+  @IsNumber()
+  score1_2?: number;
 
   @IsOptional()
   @Min(10.8)
   @Max(54)
   @IsNumber()
-  score2_2?: number;
+  score2_1?: number;
+
+  @Min(10.8)
+  @Max(54)
+  @IsNumber()
+  score2_2: number;
 
   @Min(14.4)
   @Max(72)
@@ -53,6 +64,8 @@ export class SecondSubmissionDto {
   @IsNumber()
   scoreTotal: number;
 
+  @Max(74)
+  @Min(0)
   @IsNumber()
   rankPercentage: number;
 }

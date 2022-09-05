@@ -245,12 +245,11 @@ export class ApplicationService {
 
     await this.prisma.application_score.create({
       data: {
-        ...data,
         score1_2: -1,
         score1_1: -1,
-        score2_1: data.score2_1 ? data.score2_1 : -1,
-        score2_2: data.score2_2 ? data.score2_2 : -1,
+        score2_1: -1,
         score3_2: -1,
+        ...data,
 
         application: {
           connect: { applicationIdx: user.application.applicationIdx },
