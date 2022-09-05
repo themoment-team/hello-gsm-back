@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  RequestTimeoutException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ENV } from 'apps/client/src/lib/env';
 import { PrismaService } from 'apps/client/src/prisma/prisma.service';
@@ -152,17 +156,12 @@ export class ApplicationService {
       },
     };
 
-    this.s3Upload(params, user_idx, user, 0);
+    await this.s3Upload(params, user_idx, user);
 
     return '이미지 업로드에 성공했습니다';
   }
 
-  async s3Upload(
-    params: AWS.S3.PutObjectRequest,
-    user_idx: number,
-    user: any,
-    cnt: number,
-  ) {
+  async s3Upload(params: AWS.S3.PutObjectRequest, user_idx: number, user: any) {
     try {
       const result = await this.s3.upload(params).promise();
 
@@ -178,9 +177,9 @@ export class ApplicationService {
           where: { user_idx },
           data: { idPhotoUrl: result.Location },
         });
+      return result.Location;
     } catch (e) {
-      if (cnt > 2) return;
-      this.s3Upload(params, user_idx, user, cnt++);
+      throw new RequestTimeoutException('이미지 업로드에 실패했습니다');
     }
   }
 
