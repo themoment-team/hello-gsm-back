@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
-import { Request, Response } from 'express';
+import { CookieOptions, Request, Response } from 'express';
 import { ENV } from 'apps/client/src/lib/env';
 import { AtUser } from 'apps/client/src/types';
 import { AuthService } from './auth.service';
@@ -26,10 +26,11 @@ import {
 
 @Controller('auth')
 export class AuthController {
-  private cookieOption = {
+  private cookieOption: CookieOptions = {
     httpOnly: true,
     domain: this.configService.get(ENV.DOMAIN),
     secure: process.env.NODE_ENV === 'prod',
+    sameSite: 'none',
   };
 
   constructor(
