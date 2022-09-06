@@ -2,7 +2,6 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'apps/client/src/prisma/prisma.service';
-import * as bcrypt from 'bcrypt';
 import { ENV } from 'apps/client/src/lib/env';
 import { AtUser } from 'apps/client/src/types';
 import KakaoUserType from './types/kakao.user.type';
@@ -38,7 +37,7 @@ export class AuthService {
 
     const tokens = await this.getTokens(Number(user.user_idx));
 
-    await this.saveRefresh(tokens, kakaoUser.id);
+    await this.saveRefresh(tokens.rt, kakaoUser.id);
 
     return tokens;
   }
@@ -73,13 +72,11 @@ export class AuthService {
 
   async refresh({ user_idx }: AtUser) {
     const tokens = await this.getTokens(user_idx);
-    await this.saveRefresh(tokens, user_idx);
+    await this.saveRefresh(tokens.rt, user_idx);
     return tokens;
   }
 
-  private async saveRefresh(tokens: any, user_idx: number) {
-    const refresh_token = await bcrypt.hash(tokens.rt, 10);
-
+  private async saveRefresh(refresh_token: string, user_idx: number) {
     await this.prisma.refresh_token.update({
       where: { user_idx },
       data: { refresh_token },
