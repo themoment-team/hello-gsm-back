@@ -22,7 +22,7 @@ export class AuthController {
     httpOnly: true,
     domain: this.configService.get(ENV.ADMIN_DOMAIN),
     secure: process.env.NODE_ENV === 'prod',
-    sameSite: 'lax',
+    sameSite: 'none',
   };
 
   @Public()
