@@ -2,7 +2,10 @@ import { Body, Controller, Post, Res, UseGuards } from '@nestjs/common';
 import { CookieOptions, Response } from 'express';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto';
-import { accessToken, refreshToken } from 'apps/admin/src/utils/token.name';
+import {
+  adminAccessToken,
+  adminRefreshToken,
+} from 'apps/admin/src/utils/token.name';
 import { ConfigService } from '@nestjs/config';
 import { ENV } from 'apps/admin/src/lib/env';
 import { Public } from 'apps/admin/src/auth/decorators';
@@ -22,7 +25,6 @@ export class AuthController {
     httpOnly: true,
     domain: this.configService.get(ENV.ADMIN_DOMAIN),
     secure: process.env.NODE_ENV === 'prod',
-    sameSite: 'none',
   };
 
   @Public()
@@ -38,10 +40,10 @@ export class AuthController {
   async logout(@User() data: UserDecoratorType, @Res() res: Response) {
     this.authService.logout(data);
 
-    res.clearCookie(accessToken, {
+    res.clearCookie(adminAccessToken, {
       ...this.cookieOption,
     });
-    res.clearCookie(refreshToken, {
+    res.clearCookie(adminRefreshToken, {
       ...this.cookieOption,
     });
     res.send('로그아웃에 성공하였습니다');
@@ -57,11 +59,11 @@ export class AuthController {
   }
 
   private ResCookie(res: Response, tokens: TokensType) {
-    res.cookie(accessToken, tokens.at, {
+    res.cookie(adminAccessToken, tokens.at, {
       expires: tokens.atExpired,
       ...this.cookieOption,
     });
-    res.cookie(refreshToken, tokens.rt, {
+    res.cookie(adminRefreshToken, tokens.rt, {
       expires: tokens.rtExpired,
       ...this.cookieOption,
     });

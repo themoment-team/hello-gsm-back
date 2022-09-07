@@ -5,7 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
 import { PrismaService } from 'apps/admin/src/prisma/prisma.service';
 import { ENV } from 'apps/admin/src/lib/env';
-import { refreshToken } from 'apps/admin/src/utils/token.name';
+import { adminRefreshToken } from 'apps/admin/src/utils/token.name';
 import * as bcrypt from 'bcrypt';
 
 type JwtPayload = {
@@ -19,7 +19,7 @@ export class RtStrategy extends PassportStrategy(Strategy, 'jwt-rt') {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (req: Request) => {
-          const cookie = req.cookies[refreshToken];
+          const cookie = req.cookies[adminRefreshToken];
           if (!cookie) return null;
           return cookie;
         },
@@ -43,7 +43,7 @@ export class RtStrategy extends PassportStrategy(Strategy, 'jwt-rt') {
     if (
       !user ||
       !refresh.refresh_token ||
-      !bcrypt.compareSync(req.cookies[refreshToken], refresh.refresh_token)
+      !bcrypt.compareSync(req.cookies[adminRefreshToken], refresh.refresh_token)
     )
       return null;
 
