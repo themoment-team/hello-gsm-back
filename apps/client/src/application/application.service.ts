@@ -138,10 +138,10 @@ export class ApplicationService {
       include: { application_image: true, application: true },
     });
 
-    if (user.application.isFinalSubmission)
+    if (user?.application?.isFinalSubmission)
       throw new BadRequestException('최종 제출된 서류는 수정할 수 없습니다');
 
-    if (user.application_image)
+    if (user?.application_image)
       this.deleteImg(user.application_image.idPhotoUrl);
 
     const params = {
