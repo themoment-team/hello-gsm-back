@@ -5,7 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'apps/admin/src/prisma/prisma.service';
 import { Request } from 'express';
 import { ENV } from 'apps/admin/src/lib/env';
-import { accessToken } from 'apps/admin/src/utils/token.name';
+import { adminAccessToken } from 'apps/admin/src/utils/token.name';
 
 type JwtPayload = {
   user_idx: number;
@@ -18,7 +18,7 @@ export class AtStrategy extends PassportStrategy(Strategy, 'jwt') {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (req: Request) => {
-          const cookie = req.cookies[accessToken];
+          const cookie = req.cookies[adminAccessToken];
           if (!cookie) return null;
           return cookie;
         },
@@ -31,7 +31,7 @@ export class AtStrategy extends PassportStrategy(Strategy, 'jwt') {
   async validate(req: Request, { user_idx }: JwtPayload) {
     if (!user_idx) return null;
 
-    const at = req.cookies[accessToken];
+    const at = req.cookies[adminAccessToken];
     const user = await this.prisma.admin.findFirst({
       where: { admin_idx: user_idx },
     });

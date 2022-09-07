@@ -11,7 +11,7 @@ export class ApplicationService {
    * @param {GetAllApplicationQuery} query
    */
   async GetAllApplication(query: GetAllApplicationQuery) {
-    if (!parseInt(query.page))
+    if (!parseInt(query.page) || parseInt(query.page) < 0)
       throw new BadRequestException('잘못된 입력입니다');
 
     return this.prisma.user.findMany({

@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  PreconditionFailedException,
   RequestTimeoutException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -97,7 +98,7 @@ export class ApplicationService {
     });
 
     if (user.application)
-      throw new BadRequestException('이미 작성된 원서가 있습니다.');
+      throw new PreconditionFailedException('이미 작성된 원서가 있습니다.');
 
     this.checkMajor(data.applicationDetail);
 
@@ -138,10 +139,10 @@ export class ApplicationService {
       include: { application_image: true, application: true },
     });
 
-    if (user.application.isFinalSubmission)
+    if (user?.application?.isFinalSubmission)
       throw new BadRequestException('최종 제출된 서류는 수정할 수 없습니다');
 
-    if (user.application_image)
+    if (user?.application_image)
       this.deleteImg(user.application_image.idPhotoUrl);
 
     const params = {
@@ -238,7 +239,7 @@ export class ApplicationService {
     const user = await this.getUserApplication(user_idx);
 
     if (user.application.application_score)
-      throw new BadRequestException('이미 작성된 원서가 있습니다');
+      throw new PreconditionFailedException('이미 작성된 원서가 있습니다');
 
     this.calcScore(data);
 
@@ -398,7 +399,7 @@ export class ApplicationService {
     if (user.application.application_details.educationStatus !== type)
       throw new BadRequestException('잘못된 요청입니다');
     if (!isPatch && user.application.application_score)
-      throw new BadRequestException('이미 작성된 원서가 있습니다');
+      throw new PreconditionFailedException('이미 작성된 원서가 있습니다');
     if (isPatch && !user.application.application_score)
       throw new BadRequestException('작성된 원서가 없습니다');
   }
