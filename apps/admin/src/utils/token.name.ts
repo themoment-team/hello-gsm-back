@@ -1,3 +1,3 @@
-export const accessToken = 'accessToken',
-  refreshToken = 'refreshToken',
-  registerToken = 'registerToken';
+export const adminAccessToken = 'adminAaccessToken',
+  adminRefreshToken = 'adminRefreshToken',
+  adminRegisterToken = 'adminRegisterToken';
