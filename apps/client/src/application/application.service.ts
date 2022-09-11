@@ -667,19 +667,25 @@ export class ApplicationService {
    * @throws { BadRequestException } BadRequestException
    */
   private calcScore(data: SecondSubmissionDto) {
-    const total =
+    const total = +(
       data.score1_1 +
       data.score1_2 +
       data.score2_2 +
       data.score2_1 +
-      data.score3_1;
+      data.score3_1
+    ).toFixed(3);
 
-    const curriculumScoreSubtotal =
-      data.artSportsScore + data.generalCurriculumScoreSubtotal;
-    const nonCurriculumScoreSubtotal =
-      data.attendanceScore + data.volunteerScore;
-    const scoreTotal =
-      data.curriculumScoreSubtotal + data.nonCurriculumScoreSubtotal;
+    const curriculumScoreSubtotal = +(
+      data.artSportsScore + data.generalCurriculumScoreSubtotal
+    ).toFixed(4);
+
+    const nonCurriculumScoreSubtotal = +(
+      data.attendanceScore + data.volunteerScore
+    ).toFixed(4);
+
+    const scoreTotal = +(
+      data.curriculumScoreSubtotal + data.nonCurriculumScoreSubtotal
+    ).toFixed(3);
 
     if (
       total !== data.generalCurriculumScoreSubtotal ||
@@ -696,12 +702,10 @@ export class ApplicationService {
    * @param {GedSubmissionDto} data
    */
   private GedScoreValid(data: GedSubmissionDto) {
-    const rankPercentage = Number(
-      (
-        (1 - data.curriculumScoreSubtotal / data.nonCurriculumScoreSubtotal) *
-        100
-      ).toFixed(3),
-    );
+    const rankPercentage = +(
+      (1 - data.curriculumScoreSubtotal / data.nonCurriculumScoreSubtotal) *
+      100
+    ).toFixed(3);
 
     const scoreTotal = Number(
       ((300 - (300 * rankPercentage) / 100) * 0.87).toFixed(3),
@@ -764,22 +768,32 @@ export class ApplicationService {
   }
 
   private graduationScoreCalc(data: GraduationSubmissionDto) {
-    const total =
+    const total = +(
       (data.score1_1 || 0) +
       (data.score1_2 || 0) +
       (data.score2_1 || 0) +
       (data.score2_2 || 0) +
       data.score3_1 +
-      data.score3_2;
+      data.score3_2
+    ).toFixed(3);
+
+    const curriculumScoreSubtotal = +(
+      data.artSportsScore + data.generalCurriculumScoreSubtotal
+    ).toFixed(4);
+
+    const nonCurriculumScoreSubtotal = +(
+      data.attendanceScore + data.volunteerScore
+    ).toFixed(4);
+
+    const scoreTotal = +(
+      data.curriculumScoreSubtotal + data.nonCurriculumScoreSubtotal
+    ).toFixed(3);
 
     if (
       total !== data.generalCurriculumScoreSubtotal ||
-      data.artSportsScore + data.generalCurriculumScoreSubtotal !==
-        data.curriculumScoreSubtotal ||
-      data.nonCurriculumScoreSubtotal !==
-        data.attendanceScore + data.volunteerScore ||
-      data.curriculumScoreSubtotal + data.nonCurriculumScoreSubtotal !==
-        data.scoreTotal ||
+      curriculumScoreSubtotal !== data.curriculumScoreSubtotal ||
+      nonCurriculumScoreSubtotal !== data.nonCurriculumScoreSubtotal ||
+      scoreTotal !== data.scoreTotal ||
       data.rankPercentage !== this.calcRankPercentage(data.scoreTotal)
     )
       throw new BadRequestException('계산 결과가 올바르지 않습니다');
