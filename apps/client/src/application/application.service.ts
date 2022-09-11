@@ -668,10 +668,10 @@ export class ApplicationService {
    */
   private calcScore(data: SecondSubmissionDto) {
     const total = +(
-      data.score1_1 +
-      data.score1_2 +
+      (data.score1_1 || 0) +
+      (data.score1_2 || 0) +
+      (data.score2_1 || 0) +
       data.score2_2 +
-      data.score2_1 +
       data.score3_1
     ).toFixed(3);
 
