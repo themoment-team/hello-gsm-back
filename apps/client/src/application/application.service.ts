@@ -667,32 +667,45 @@ export class ApplicationService {
    * @throws { BadRequestException } BadRequestException
    */
   private calcScore(data: SecondSubmissionDto) {
-    const total = data.score2_2 + data.score2_1 + data.score3_1;
+    const total = +(
+      data.score1_1 +
+      data.score1_2 +
+      data.score2_2 +
+      data.score2_1 +
+      data.score3_1
+    ).toFixed(3);
+
+    const curriculumScoreSubtotal = +(
+      data.artSportsScore + data.generalCurriculumScoreSubtotal
+    ).toFixed(4);
+
+    const nonCurriculumScoreSubtotal = +(
+      data.attendanceScore + data.volunteerScore
+    ).toFixed(4);
+
+    const scoreTotal = +(
+      data.curriculumScoreSubtotal + data.nonCurriculumScoreSubtotal
+    ).toFixed(3);
+
     if (
       total !== data.generalCurriculumScoreSubtotal ||
-      data.artSportsScore + data.generalCurriculumScoreSubtotal !==
-        data.curriculumScoreSubtotal ||
-      data.nonCurriculumScoreSubtotal !==
-        data.attendanceScore + data.volunteerScore ||
-      data.curriculumScoreSubtotal + data.nonCurriculumScoreSubtotal !==
-        data.scoreTotal ||
+      curriculumScoreSubtotal !== data.curriculumScoreSubtotal ||
+      nonCurriculumScoreSubtotal !== data.nonCurriculumScoreSubtotal ||
+      scoreTotal !== data.scoreTotal ||
       this.calcRankPercentage(data.scoreTotal) !== data.rankPercentage
     )
       throw new BadRequestException('계산 결과가 올바르지 않습니다');
   }
 
-  /*
+  /**
    * 검정고시 성적 계산
    * @param {GedSubmissionDto} data
-   * @return {number} result
    */
   private GedScoreValid(data: GedSubmissionDto) {
-    const rankPercentage = Number(
-      (
-        (1 - data.curriculumScoreSubtotal / data.nonCurriculumScoreSubtotal) *
-        100
-      ).toFixed(3),
-    );
+    const rankPercentage = +(
+      (1 - data.curriculumScoreSubtotal / data.nonCurriculumScoreSubtotal) *
+      100
+    ).toFixed(3);
 
     const scoreTotal = Number(
       ((300 - (300 * rankPercentage) / 100) * 0.87).toFixed(3),
@@ -741,7 +754,7 @@ export class ApplicationService {
     return user;
   }
 
-  /*
+  /**
    * 서류를 작성할 수 있는 날짜 체크
    * @throws {BadRequestException}
    */
@@ -751,26 +764,36 @@ export class ApplicationService {
   }
 
   private calcRankPercentage(scoreTotal: number) {
-    return Number(((1 - scoreTotal / 300) * 100).toFixed(4));
+    return Number(((1 - scoreTotal / 300) * 100).toFixed(3));
   }
 
   private graduationScoreCalc(data: GraduationSubmissionDto) {
-    const total =
+    const total = +(
       (data.score1_1 || 0) +
       (data.score1_2 || 0) +
       (data.score2_1 || 0) +
       (data.score2_2 || 0) +
       data.score3_1 +
-      data.score3_2;
+      data.score3_2
+    ).toFixed(3);
+
+    const curriculumScoreSubtotal = +(
+      data.artSportsScore + data.generalCurriculumScoreSubtotal
+    ).toFixed(4);
+
+    const nonCurriculumScoreSubtotal = +(
+      data.attendanceScore + data.volunteerScore
+    ).toFixed(4);
+
+    const scoreTotal = +(
+      data.curriculumScoreSubtotal + data.nonCurriculumScoreSubtotal
+    ).toFixed(3);
 
     if (
       total !== data.generalCurriculumScoreSubtotal ||
-      data.artSportsScore + data.generalCurriculumScoreSubtotal !==
-        data.curriculumScoreSubtotal ||
-      data.nonCurriculumScoreSubtotal !==
-        data.attendanceScore + data.volunteerScore ||
-      data.curriculumScoreSubtotal + data.nonCurriculumScoreSubtotal !==
-        data.scoreTotal ||
+      curriculumScoreSubtotal !== data.curriculumScoreSubtotal ||
+      nonCurriculumScoreSubtotal !== data.nonCurriculumScoreSubtotal ||
+      scoreTotal !== data.scoreTotal ||
       data.rankPercentage !== this.calcRankPercentage(data.scoreTotal)
     )
       throw new BadRequestException('계산 결과가 올바르지 않습니다');
