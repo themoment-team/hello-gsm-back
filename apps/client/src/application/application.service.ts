@@ -667,7 +667,13 @@ export class ApplicationService {
    * @throws { BadRequestException } BadRequestException
    */
   private calcScore(data: SecondSubmissionDto) {
-    const total = data.score2_2 + data.score2_1 + data.score3_1;
+    const total =
+      data.score1_1 +
+      data.score1_2 +
+      data.score2_2 +
+      data.score2_1 +
+      data.score3_1;
+
     const curriculumScoreSubtotal =
       data.artSportsScore + data.generalCurriculumScoreSubtotal;
     const nonCurriculumScoreSubtotal =
@@ -754,7 +760,7 @@ export class ApplicationService {
   }
 
   private calcRankPercentage(scoreTotal: number) {
-    return Number(((1 - scoreTotal / 300) * 100).toFixed(4));
+    return Number(((1 - scoreTotal / 300) * 100).toFixed(3));
   }
 
   private graduationScoreCalc(data: GraduationSubmissionDto) {
