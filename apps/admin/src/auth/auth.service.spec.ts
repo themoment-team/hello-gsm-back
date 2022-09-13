@@ -62,7 +62,7 @@ describe('AuthService', () => {
       secret: 'JWT_REFRESH_SECRET',
     });
 
-    expect(at.id).toEqual('id');
-    expect(rt.id).toEqual('id');
+    expect(at.user_idx).toEqual(admin.admin_idx);
+    expect(rt.user_idx).toEqual(admin.admin_idx);
   });
 });
