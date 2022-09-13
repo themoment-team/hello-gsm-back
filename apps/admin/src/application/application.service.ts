@@ -40,8 +40,8 @@ export class ApplicationService {
           AND: [
             { NOT: undefined },
             { user: { name: { contains: query.name } } },
+            { isFinalSubmission: { equals: true } },
           ],
-          isFinalSubmission: { equals: true },
         },
       },
     });
