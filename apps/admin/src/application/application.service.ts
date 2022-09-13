@@ -16,6 +16,7 @@ export class ApplicationService {
 
     return this.prisma.user.findMany({
       select: {
+        name: true,
         cellphoneNumber: true,
         application: {
           select: {
