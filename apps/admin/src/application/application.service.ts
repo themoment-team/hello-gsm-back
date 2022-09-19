@@ -21,6 +21,7 @@ export class ApplicationService {
         application: {
           select: {
             applicationIdx: true,
+            registrationNumber: true,
             screening: true,
             schoolName: true,
             isDocumentReception: true,
@@ -40,8 +41,8 @@ export class ApplicationService {
           AND: [
             { NOT: undefined },
             { user: { name: { contains: query.name } } },
+            { isFinalSubmission: { equals: true } },
           ],
-          isFinalSubmission: { equals: true },
         },
       },
     });
