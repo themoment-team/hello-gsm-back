@@ -21,6 +21,7 @@ export class ApplicationService {
         application: {
           select: {
             applicationIdx: true,
+            registrationNumber: true,
             screening: true,
             schoolName: true,
             isDocumentReception: true,
