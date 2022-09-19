@@ -15,7 +15,9 @@ export class LoggerMiddleware implements NestMiddleware {
       const logger = new Logger(protocol);
 
       logger.log(
-        `${method} ${originalUrl} ${statusCode} ${contentLength} - ${userAgent} ${ip}`,
+        `${
+          statusCode === 500 && '[Error] '
+        }${method} ${originalUrl} ${statusCode} ${contentLength} - ${userAgent} ${ip}`,
       );
     });
 
