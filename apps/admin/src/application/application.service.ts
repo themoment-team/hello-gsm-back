@@ -29,6 +29,11 @@ export class ApplicationService {
             teacherCellphoneNumber: true,
             firstResultScreening: true,
             finalResultScreening: true,
+            application_score: {
+              select: {
+                personalityEvaluationScore: true,
+              },
+            },
           },
         },
       },
