@@ -61,9 +61,18 @@ export class ApplicationService {
     if (!application) throw new BadRequestException('유저를 찾을 수 없습니다');
     if (!application.firstResultScreening)
       throw new BadRequestException('1차에 합격하지 않았습니다');
+
+    // 배포 기간 : 2022-10-28 ~ 2022-11-08
+    // 테스트 기간 :  2022-09-21 ~ 2022-09월-25
     if (
-      new Date() < new Date('2022-10-28') ||
-      new Date() >= new Date('2022-11-09')
+      !(
+        new Date() >= new Date('2022-10-28') &&
+        new Date() <= new Date('2022-11-08')
+      ) ||
+      !(
+        new Date() >= new Date('2022-09-21') &&
+        new Date() <= new Date('2022-09-25')
+      )
     )
       throw new BadRequestException('수정할 수 있는 기간이 아닙니다');
 
