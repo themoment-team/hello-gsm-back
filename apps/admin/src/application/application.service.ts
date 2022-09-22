@@ -73,7 +73,7 @@ export class ApplicationService {
       !(
         new Date() >= new Date('2022-10-28') &&
         new Date() <= new Date('2022-11-08')
-      ) ||
+      ) &&
       !(
         new Date() >= new Date('2022-09-21') &&
         new Date() <= new Date('2022-09-25')
