@@ -74,12 +74,12 @@ export class ApplicationService {
     if (!application.firstResultScreening)
       throw new BadRequestException('1차에 합격하지 않았습니다');
 
-    // 배포 기간 : 2022-10-28 ~ 2022-11-08
+    // 배포 기간 : 2022-10-28 ~ 2022-11-01
     // 테스트 기간 :  2022-09-21 ~ 2022-09-27
     if (
       !(
-        new Date() >= new Date('2022-10-28') &&
-        new Date() <= new Date('2022-11-08')
+        new Date() >= new Date('2022-10-28 09:00') &&
+        new Date() <= new Date('2022-11-01 22:00')
       ) &&
       !(
         new Date() >= new Date('2022-09-21:00:00') &&
