@@ -7,7 +7,7 @@ export class ScoreDto {
 
   @IsNumber()
   @IsNotEmpty()
-  @Max(140)
-  @Min(0)
+  @Max(100)
+  @Min(1)
   personalityEvaluationScore: number;
 }
