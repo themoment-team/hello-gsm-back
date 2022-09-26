@@ -50,6 +50,13 @@ export class ApplicationService {
           ],
         },
       },
+      orderBy: {
+        application: {
+          finalResultScreening: 'asc',
+          firstResultScreening: 'asc',
+          applicationIdx: 'asc',
+        },
+      },
     });
   }
 
