@@ -759,7 +759,7 @@ export class ApplicationService {
    * @throws {BadRequestException}
    */
   private applicationDateValid() {
-    if (new Date() >= new Date('2022-10-21'))
+    if (!(new Date() <= new Date('2022-10-20 17:00')))
       throw new BadRequestException('서류를 작성할 수 있는 기간이 지났습니다');
   }
 
