@@ -75,15 +75,15 @@ export class ApplicationService {
       throw new BadRequestException('1차에 합격하지 않았습니다');
 
     // 배포 기간 : 2022-10-28 ~ 2022-11-01
-    // 테스트 기간 :  2022-09-21 ~ 2022-09-27
+    // 테스트 기간 :  2022-09-21 ~ 2022-10-03
     if (
       !(
-        new Date() >= new Date('2022-10-28 09:00') &&
-        new Date() <= new Date('2022-11-01 22:00')
+        new Date() > new Date('2022-10-28 09:00') &&
+        new Date() < new Date('2022-11-01 22:00')
       ) &&
       !(
         new Date() >= new Date('2022-09-21:00:00') &&
-        new Date('2022-09-27:00:00')
+        new Date() < new Date('2022-10-03 24:00')
       )
     )
       throw new BadRequestException('수정할 수 있는 기간이 아닙니다');
