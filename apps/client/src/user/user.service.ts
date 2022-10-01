@@ -51,15 +51,26 @@ export class UserService {
   }
 
   async getUserInfo(user_idx: number) {
-    return this.prisma.user.findFirst({
-      where: { user_idx },
-      select: {
-        user_idx: true,
-        name: true,
-        birth: true,
-        gender: true,
-        cellphoneNumber: true,
-      },
-    });
+    return this.filterBigint(
+      await this.prisma.user.findFirst({
+        where: { user_idx },
+        select: {
+          user_idx: true,
+          name: true,
+          birth: true,
+          gender: true,
+          cellphoneNumber: true,
+        },
+      }),
+    );
+  }
+
+  private filterBigint(json: any) {
+    return JSON.parse(
+      JSON.stringify(
+        json,
+        (_, value) => (typeof value === 'bigint' ? value.toString() : value), // return everything else unchanged
+      ),
+    );
   }
 }
