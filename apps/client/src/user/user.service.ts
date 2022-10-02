@@ -20,11 +20,13 @@ export class UserService {
             finalResultScreening: true,
             registrationNumber: true,
             screening: true,
+            application_score: { select: { scoreTotal: true } },
             application_details: {
               select: {
                 firstWantedMajor: true,
                 secondWantedMajor: true,
                 thirdWantedMajor: true,
+                educationStatus: true,
               },
             },
           },
