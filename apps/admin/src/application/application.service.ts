@@ -51,8 +51,8 @@ export class ApplicationService {
         },
       },
       orderBy: [
-        { application: { finalResultScreening: 'desc' } },
-        { application: { firstResultScreening: 'desc' } },
+        { application: { is_pass_final_screening: 'desc' } },
+        { application: { is_pass_first_screening: 'desc' } },
         { application: { applicationIdx: 'asc' } },
       ],
     });
