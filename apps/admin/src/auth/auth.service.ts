@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto } from './dto';
 import * as bcrypt from 'bcrypt';
@@ -73,9 +77,13 @@ export class AuthService {
   private async saveRefresh(tokens: TokensType, user_idx: number) {
     const refresh_token = await bcrypt.hash(tokens.rt, 10);
 
-    await this.prisma.refresh_token.update({
-      where: { user_idx },
-      data: { refresh_token },
-    });
+    try {
+      await this.prisma.refresh_token.update({
+        where: { user_idx },
+        data: { refresh_token },
+      });
+    } catch (e) {
+      throw new InternalServerErrorException('dba 잘못임 ㅠㅠ');
+    }
   }
 }
