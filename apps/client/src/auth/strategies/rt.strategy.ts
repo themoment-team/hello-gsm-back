@@ -37,7 +37,7 @@ export class RtStrategy extends PassportStrategy(Strategy, 'jwt-rt') {
       where: { user_idx, refresh_token: req.cookies[refreshToken] },
     });
 
-    if (!user || !refresh.refresh_token) return null;
+    if (!user || !refresh || !refresh.refresh_token) return null;
 
     return { user_idx };
   }
