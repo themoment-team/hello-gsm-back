@@ -81,7 +81,7 @@ export class ApplicationService {
       ) &&
       !(
         new Date() >= new Date('2022-09-21:00:00') &&
-        new Date() < new Date('2022-10-03 24:00')
+        new Date() < new Date('2022-10-12 00:00')
       )
     )
       throw new BadRequestException('수정할 수 있는 기간이 아닙니다');
