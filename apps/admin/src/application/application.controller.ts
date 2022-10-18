@@ -25,4 +25,9 @@ export class ApplicationController {
   async document(@Body() data: DocumentDto) {
     return this.applicationService.document(data);
   }
+
+  @Get('/count')
+  async count() {
+    return { count: await this.applicationService.count() };
+  }
 }
