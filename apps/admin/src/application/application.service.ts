@@ -58,6 +58,14 @@ export class ApplicationService {
     });
   }
 
+  async count() {
+    return this.prisma.application.count({
+      where: {
+        AND: [{ NOT: undefined }, { isFinalSubmission: { equals: true } }],
+      },
+    });
+  }
+
   /*
    * 2차 시험을 치른 후 점수를 입력하는 기능
    * @param {ScoreDto} data
