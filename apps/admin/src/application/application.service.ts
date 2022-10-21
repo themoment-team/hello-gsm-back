@@ -126,7 +126,7 @@ export class ApplicationService {
       },
       where: {
         application: {
-          firstResultScreening: { not: null },
+          is_pass_first_screening: { not: false },
         },
       },
     });
