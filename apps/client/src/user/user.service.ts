@@ -27,6 +27,7 @@ export class UserService {
                 secondWantedMajor: true,
                 thirdWantedMajor: true,
                 educationStatus: true,
+                majorResult: true,
               },
             },
           },
