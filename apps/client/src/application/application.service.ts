@@ -90,7 +90,7 @@ export class ApplicationService {
     user_idx: number,
     data: FirstSubmissionDto,
   ): Promise<string> {
-    this.applicationDateValid();
+    // this.applicationDateValid();
 
     const user = await this.prisma.user.findFirst({
       where: { user_idx },
@@ -127,7 +127,7 @@ export class ApplicationService {
    * @throws {BadRequestException} BadRequestException
    */
   async image(photo: Express.Multer.File, user_idx: number): Promise<string> {
-    this.applicationDateValid();
+    // this.applicationDateValid();
 
     if (!photo || !photo.mimetype.includes('image'))
       throw new BadRequestException('Not Found photo');
@@ -190,7 +190,7 @@ export class ApplicationService {
    * @returns {Promise<string>} 원서 제거에 성공했습니다
    */
   async deleteApplication(user_idx: number): Promise<string> {
-    this.applicationDateValid();
+    // this.applicationDateValid();
 
     const user = await this.prisma.user.findFirst({
       where: { user_idx },
@@ -234,7 +234,7 @@ export class ApplicationService {
     data: SecondSubmissionDto,
     user_idx: number,
   ): Promise<string> {
-    this.applicationDateValid();
+    // this.applicationDateValid();
 
     const user = await this.getUserApplication(user_idx);
 
@@ -268,7 +268,7 @@ export class ApplicationService {
    */
   async graduationSubmission(data: GraduationSubmissionDto, user_idx: number) {
     // 성적 입력이 가능한 날짜 검증
-    this.applicationDateValid();
+    // this.applicationDateValid();
 
     // 유저 정보 가져오기
     const user = await this.getUserApplication(user_idx);
@@ -298,7 +298,7 @@ export class ApplicationService {
     user_idx: number,
   ) {
     // 성적 입력이 가능한 날짜 검증
-    this.applicationDateValid();
+    // this.applicationDateValid();
 
     // 유저 정보 가져오기
     const user = await this.getUserApplication(user_idx);
@@ -341,7 +341,7 @@ export class ApplicationService {
    */
   async GedSubmission(data: GedSubmissionDto, user_idx: number) {
     // 성적 입력이 가능한 날짜 검증
-    this.applicationDateValid();
+    // this.applicationDateValid();
 
     // 유저 정보 가져오기
     const user = await this.getUserApplication(user_idx);
@@ -371,7 +371,7 @@ export class ApplicationService {
    */
   async GedSubmissionPatch(data: GedSubmissionDto, user_idx: number) {
     // 성적 입력이 가능한 날짜 검증
-    this.applicationDateValid();
+    // this.applicationDateValid();
 
     // 유저 정보 가져오기
     const user = await this.getUserApplication(user_idx);
@@ -415,7 +415,7 @@ export class ApplicationService {
     user_idx: number,
     data: FirstSubmissionDto,
   ): Promise<string> {
-    this.applicationDateValid();
+    // this.applicationDateValid();
 
     const application = await this.prisma.application.findFirst({
       where: { user_idx },
@@ -462,7 +462,7 @@ export class ApplicationService {
     data: SecondSubmissionDto,
     user_idx: number,
   ): Promise<string> {
-    this.applicationDateValid();
+    // this.applicationDateValid();
 
     const user = await this.getUserApplication(user_idx);
 
@@ -490,7 +490,7 @@ export class ApplicationService {
    * @throws {BadRequestException} BadRequestException
    */
   async finalSubmission(user_idx: number): Promise<number> {
-    this.applicationDateValid();
+    // this.applicationDateValid();
 
     const user = await this.prisma.user.findFirst({
       where: { user_idx },
@@ -758,10 +758,10 @@ export class ApplicationService {
    * 서류를 작성할 수 있는 날짜 체크
    * @throws {BadRequestException}
    */
-  private applicationDateValid() {
-    if (!(new Date() <= new Date('2022-10-20 17:00')))
-      throw new BadRequestException('서류를 작성할 수 있는 기간이 지났습니다');
-  }
+  // private applicationDateValid() {
+  //   if (!(new Date() <= new Date('2022-10-20 17:00')))
+  //     throw new BadRequestException('서류를 작성할 수 있는 기간이 지났습니다');
+  // }
 
   private calcRankPercentage(scoreTotal: number) {
     return Number(((1 - scoreTotal / 300) * 100).toFixed(3));
